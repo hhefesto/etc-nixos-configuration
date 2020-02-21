@@ -60,10 +60,7 @@ in {
   #     };
   # in
     environment.systemPackages = with pkgs; [
-      # texlive.combine {
-      #   inherit (texlive) scheme-small collection-langkorean algorithms cm-super;
-      # }
-      # easy-ps
+      unetbootin
       any-nix-shell
       texlive.combined.scheme-basic
       rxvt_unicode
@@ -100,7 +97,7 @@ in {
       gparted
       octave
       htop
-      nixpkgs-19-03.stack
+      stack
       postgresql_11
       nixops
       # skypeforlinux
@@ -117,6 +114,10 @@ in {
       haskellPackages.yesod-bin
       # system-sendmail
       msmtp
+      hunspell
+      hunspellDicts.es-any
+      hunspellDicts.es-mx
+      hunspellDicts.en-us
       aspell
       aspellDicts.en
       aspellDicts.en-computers
