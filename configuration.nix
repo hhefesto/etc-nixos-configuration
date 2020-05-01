@@ -5,6 +5,7 @@
 { config, pkgs, ... }:
 let
   nixpkgs-19-03 = import (fetchTarball https://releases.nixos.org/nixos/19.03/nixos-19.03.173684.c8db7a8a16e/nixexprs.tar.xz) { };
+  # nixpkgs-19-09-unstable = import (fetchTarball https://releases.nixos.org/releases.nixos.org/nixos/unstable/nixos-19.09pre192418.e19054ab3cd/nixexprs.tar.xz) { };
 in {
   imports =
     [ # Include the results of the hardware scan.
@@ -41,12 +42,28 @@ in {
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   nixpkgs.config.allowUnfree = true;
-
+  
   environment.interactiveShellInit = ''
+    # alias fn='cabal repl' #TODO:Fix
+    # alias 'cabal run'='cabal new-run' #TODO:Fix
+    # alias 'cabal build'='cabal new-build' #TODO:Fix
+    alias crun='cabal new-run'
+    alias ct='cabal new-test'
+    alias cr='cabal new-repl'
+    alias cb='cabal new-build'
+    alias sr='cd ~/src/stand-in-language && cabal new-run sil-mini-repl -- --haskell'
+    alias sil-repl='cd ~/src/stand-in-language && cabal new-run sil-mini-repl -- --haskell'
     alias gs='git status'
+    alias ga='git add -A'
+    alias gd='git diff'
+    alias gc='git commit -am'
     alias sendmail='/run/current-system/sw/bin/msmtp --debug --from=default --file=/etc/msmtp/laurus -t'
     alias xclip='xclip -selection c'
     alias please='sudo'
+    alias n='nix-shell shell.nix'
+    alias nod='nixops deploy -d laurus-nobilis-gce' 
+    alias sn='sudo nixos-rebuild switch'
+    alias gr='grep -R --exclude-dir={.stack-work,dist-newstyle} -n'
   '';
 
   # For a Purescript enviroment
@@ -59,90 +76,96 @@ in {
   #       inherit pkgs;
   #     };
   # in
-    environment.systemPackages = with pkgs; [
-      unetbootin
-      any-nix-shell
-      texlive.combined.scheme-basic
-      rxvt_unicode
-      wget
-      vim
-      emacs
-      tmux
-      curl
-      gist
-      git
-      lambda-mod-zsh-theme
-      oh-my-zsh
-      zsh
-      scrot
-      xclip
-      feh
-      firefox
-      dmenu
-      tabbed
-      st
-      haskellPackages.xmobar
-      ranger
-      # fish
-      obs-studio
-      qbittorrent
-      libreoffice
-      vlc
-      dropbox-cli
-      gnome3.nautilus
-      calibre
-      taffybar
-      sshpass
-      gimp
-      gparted
-      octave
-      htop
-      stack
-      postgresql_11
-      nixops
-      # skypeforlinux
-      google-chrome
-      # spotify # this loops `nixos-rebuild switch` 
-      # stack2nix
-      # ghc
-      ffmpeg
-      xdotool
-      cabal2nix
-      cabal-install
-      nix-prefetch-git
-      xvkbd
-      haskellPackages.yesod-bin
-      # system-sendmail
-      msmtp
-      hunspell
-      hunspellDicts.es-any
-      hunspellDicts.es-mx
-      hunspellDicts.en-us
-      aspell
-      aspellDicts.en
-      aspellDicts.en-computers
-      aspellDicts.en-science
-      aspellDicts.es
-      inkscape
-      # haskellPackages.keter
-      # nixos.zathura
-      unrar
-      unzip
-      teamviewer
-      hack-font
-      cachix
-      tree
-      gnumake
-      nodejs
-      nodePackages.yarn
-      nixpkgs-19-03.yarn2nix
-      nodePackages.typescript
-      nodePackages.create-react-app
-    ];
+  environment.systemPackages = with pkgs; [
+    zoom-us
+    discord
+    spotify
+    pgadmin
+    # pgmanage
+    signal-desktop
+    unetbootin
+    any-nix-shell
+    texlive.combined.scheme-basic
+    rxvt_unicode
+    wget
+    vim
+    emacs
+    tmux
+    curl
+    gist
+    git
+    lambda-mod-zsh-theme
+    oh-my-zsh
+    zsh
+    scrot
+    xclip
+    feh
+    firefox
+    dmenu
+    tabbed
+    st
+    haskellPackages.xmobar
+    ranger
+    # fish
+    obs-studio
+    qbittorrent
+    libreoffice
+    vlc
+    dropbox-cli
+    gnome3.nautilus
+    calibre
+    taffybar
+    sshpass
+    gimp
+    gparted
+    octave
+    htop
+    stack
+    postgresql_11
+    nixops
+    # skypeforlinux
+    google-chrome
+    # spotify # this loops `nixos-rebuild switch` 
+    # stack2nix
+    # ghc
+    ffmpeg
+    xdotool
+    cabal2nix
+    cabal-install
+    nix-prefetch-git
+    xvkbd
+    haskellPackages.yesod-bin
+    # system-sendmail
+    msmtp
+    hunspell
+    hunspellDicts.es-any
+    hunspellDicts.es-mx
+    hunspellDicts.en-us
+    aspell
+    aspellDicts.en
+    aspellDicts.en-computers
+    aspellDicts.en-science
+    aspellDicts.es
+    inkscape
+    # haskellPackages.keter
+    # nixos.zathura
+    unrar
+    unzip
+    teamviewer
+    hack-font
+    cachix
+    tree
+    gnumake
+    nodejs
+    nodePackages.yarn
+    nixpkgs-19-03.yarn2nix
+    nodePackages.typescript
+    nodePackages.create-react-app
+  ];
 
-fonts.fonts = with pkgs; [
-  hack-font
-];
+  fonts.fonts = with pkgs; [
+    hack-font
+  ];
 
   systemd.user.services.dropbox = {
     restartIfChanged = true;
@@ -169,10 +192,12 @@ fonts.fonts = with pkgs; [
     interactiveShellInit = ''
       # z - jump around
       # source ${pkgs.fetchurl {url = "https://github.com/rupa/z/raw/2ebe419ae18316c5597dd5fb84b5d8595ff1dde9/z.sh"; sha256 = "0ywpgk3ksjq7g30bqbhl9znz3jh6jfg8lxnbdbaiipzgsy41vi10";}}
+      save_aliases=$(alias -L)
       export ZSH=${pkgs.oh-my-zsh}/share/oh-my-zsh
       export ZSH_THEME="bira" #"lambda"
       plugins=(git sudo colorize extract history postgres)
       source $ZSH/oh-my-zsh.sh
+      eval $save_aliases; unset save_aliases
     '';
     promptInit = ''
       any-nix-shell zsh --info-right | source /dev/stdin
