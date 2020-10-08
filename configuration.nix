@@ -3,15 +3,90 @@
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
 { config, pkgs, ... }:
-let
+let 
   nixpkgs-19-03 = import (fetchTarball https://releases.nixos.org/nixos/19.03/nixos-19.03.173684.c8db7a8a16e/nixexprs.tar.xz) { };
+  home-manager = builtins.fetchGit {
+    url = "https://github.com/rycee/home-manager.git";
+    rev = "b78b5fa4a073dfcdabdf0deb9a8cfd56050113be";
+    ref = "release-19.09";
+  };
+
+  # unstable = import <nixos-unstable> { config = { allowUnfree = true; }; };
+  # nixpkgs = import <nixos-unstable> {};
+  unstable = import (builtins.fetchGit {
+    # Descriptive name to make the store path easier to identify
+    name = "nixos-unstable-2020-08-27";
+    url = "https://github.com/nixos/nixpkgs-channels/";
+    # Commit hash for nixos-unstable as of 2018-09-12
+    # `git ls-remote https://github.com/nixos/nixpkgs-channels nixos-unstable`
+    ref = "refs/heads/nixos-unstable";
+    rev = "c59ea8b8a0e7f927e7291c14ea6cd1bd3a16ff38";
+    # rev = "ca2ba44cab47767c8127d1c8633e2b581644eb8f";
+  }) { config = { allowUnfree = true; }; };
+
+  # nixos-20-03 = import (builtins.fetchGit {
+  #   # Descriptive name to make the store path easier to identify
+  #   name = "nixos-20.03-2020-1-07";
+  #   url = "https://github.com/nixos/nixpkgs-channels/";
+  #   # Commit hash for nixos-unstable as of 2018-09-12
+  #   # `git ls-remote https://github.com/nixos/nixpkgs-channels nixos-unstable`
+  #   ref = "refs/heads/nixos-20.03";
+  #   rev = "c59ea8b8a0e7f927e7291c14ea6cd1bd3a16ff38";
+  #   # rev = "ca2ba44cab47767c8127d1c8633e2b581644eb8f";
+  # }) { config = { allowUnfree = true; }; };
+
+  # doom-emacs = pkgs.callPackage (builtins.fetchTarball {
+  #   url = https://github.com/vlaci/nix-doom-emacs/archive/master.tar.gz;
+  # }) {
+  #   doomPrivateDir = /home/hhefesto/doom.d; # Directory containing your config.el init.el
+  #                                            # and packages.el files
+  # };
   # nixpkgs-19-09-unstable = import (fetchTarball https://releases.nixos.org/releases.nixos.org/nixos/unstable/nixos-19.09pre192418.e19054ab3cd/nixexprs.tar.xz) { };
 in {
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
       ./cachix.nix
+      # (import "${builtins.fetchTarball https://github.com/rycee/home-manager/archive/master.tar.gz}/nixos")
+      (import "${home-manager}/nixos")
+      # ( builtins.fetchTarball "https://github.com/hercules-ci/hercules-ci-agent/archive/stable.tar.gz"
+      #   + "/module.nix"
+      # )
     ];
+
+  home-manager.users.hhefesto = {
+    # Let Home Manager install and manage itself.
+    programs.home-manager.enable = true;
+
+    programs.bat.enable = true;
+
+    home.packages = [ # doom-emacs
+                      pkgs.git
+                    ];
+
+    # home.file.".emacs.d/init.el".text = ''
+    #  (load "default.el")
+    # '';
+
+    # Home Manager needs a bit of information about you and the
+    # paths it should manage.
+    home.username = "hhefesto";
+    home.homeDirectory = "/home/hhefesto";
+
+    # remove when possible
+    manual.manpages.enable = false;
+    
+    # This value determines the Home Manager release that your
+    # configuration is compatible with. This helps avoid breakage
+    # when a new Home Manager release introduces backwards
+    # incompatible changes.
+    #
+    # You can update Home Manager without changing this value. See
+    # the Home Manager release notes for a list of state version
+    # changes in each release.
+    home.stateVersion = "19.09";
+  };
+
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -47,6 +122,8 @@ in {
     # alias fn='cabal repl' #TODO:Fix
     # alias 'cabal run'='cabal new-run' #TODO:Fix
     # alias 'cabal build'='cabal new-build' #TODO:Fix
+    alias cat='bat'
+    alias _cat='cat'
     alias crun='cabal new-run'
     alias ct='cabal new-test'
     alias cr='cabal new-repl'
@@ -57,13 +134,15 @@ in {
     alias ga='git add -A'
     alias gd='git diff'
     alias gc='git commit -am'
+    alias gcs='git commit -am "squash"'
     alias sendmail='/run/current-system/sw/bin/msmtp --debug --from=default --file=/etc/msmtp/laurus -t'
     alias xclip='xclip -selection c'
     alias please='sudo'
     alias n='nix-shell shell.nix'
     alias nod='nixops deploy -d laurus-nobilis-gce' 
     alias sn='sudo nixos-rebuild switch'
-    alias gr='grep -R --exclude-dir={.stack-work,dist-newstyle} -n'
+    alias gr='grep -R --exclude='TAGS' --exclude-dir={.stack-work,dist-newstyle,result,result-2} -n'
+    alias where='pwd'
   '';
 
   # For a Purescript enviroment
@@ -77,12 +156,20 @@ in {
   #     };
   # in
   environment.systemPackages = with pkgs; [
-    zoom-us
+    rename
+    parallel
+    pywal
+    stylish-haskell
+    python
+    direnv
+    ripgrep
+    sox
+    unstable.zoom-us
     discord
     spotify
     pgadmin
     # pgmanage
-    signal-desktop
+    unstable.signal-desktop
     unetbootin
     any-nix-shell
     texlive.combined.scheme-basic
@@ -100,7 +187,7 @@ in {
     scrot
     xclip
     feh
-    firefox
+    unstable.firefox
     dmenu
     tabbed
     st
@@ -114,7 +201,7 @@ in {
     dropbox-cli
     gnome3.nautilus
     calibre
-    taffybar
+    nixpkgs-19-03.taffybar
     sshpass
     gimp
     gparted
@@ -162,10 +249,17 @@ in {
     nodePackages.typescript
     nodePackages.create-react-app
   ];
-
+  # TODO: see about this.
+  nixpkgs.config.permittedInsecurePackages = [
+    "google-chrome-81.0.4044.138"
+    "openssl-1.0.2u"
+  ];
+  
   fonts.fonts = with pkgs; [
     hack-font
   ];
+  
+  # services.lorri.enable = true;
 
   systemd.user.services.dropbox = {
     restartIfChanged = true;
@@ -184,6 +278,8 @@ in {
     serviceConfig.RestartSec = 2;
     serviceConfig.ExecStart = "${pkgs.rxvt_unicode}/bin/urxvtd -q -o";
   };
+
+  # programs.nm-applet.enable = true;
 
   programs.zsh = {
     enable = true;
@@ -224,6 +320,10 @@ in {
   
   # List services that you want to enable:
 
+  # services.hercules-ci-agent.enable = true;
+  # services.hercules-ci-agent.concurrentTasks = 4; # Number of jobs to run
+  # services.hercules-ci-agent.patchNix = true;
+
   # Enable the OpenSSH daemon.
   # services.openssh.enable = true;
 
@@ -240,126 +340,32 @@ in {
   # sound.enable = true;
   # hardware.pulseaudio.enable = true;
 
+  services.openssh.enable = true;
+
   # Enable the X11 windowing system.
-  # services.xserver.enable = true;
-  # services.xserver.layout = "us";
-  # services.xserver.xkbOptions = "eurosign:e";
-  services = {
-    openssh.enable = true;
-    xserver = {
-      enable = true;
-      layout = "us";
-      xkbOptions = "ctrl:nocaps";
-      xkbVariant = "altgr-intl";
-      displayManager = {
-        gdm.enable = true;
-        gdm.autoLogin.user = "hhefesto";
-        # kdm.enable = false;
-        # lightdm.enable = true;
-        slim.enable = false;
-        slim.defaultUser = "hhefesto";
-        sessionCommands = ''
-          ${pkgs.xorg.xrdb}/bin/xrdb -merge <${pkgs.writeText "Xresources" ''
-             *international: true
-             URxvt*.scrollBar:      false
-             URxvt*.depth:          32
-             URxvt*font:            xft:Source Code Pro:size=10, xft:DejaVu Sans:size=8, xft:Free Mono:size=10
-             URxvt*perl-lib:        /etc/nixos/conf/urxvt-perl
-             URxvt*perl-ext-common: default,clipboard,url-select,keyboard-select
-             URxvt.keysym.Control-f: perl:keyboard-select:search
-             URxvt.keysym.Control-s: perl:keyboard-select:activate
-             URxvt.keysym.Mod1-u: perl:url-select:select_next
-             URxvt.keysym.Mod1-x: perl:clipboard:copy
-             URxvt.keysym.Mod1-y: perl:clipboard:paste
-             URxvt.url-select.launcher: xdg-open
-             URxvt.url-select.underline: true
+  services.xserver.enable = true;
+  services.xserver.layout = "us";
+  services.xserver.xkbOptions = "ctrl:nocaps";
+  services.xserver.xkbVariant = "altgr-intl";
+  services.xserver.windowManager.xmonad = {
+    enable = true;
+    enableContribAndExtras = true;
+    extraPackages = haskellPackages:[
+      haskellPackages.xmonad-contrib
+      haskellPackages.xmonad-extras
+      haskellPackages.xmonad
+    ];
+  };
+  services.xserver.displayManager = {
+    defaultSession = "gnome";
+    gdm.enable = true;
+    gdm.autoLogin.user = "hhefesto";
+  };
+  services.xserver.desktopManager = {
+    gnome3.enable = true;
+  };
 
-
-             ! Solarized color scheme for the X Window System
-             !
-             ! http://ethanschoonover.com/solarized
-
-
-             ! Common
-
-             #define S_yellow        #b58900
-             #define S_orange        #cb4b16
-             #define S_red           #dc322f
-             #define S_magenta       #d33682
-             #define S_violet        #6c71c4
-             #define S_blue          #268bd2
-             #define S_cyan          #2aa198
-             #define S_green         #859900
-
-
-             ! Dark
-
-             #define S_base03        #002b36
-             #define S_base02        #073642
-             #define S_base01        #586e75
-             #define S_base00        #657b83
-             #define S_base0         #839496
-             #define S_base1         #93a1a1
-             #define S_base2         #eee8d5
-             #define S_base3         #fdf6e3
-
-
-             ! Light
-
-             !#define S_base03        #fdf6e3
-             !#define S_base02        #eee8d5
-             !#define S_base01        #93a1a1
-             !#define S_base00        #839496
-             !#define S_base0         #657b83
-             !#define S_base1         #586e75
-             !#define S_base2         #073642
-             !#define S_base3         #002b36
-
-             URxvt*background:         S_base03
-             URxvt*foreground:         S_base0
-             URxvt*cursorColor:             S_base1
-             URxvt*pointerColorBackground:  S_base01
-             URxvt*pointerColorForeground:  S_base1
-             URxvt.intensityStyles: false
-
-             URxvt*color0:                  S_base02
-             URxvt*color1:                  S_red
-             URxvt*color2:                  S_green
-             URxvt*color3:                  S_yellow
-             URxvt*color4:                  S_blue
-             URxvt*color5:                  S_magenta
-             URxvt*color6:                  S_cyan
-             URxvt*color7:                  S_base2
-             URxvt*color8:                  S_base03
-             URxvt*color9:                  S_orange
-             URxvt*color10:                 S_base01
-             URxvt*color11:                 S_base00
-             URxvt*color12:                 S_base0
-             URxvt*color13:                 S_violet
-             URxvt*color14:                 S_base1
-             URxvt*color15: S_base3
-
-            Xcursor.theme: Adwaita
-            Xcursor.size: 16
-          ''}
-        '';
-      };
-      desktopManager = {
-        gnome3.enable = true;
-        default = "gnome3";
-      };
-      windowManager.default = "xmonad";
-      windowManager.xmonad = {
-        enable = true;
-        enableContribAndExtras = true;
-        extraPackages = haskellPackages:[
-          haskellPackages.xmonad-contrib
-          haskellPackages.xmonad-extras
-          haskellPackages.xmonad
-        ];
-      };
-    };
-    postgresql = {
+  services.postgresql = {
       enable = true;
       package = pkgs.postgresql_11;
       enableTCPIP = true;
@@ -376,9 +382,8 @@ in {
         CREATE DATABASE sandbox;
         GRANT ALL PRIVILEGES ON DATABASE sandbox TO hhefesto;
     '';
-    };
   };
-  
+
   virtualisation.docker.enable = true;
   virtualisation.virtualbox.host.enable = true;
   
@@ -418,9 +423,12 @@ in {
   #   inherit (texlive) scheme-small algorithms cm-super;
   # };
 
+  nix.allowedUsers =  [ "@wheel" "hhefesto" ];
+  nix.trustedUsers = [ "root" "hhefesto" ];
+
   # This value determines the NixOS release with which your system is to be
   # compatible, in order to avoid breaking some software such as database
   # servers. You should change this only after NixOS release notes say you
   # should.
-  system.stateVersion = "19.09"; # Did you read the comment?
+  system.stateVersion = "20.03"; # Did you read the comment?
 }
