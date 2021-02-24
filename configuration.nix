@@ -5,87 +5,69 @@
 { config, pkgs, ... }:
 let 
   nixpkgs-19-03 = import (fetchTarball https://releases.nixos.org/nixos/19.03/nixos-19.03.173684.c8db7a8a16e/nixexprs.tar.xz) { };
-  home-manager = builtins.fetchGit {
-    url = "https://github.com/rycee/home-manager.git";
-    rev = "b78b5fa4a073dfcdabdf0deb9a8cfd56050113be";
-    ref = "release-19.09";
-  };
-
-  # unstable = import <nixos-unstable> { config = { allowUnfree = true; }; };
-  # nixpkgs = import <nixos-unstable> {};
-  unstable = import (builtins.fetchGit {
-    # Descriptive name to make the store path easier to identify
-    name = "nixos-unstable-2020-08-27";
-    url = "https://github.com/nixos/nixpkgs-channels/";
-    # Commit hash for nixos-unstable as of 2018-09-12
-    # `git ls-remote https://github.com/nixos/nixpkgs-channels nixos-unstable`
-    ref = "refs/heads/nixos-unstable";
-    rev = "c59ea8b8a0e7f927e7291c14ea6cd1bd3a16ff38";
-    # rev = "ca2ba44cab47767c8127d1c8633e2b581644eb8f";
-  }) { config = { allowUnfree = true; }; };
-
-  # nixos-20-03 = import (builtins.fetchGit {
+  # home-manager = builtins.fetchGit {
+  #   url = "https://github.com/rycee/home-manager.git";
+  #   rev = "b78b5fa4a073dfcdabdf0deb9a8cfd56050113be";
+  #   ref = "release-19.09";
+  # };
+  # nixos-20-09 = import <nixos> { config = { allowUnfree = true; }; };
+  nixos-unstable = import <nixos-unstable> { config = { allowUnfree = true; }; };
+  # nixos-unstable = import <nixos> { config = { allowUnfree = true; }; };
+  # nixos-20-09 = import <nixos> { config = { allowUnfree = true; }; };
+  # nixos-20-09 = import (builtins.fetchGit {
   #   # Descriptive name to make the store path easier to identify
-  #   name = "nixos-20.03-2020-1-07";
+  #   name = "nixos-20.09-2020-10-08";
   #   url = "https://github.com/nixos/nixpkgs-channels/";
   #   # Commit hash for nixos-unstable as of 2018-09-12
   #   # `git ls-remote https://github.com/nixos/nixpkgs-channels nixos-unstable`
-  #   ref = "refs/heads/nixos-20.03";
+  #   ref = "refs/heads/nixos-20.09";
   #   rev = "c59ea8b8a0e7f927e7291c14ea6cd1bd3a16ff38";
   #   # rev = "ca2ba44cab47767c8127d1c8633e2b581644eb8f";
   # }) { config = { allowUnfree = true; }; };
-
-  # doom-emacs = pkgs.callPackage (builtins.fetchTarball {
-  #   url = https://github.com/vlaci/nix-doom-emacs/archive/master.tar.gz;
-  # }) {
-  #   doomPrivateDir = /home/hhefesto/doom.d; # Directory containing your config.el init.el
-  #                                            # and packages.el files
-  # };
-  # nixpkgs-19-09-unstable = import (fetchTarball https://releases.nixos.org/releases.nixos.org/nixos/unstable/nixos-19.09pre192418.e19054ab3cd/nixexprs.tar.xz) { };
 in {
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
       ./cachix.nix
       # (import "${builtins.fetchTarball https://github.com/rycee/home-manager/archive/master.tar.gz}/nixos")
-      (import "${home-manager}/nixos")
+      # (import "${home-manager}/nixos")
       # ( builtins.fetchTarball "https://github.com/hercules-ci/hercules-ci-agent/archive/stable.tar.gz"
       #   + "/module.nix"
       # )
     ];
 
-  home-manager.users.hhefesto = {
-    # Let Home Manager install and manage itself.
-    programs.home-manager.enable = true;
-
-    programs.bat.enable = true;
-
-    home.packages = [ # doom-emacs
-                      pkgs.git
-                    ];
-
-    # home.file.".emacs.d/init.el".text = ''
-    #  (load "default.el")
-    # '';
-
-    # Home Manager needs a bit of information about you and the
-    # paths it should manage.
-    home.username = "hhefesto";
-    home.homeDirectory = "/home/hhefesto";
-
-    # remove when possible
-    manual.manpages.enable = false;
-    
-    # This value determines the Home Manager release that your
-    # configuration is compatible with. This helps avoid breakage
-    # when a new Home Manager release introduces backwards
-    # incompatible changes.
-    #
-    # You can update Home Manager without changing this value. See
-    # the Home Manager release notes for a list of state version
-    # changes in each release.
-    home.stateVersion = "19.09";
-  };
+ # home-manager.users.hhefesto = {
+ #   # Let Home Manager install and manage itself.
+ #   programs.home-manager.enable = true;
+ #
+ #   programs.bat.enable = true;
+ #
+ #   home.packages = [ # doom-emacs
+ #                     pkgs.git
+ #                   ];
+ #
+ #   # home.file.".emacs.d/init.el".text = ''
+ #   #  (load "default.el")
+ #   # '';
+ #
+ #   # Home Manager needs a bit of information about you and the
+ #   # paths it should manage.
+ #   home.username = "hhefesto";
+ #   home.homeDirectory = "/home/hhefesto";
+ #
+ #   # remove when possible
+ #   manual.manpages.enable = false;
+ #   
+ #   # This value determines the Home Manager release that your
+ #   # configuration is compatible with. This helps avoid breakage
+ #   # when a new Home Manager release introduces backwards
+ #   # incompatible changes.
+ #   #
+ #   # You can update Home Manager without changing this value. See
+ #   # the Home Manager release notes for a list of state version
+ #   # changes in each release.
+ #   home.stateVersion = "19.09";
+ # };
 
 
   # Use the systemd-boot EFI boot loader.
@@ -156,6 +138,9 @@ in {
   #     };
   # in
   environment.systemPackages = with pkgs; [
+    # steam
+    zip
+    # teams
     rename
     parallel
     pywal
@@ -164,12 +149,12 @@ in {
     direnv
     ripgrep
     sox
-    unstable.zoom-us
+    nixos-unstable.zoom-us
     discord
     spotify
     pgadmin
     # pgmanage
-    unstable.signal-desktop
+    nixos-unstable.signal-desktop
     unetbootin
     any-nix-shell
     texlive.combined.scheme-basic
@@ -187,7 +172,7 @@ in {
     scrot
     xclip
     feh
-    unstable.firefox
+    nixos-unstable.firefox
     dmenu
     tabbed
     st
@@ -207,23 +192,20 @@ in {
     gparted
     octave
     htop
-    stack
-    postgresql_11
+    # nixos-unstable.stack
     nixops
     # skypeforlinux
     google-chrome
     # spotify # this loops `nixos-rebuild switch` 
     # stack2nix
-    # ghc
+    # nixos-unstable.ghc
     ffmpeg
     xdotool
-    cabal2nix
-    cabal-install
+    # cabal2nix
+    # cabal-install
     nix-prefetch-git
     xvkbd
-    haskellPackages.yesod-bin
     # system-sendmail
-    msmtp
     hunspell
     hunspellDicts.es-any
     hunspellDicts.es-mx
@@ -248,6 +230,15 @@ in {
     nixpkgs-19-03.yarn2nix
     nodePackages.typescript
     nodePackages.create-react-app
+
+    # for laurus-nobilis
+    zlib
+    postgresql_11
+    haskellPackages.yesod-bin
+    msmtp
+    gmp
+    # zip
+    # \for laurus-nobilis
   ];
   # TODO: see about this.
   nixpkgs.config.permittedInsecurePackages = [
@@ -280,6 +271,10 @@ in {
   };
 
   # programs.nm-applet.enable = true;
+
+  programs.light.enable = true;
+
+  programs.steam.enable = true;
 
   programs.zsh = {
     enable = true;
@@ -359,12 +354,10 @@ in {
   services.xserver.displayManager = {
     defaultSession = "gnome";
     gdm.enable = true;
-    gdm.autoLogin.user = "hhefesto";
+    # autoLogin.user = "hhefesto";
   };
-  services.xserver.desktopManager = {
-    gnome3.enable = true;
-  };
-
+  services.xserver.desktopManager.gnome3.enable = true;
+  
   services.postgresql = {
       enable = true;
       package = pkgs.postgresql_11;
@@ -414,7 +407,7 @@ in {
     isNormalUser = true;
     home = "/home/hhefesto";
     description = "Daniel Herrera";
-    extraGroups = [ "wheel" "networkmanager" "docker" ];
+    extraGroups = [ "video" "wheel" "networkmanager" "docker" ];
     hashedPassword = "$6$/RvS0Se.iCx$A0eA/8PzgMj.Ms9ohNamfu53c9S.zdG30hEmUHLjmWP0CaXTPVA6QxGIZ6fy.abkjSOTJMAq7fFL6LUBGs4BU0";
     shell = pkgs.zsh; #"/run/current-system/sw/bin/bash";
   };
@@ -423,6 +416,14 @@ in {
   #   inherit (texlive) scheme-small algorithms cm-super;
   # };
 
+  # For nix flakes
+  nix.package = pkgs.nixFlakes;
+  nix.extraOptions = "experimental-features = nix-command flakes";
+
+  # Added for obrlisk installation: https://github.com/obsidiansystems/obelisk
+  nix.binaryCaches = [ "https://nixcache.reflex-frp.org" ];
+  nix.binaryCachePublicKeys = [ "ryantrinkle.com-1:JJiAKaRv9mWgpVAz8dwewnZe0AzzEAzPkagE9SP5NWI=" ];
+
   nix.allowedUsers =  [ "@wheel" "hhefesto" ];
   nix.trustedUsers = [ "root" "hhefesto" ];
 
@@ -430,5 +431,5 @@ in {
   # compatible, in order to avoid breaking some software such as database
   # servers. You should change this only after NixOS release notes say you
   # should.
-  system.stateVersion = "20.03"; # Did you read the comment?
+  system.stateVersion = "20.09"; # Did you read the comment?
 }
