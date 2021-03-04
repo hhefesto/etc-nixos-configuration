@@ -15,17 +15,17 @@
   boot.extraModulePackages = [ ];
 
   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/c1e016d0-473a-4d0e-9e4f-d1f30871a3fb";
+    { device = "/dev/disk/by-uuid/a9acdef0-da4e-4350-916b-9a15a2eacdb6";
       fsType = "ext4";
     };
 
   fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/19B0-AC4C";
+    { device = "/dev/disk/by-uuid/0E1E-6EB2";
       fsType = "vfat";
     };
 
   swapDevices =
-    [ { device = "/dev/disk/by-uuid/d8820554-506f-4d07-b28b-9cc10ce19684"; }
+    [ { device = "/dev/disk/by-uuid/e673b0b2-6aca-4c38-b7f6-ce4133feb0b1"; }
     ];
 
   nix.maxJobs = lib.mkDefault 16;
