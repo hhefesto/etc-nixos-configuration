@@ -1,80 +1,34 @@
-# Edit this configuration file to define what should be installed on
-# your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running ‘nixos-help’).
-
-{ config, pkgs, ... }:
-let 
-  nixpkgs-19-03 = import (fetchTarball https://releases.nixos.org/nixos/19.03/nixos-19.03.173684.c8db7a8a16e/nixexprs.tar.xz) { };
-  # home-manager = builtins.fetchGit {
-  #   url = "https://github.com/rycee/home-manager.git";
-  #   rev = "b78b5fa4a073dfcdabdf0deb9a8cfd56050113be";
-  #   ref = "release-19.09";
-  # };
-  # nixos-20-09 = import <nixos> { config = { allowUnfree = true; }; };
-  nixos-unstable = import <nixos-unstable> { config = { allowUnfree = true; }; };
-  # nixos-unstable = import <nixos> { config = { allowUnfree = true; }; };
-  # nixos-20-09 = import <nixos> { config = { allowUnfree = true; }; };
-  # nixos-20-09 = import (builtins.fetchGit {
-  #   # Descriptive name to make the store path easier to identify
-  #   name = "nixos-20.09-2020-10-08";
-  #   url = "https://github.com/nixos/nixpkgs-channels/";
-  #   # Commit hash for nixos-unstable as of 2018-09-12
-  #   # `git ls-remote https://github.com/nixos/nixpkgs-channels nixos-unstable`
-  #   ref = "refs/heads/nixos-20.09";
-  #   rev = "c59ea8b8a0e7f927e7291c14ea6cd1bd3a16ff38";
-  #   # rev = "ca2ba44cab47767c8127d1c8633e2b581644eb8f";
-  # }) { config = { allowUnfree = true; }; };
-in {
+{ config, pkgs, lib, modulesPath, inputs, ... }:
+  # let
+  #     overlay-unstable = final: prev: {
+  #       unstable = inputs.unstable.legacyPackages.x86_64-linux;
+  #     };
+  # in
+{
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
       ./cachix.nix
-      # (import "${builtins.fetchTarball https://github.com/rycee/home-manager/archive/master.tar.gz}/nixos")
-      # (import "${home-manager}/nixos")
-      # ( builtins.fetchTarball "https://github.com/hercules-ci/hercules-ci-agent/archive/stable.tar.gz"
-      #   + "/module.nix"
-      # )
     ];
 
- # home-manager.users.hhefesto = {
- #   # Let Home Manager install and manage itself.
- #   programs.home-manager.enable = true;
- #
- #   programs.bat.enable = true;
- #
- #   home.packages = [ # doom-emacs
- #                     pkgs.git
- #                   ];
- #
- #   # home.file.".emacs.d/init.el".text = ''
- #   #  (load "default.el")
- #   # '';
- #
- #   # Home Manager needs a bit of information about you and the
- #   # paths it should manage.
- #   home.username = "hhefesto";
- #   home.homeDirectory = "/home/hhefesto";
- #
- #   # remove when possible
- #   manual.manpages.enable = false;
- #   
- #   # This value determines the Home Manager release that your
- #   # configuration is compatible with. This helps avoid breakage
- #   # when a new Home Manager release introduces backwards
- #   # incompatible changes.
- #   #
- #   # You can update Home Manager without changing this value. See
- #   # the Home Manager release notes for a list of state version
- #   # changes in each release.
- #   home.stateVersion = "19.09";
- # };
-
+  # nixpkgs.overlays = [
+  #   (final: prev: {
+  #      unstable = final.unstable;
+  #      # zoom-us = final.unstable.zoom-us;
+  #    }
+  #   )
+  # ];
+  # nixpkgs.overlays = [ inputs.unstable.overlay ];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  networking.hostName = "Olimpo"; # Define your hostname.
+  # Added because it is present in nix flakes examples.
+  boot.isContainer = true;
+
+
+  networking.hostName = "olimpo"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Configure network proxy if necessary
@@ -95,11 +49,11 @@ in {
   #   TERMINAL = [ "st" ];
   #   OH_MY_ZSH = [ "${pkgs.oh-my-zsh}/share/oh-my-zsh" ];
   # };
-  
+
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   nixpkgs.config.allowUnfree = true;
-  
+
   environment.interactiveShellInit = ''
     # alias fn='cabal repl' #TODO:Fix
     # alias 'cabal run'='cabal new-run' #TODO:Fix
@@ -121,23 +75,14 @@ in {
     alias xclip='xclip -selection c'
     alias please='sudo'
     alias n='nix-shell shell.nix'
-    alias nod='nixops deploy -d laurus-nobilis-gce' 
+    # alias nod='nixops deploy -d laurus-nobilis-gce'
     alias sn='sudo nixos-rebuild switch'
     alias gr='grep -R --exclude='TAGS' --exclude-dir={.stack-work,dist-newstyle,result,result-2} -n'
     alias where='pwd'
   '';
 
-  # For a Purescript enviroment
-  # let easy-ps = import (pkgs.fetchFromGitHub {
-  #       owner = "justinwoo";
-  #       repo = "easy-purescript-nix";
-  #       rev = "7d072cef5ad9dc33a9a9f1b7fcf8ff083ff484b3";
-  #       sha256 = "0974wrnp8rnmj1wzaxwlmk5mf1vxdbrvjc1h8jgm9j5686qn0mna";
-  #     }) {
-  #       inherit pkgs;
-  #     };
-  # in
   environment.systemPackages = with pkgs; [
+    jq
     # steam
     zip
     # teams
@@ -145,16 +90,21 @@ in {
     parallel
     pywal
     stylish-haskell
-    python
+
+
+    # python
+
     direnv
     ripgrep
     sox
-    nixos-unstable.zoom-us
+    # unstable.zoom-us
+    zoom-us
     discord
     spotify
-    pgadmin
+    # pgadmin
     # pgmanage
-    nixos-unstable.signal-desktop
+    # unstable.signal-desktop
+    signal-desktop
     unetbootin
     any-nix-shell
     texlive.combined.scheme-basic
@@ -172,7 +122,8 @@ in {
     scrot
     xclip
     feh
-    nixos-unstable.firefox
+    # unstable.firefox
+    firefox
     dmenu
     tabbed
     st
@@ -186,19 +137,21 @@ in {
     dropbox-cli
     gnome3.nautilus
     calibre
-    nixpkgs-19-03.taffybar
+    # nixpkgs-19-03.taffybar
     sshpass
     gimp
     gparted
     octave
     htop
-    # nixos-unstable.stack
-    nixops
+    # unstable.stack
+
+    # nixops
+
     # skypeforlinux
     google-chrome
-    # spotify # this loops `nixos-rebuild switch` 
+    # spotify # this loops `nixos-rebuild switch`
     # stack2nix
-    # nixos-unstable.ghc
+    # unstable.ghc
     ffmpeg
     xdotool
     # cabal2nix
@@ -220,14 +173,14 @@ in {
     # nixos.zathura
     unrar
     unzip
-    teamviewer
+    # teamviewer
     hack-font
     cachix
     tree
     gnumake
     nodejs
     nodePackages.yarn
-    nixpkgs-19-03.yarn2nix
+    # nixpkgs-19-03.yarn2nix
     nodePackages.typescript
     nodePackages.create-react-app
 
@@ -245,11 +198,11 @@ in {
     "google-chrome-81.0.4044.138"
     "openssl-1.0.2u"
   ];
-  
+
   fonts.fonts = with pkgs; [
     hack-font
   ];
-  
+
   # services.lorri.enable = true;
 
   systemd.user.services.dropbox = {
@@ -260,6 +213,8 @@ in {
       PassEnvironment = "DISPLAY";
     };
   };
+
+  # TODO: turn off?
   systemd.user.services."urxvtd" = {
     enable = true;
     description = "rxvt unicode daemon";
@@ -274,7 +229,7 @@ in {
 
   programs.light.enable = true;
 
-  programs.steam.enable = true;
+  # programs.steam.enable = true;
 
   programs.zsh = {
     enable = true;
@@ -312,15 +267,6 @@ in {
   #   source $ZSH/oh-my-zsh.sh
   # '';
   # programs.zsh.promptInit = ""; # Clear this to avoid a conflict with oh-my-zsh
-  
-  # List services that you want to enable:
-
-  # services.hercules-ci-agent.enable = true;
-  # services.hercules-ci-agent.concurrentTasks = 4; # Number of jobs to run
-  # services.hercules-ci-agent.patchNix = true;
-
-  # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
 
   # Open ports in the firewall.
   networking.firewall.allowedTCPPorts = [ 3000 5432 587 5938 ];
@@ -335,7 +281,16 @@ in {
   # sound.enable = true;
   # hardware.pulseaudio.enable = true;
 
+  # List services that you want to enable:
+
+  # services.hercules-ci-agent.enable = true;
+  # services.hercules-ci-agent.concurrentTasks = 4; # Number of jobs to run
+  # services.hercules-ci-agent.patchNix = true;
+
+  # Enable the OpenSSH daemon.
   services.openssh.enable = true;
+
+  services.sshd.enable = true;
 
   # Enable the X11 windowing system.
   services.xserver.enable = true;
@@ -357,29 +312,10 @@ in {
     # autoLogin.user = "hhefesto";
   };
   services.xserver.desktopManager.gnome3.enable = true;
-  
-  services.postgresql = {
-      enable = true;
-      package = pkgs.postgresql_11;
-      enableTCPIP = true;
-      authentication = pkgs.lib.mkOverride 10 ''
-        local all all trust
-        host all all ::1/128 trust
-      '';
-      initialScript = pkgs.writeText "backend-initScript" ''
-        CREATE ROLE analyzer WITH LOGIN PASSWORD 'anapass' CREATEDB;
-        CREATE DATABASE aanalyzer_yesod;
-        GRANT ALL PRIVILEGES ON DATABASE analyzer TO aanalyzer_yesod;
-
-        CREATE ROLE hhefesto WITH LOGIN PASSWORD 'hhefesto' CREATEDB;
-        CREATE DATABASE sandbox;
-        GRANT ALL PRIVILEGES ON DATABASE sandbox TO hhefesto;
-    '';
-  };
 
   virtualisation.docker.enable = true;
   virtualisation.virtualbox.host.enable = true;
-  
+
   # Enable touchpad support.
   # services.xserver.libinput.enable = true;
 
@@ -392,7 +328,6 @@ in {
   #   isNormalUser = true;
   #   extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
   # };
-  
 
   users.mutableUsers = false;
 
@@ -431,5 +366,9 @@ in {
   # compatible, in order to avoid breaking some software such as database
   # servers. You should change this only after NixOS release notes say you
   # should.
-  system.stateVersion = "20.09"; # Did you read the comment?
+  # system.stateVersion = "20.09"; # Did you read the comment?
+
+  # Let 'nixos-version --json' know about the Git revision
+  # of this flake.
+  # system.configurationRevision = nixpkgs.lib.mkIf (self ? rev) self.rev;
 }
