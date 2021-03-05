@@ -25,7 +25,7 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Added because it is present in nix flakes examples.
-  boot.isContainer = true;
+  # boot.isContainer = true;
 
 
   networking.hostName = "olimpo"; # Define your hostname.
