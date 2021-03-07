@@ -24,10 +24,6 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # Added because it is present in nix flakes examples.
-  # boot.isContainer = true;
-
-
   networking.hostName = "olimpo"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
@@ -82,6 +78,7 @@
   '';
 
   environment.systemPackages = with pkgs; [
+    bat
     jq
     # steam
     zip
@@ -90,10 +87,7 @@
     parallel
     pywal
     stylish-haskell
-
-
     # python
-
     direnv
     ripgrep
     sox
@@ -144,9 +138,7 @@
     octave
     htop
     # unstable.stack
-
     # nixops
-
     # skypeforlinux
     google-chrome
     # spotify # this loops `nixos-rebuild switch`
@@ -183,7 +175,6 @@
     # nixpkgs-19-03.yarn2nix
     nodePackages.typescript
     nodePackages.create-react-app
-
     # for laurus-nobilis
     zlib
     postgresql_11
@@ -249,24 +240,6 @@
       any-nix-shell zsh --info-right | source /dev/stdin
   '';
   };
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  # programs.gnupg.agent = { enable = true; enableSSHSupport = true; };
-  # programs.fish.enable = true;
-  # programs.fish.promptInit = ''
-  #   fish-nix-shell --info-right | source
-  # '';
-  # programs.zsh.interactiveShellInit = ''
-  #   export ZSH=${pkgs.oh-my-zsh}/share/oh-my-zsh/
-
-  #   # Customize your oh-my-zsh options here
-  #   ZSH_THEME="bira"
-  #   plugins=(git dnf sudo colorize extract history postgres)
-
-  #   source $ZSH/oh-my-zsh.sh
-  # '';
-  # programs.zsh.promptInit = ""; # Clear this to avoid a conflict with oh-my-zsh
 
   # Open ports in the firewall.
   networking.firewall.allowedTCPPorts = [ 3000 5432 587 5938 ];
@@ -332,10 +305,8 @@
   users.mutableUsers = false;
 
   # Password generated with ```mkpasswd -m sha-512```
-  # users.users.root.initialHashedPassword = "$6$n4g4i9VHr52IqYY$7DMpovz3Z91gSpnfrGPPw.s1DfbdpyfJnwjv7on4G1gtFCOr0PaWOcJUHREuGzZwKZORnx7SOFAqgyehW.nxz/";
   users.users.root.initialHashedPassword = "$6$/RvS0Se.iCx$A0eA/8PzgMj.Ms9ohNamfu53c9S.zdG30hEmUHLjmWP0CaXTPVA6QxGIZ6fy.abkjSOTJMAq7fFL6LUBGs4BU0";
   users.users.hhefesto.initialHashedPassword = "$6$/RvS0Se.iCx$A0eA/8PzgMj.Ms9ohNamfu53c9S.zdG30hEmUHLjmWP0CaXTPVA6QxGIZ6fy.abkjSOTJMAq7fFL6LUBGs4BU0"; # this may be redundant
-  # users.users.hhefesto.initialHashedPassword = "$6$n4g4i9VHr52IqYY$7DMpovz3Z91gSpnfrGPPw.s1DfbdpyfJnwjv7on4G1gtFCOr0PaWOcJUHREuGzZwKZORnx7SOFAqgyehW.nxz/"; # this may be redundant
   # users.defaultUserShell = pkgs.zsh;
   users.extraUsers.hhefesto = {
     createHome = true;
