@@ -137,7 +137,7 @@
     gparted
     octave
     htop
-    # unstable.stack
+    stack
     # nixops
     # skypeforlinux
     google-chrome
@@ -286,6 +286,21 @@
   };
   services.xserver.desktopManager.gnome3.enable = true;
 
+  services.postgresql = {
+      enable = true;
+      package = pkgs.postgresql_11;
+      enableTCPIP = true;
+      authentication = pkgs.lib.mkOverride 10 ''
+        local all all trust
+        host all all ::1/128 trust
+      '';
+      initialScript = pkgs.writeText "backend-initScript" ''
+        CREATE ROLE analyzer WITH LOGIN PASSWORD 'anapass';
+        CREATE DATABASE aanalyzer_yesod;
+        GRANT ALL PRIVILEGES ON DATABASE aanalyzer_yesod TO analyzer;
+      '';
+    };
+
   virtualisation.docker.enable = true;
   virtualisation.virtualbox.host.enable = true;
 
@@ -341,5 +356,5 @@
 
   # Let 'nixos-version --json' know about the Git revision
   # of this flake.
-  system.configurationRevision = nixpkgs.lib.mkIf (self ? rev) self.rev;
+  system.configurationRevision = inputs.nixpkgs.lib.mkIf (inputs.self ? rev) inputs.self.rev;
 }
