@@ -284,7 +284,7 @@
     gdm.enable = true;
     # autoLogin.user = "hhefesto";
   };
-  services.xserver.desktopManager.gnome3.enable = true;
+  services.xserver.desktopManager.gnome.enable = true;
 
   services.postgresql = {
       enable = true;
