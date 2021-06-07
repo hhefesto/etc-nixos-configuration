@@ -75,6 +75,7 @@
     alias sn='sudo nixos-rebuild switch'
     alias gr='grep -R --exclude='TAGS' --exclude-dir={.stack-work,dist-newstyle,result,result-2} -n'
     alias where='pwd'
+    alias nd='nix develop'
   '';
 
   environment.systemPackages = with pkgs; [
