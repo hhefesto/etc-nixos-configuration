@@ -1,9 +1,15 @@
 { config, pkgs, lib, modulesPath, inputs, ... }:
-  # let
-  #     overlay-unstable = final: prev: {
-  #       unstable = inputs.unstable.legacyPackages.x86_64-linux;
-  #     };
-  # in
+# { config, pkgs, lib, modulesPath, ... }:
+let myCustomLayout = pkgs.writeText "xkb-layout" ''
+      ! swap Caps_Lock and Control_R
+      remove Lock = Caps_Lock
+      remove Control = Control_R
+      keysym Control_R = Caps_Lock
+      keysym Caps_Lock = Control_R
+      add Lock = Caps_Lock
+      add Control = Control_R
+    '';
+in
 {
   imports =
     [ # Include the results of the hardware scan.
@@ -283,9 +289,10 @@
   services.xserver.displayManager = {
     defaultSession = "gnome";
     gdm.enable = true;
+    sessionCommands = "${pkgs.xorg.xmodmap}/bin/xmodmap ${myCustomLayout}";
     # autoLogin.user = "hhefesto";
   };
-  services.xserver.desktopManager.gnome.enable = true;
+  services.xserver.desktopManager.gnome3.enable = true;
 
   services.postgresql = {
       enable = true;
