@@ -292,7 +292,7 @@ in
     sessionCommands = "${pkgs.xorg.xmodmap}/bin/xmodmap ${myCustomLayout}";
     # autoLogin.user = "hhefesto";
   };
-  services.xserver.desktopManager.gnome3.enable = true;
+  services.xserver.desktopManager.gnome.enable = true;
 
   services.postgresql = {
       enable = true;
