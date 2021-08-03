@@ -62,6 +62,7 @@
     alias gd='git diff'
     alias gc='git commit -am'
     alias gcs='git commit -am "squash"'
+    alias gbs='git branch --sort=-committerdate'
     alias sendmail='/run/current-system/sw/bin/msmtp --debug --from=default --file=/etc/msmtp/laurus -t'
     alias xclip='xclip -selection c'
     alias please='sudo'
