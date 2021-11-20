@@ -167,11 +167,11 @@
     cachix
     tree
     gnumake
-    nodejs
-    nodePackages.yarn
+    # nodejs
+    # nodePackages.yarn
     # nixpkgs-19-03.yarn2nix
-    nodePackages.typescript
-    nodePackages.create-react-app
+    # nodePackages.typescript
+    # nodePackages.create-react-app
     # for laurus-nobilis
     zlib
     postgresql_11
