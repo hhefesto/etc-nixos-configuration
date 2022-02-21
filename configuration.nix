@@ -277,7 +277,7 @@
     ];
   };
   services.xserver.displayManager = {
-    defaultSession = "gnome";
+    defaultSession = "none+xmonad";
     gdm.enable = true;
     sessionCommands = let myCustomLayout = pkgs.writeText "xkb-layout" ''
                         ! swap Caps_Lock and Control_R
