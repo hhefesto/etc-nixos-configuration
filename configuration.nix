@@ -349,8 +349,12 @@
   nix.extraOptions = "experimental-features = nix-command flakes";
 
   # Added for obrlisk installation: https://github.com/obsidiansystems/obelisk
-  nix.binaryCaches = [ "https://nixcache.reflex-frp.org" ];
-  nix.binaryCachePublicKeys = [ "ryantrinkle.com-1:JJiAKaRv9mWgpVAz8dwewnZe0AzzEAzPkagE9SP5NWI=" ];
+  nix.binaryCaches = [ "https://nixcache.reflex-frp.org"
+                     , "https://hydra.iohk.io"
+                     ];
+  nix.binaryCachePublicKeys = [ "ryantrinkle.com-1:JJiAKaRv9mWgpVAz8dwewnZe0AzzEAzPkagE9SP5NWI="
+                              , "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
+                              ];
 
   nix.allowedUsers =  [ "@wheel" "hhefesto" ];
   nix.trustedUsers = [ "root" "hhefesto" ];
