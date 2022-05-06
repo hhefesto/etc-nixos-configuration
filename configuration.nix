@@ -93,7 +93,7 @@
     # unstable.zoom-us
     zoom-us
     discord
-    spotify
+    spotifywm
     # pgadmin
     # pgmanage
     # unstable.signal-desktop
