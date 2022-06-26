@@ -1,15 +1,4 @@
 { config, pkgs, lib, modulesPath, inputs, ... }:
-# { config, pkgs, lib, modulesPath, ... }:
-let myCustomLayout = pkgs.writeText "xkb-layout" ''
-      ! swap Caps_Lock and Control_R
-      remove Lock = Caps_Lock
-      remove Control = Control_R
-      keysym Control_R = Caps_Lock
-      keysym Caps_Lock = Control_R
-      add Lock = Caps_Lock
-      add Control = Control_R
-    '';
-in
 {
   imports =
     [ # Include the results of the hardware scan.
@@ -73,6 +62,7 @@ in
     alias gd='git diff'
     alias gc='git commit -am'
     alias gcs='git commit -am "squash"'
+    alias gbs='git branch --sort=-committerdate'
     alias sendmail='/run/current-system/sw/bin/msmtp --debug --from=default --file=/etc/msmtp/laurus -t'
     alias xclip='xclip -selection c'
     alias please='sudo'
@@ -86,6 +76,8 @@ in
   '';
 
   environment.systemPackages = with pkgs; [
+    teams
+    cmatrix
     bat
     jq
     # steam
@@ -97,12 +89,13 @@ in
     stylish-haskell
     # python
     direnv
+    nix-direnv-flakes
     ripgrep
     sox
     # unstable.zoom-us
     zoom-us
     discord
-    spotify
+    spotifywm
     # pgadmin
     # pgmanage
     # unstable.signal-desktop
@@ -138,6 +131,7 @@ in
     vlc
     dropbox-cli
     gnome3.nautilus
+    gnome.gnome-terminal
     calibre
     # nixpkgs-19-03.taffybar
     sshpass
@@ -178,11 +172,11 @@ in
     cachix
     tree
     gnumake
-    nodejs
-    nodePackages.yarn
+    # nodejs
+    # nodePackages.yarn
     # nixpkgs-19-03.yarn2nix
-    nodePackages.typescript
-    nodePackages.create-react-app
+    # nodePackages.typescript
+    # nodePackages.create-react-app
     # for laurus-nobilis
     zlib
     postgresql_11
@@ -192,6 +186,11 @@ in
     # zip
     # \for laurus-nobilis
   ];
+
+  environment.pathsToLink = [
+    "/share/nix-direnv"
+  ];
+
   # TODO: see about this.
   nixpkgs.config.permittedInsecurePackages = [
     "google-chrome-81.0.4044.138"
@@ -260,7 +259,7 @@ in
 
   # Enable sound.
   # sound.enable = true;
-  # hardware.pulseaudio.enable = true;
+  hardware.pulseaudio.enable = true;
 
   # List services that you want to enable:
 
@@ -290,7 +289,16 @@ in
   services.xserver.displayManager = {
     defaultSession = "none+xmonad";
     gdm.enable = true;
-    sessionCommands = "${pkgs.xorg.xmodmap}/bin/xmodmap ${myCustomLayout}";
+    sessionCommands = let myCustomLayout = pkgs.writeText "xkb-layout" ''
+                        ! swap Caps_Lock and Control_R
+                        remove Lock = Caps_Lock
+                        remove Control = Control_R
+                        keysym Control_R = Caps_Lock
+                        keysym Caps_Lock = Control_R
+                        add Lock = Caps_Lock
+                        add Control = Control_R
+                      '';
+                      in "${pkgs.xorg.xmodmap}/bin/xmodmap ${myCustomLayout}";
     # autoLogin.user = "hhefesto";
   };
   services.xserver.desktopManager.gnome.enable = true;
@@ -348,17 +356,32 @@ in
 
   # For nix flakes
   nix.package = pkgs.nixFlakes;
-  nix.extraOptions = "experimental-features = nix-command flakes";
+  nix.extraOptions = ''
+    experimental-features = nix-command flakes
+    keep-outputs = true
+    keep-derivations = true
+  '';
 
   # Added for obrlisk installation: https://github.com/obsidiansystems/obelisk
+  # nix.settings.substituters = [ "https://nixcache.reflex-frp.org"
+  #                               "https://hydra.iohk.io"
+  #                             ];
   nix.binaryCaches = [ "https://nixcache.reflex-frp.org"
                        "https://hydra.iohk.io"
                      ];
+  #
+  #
+  # nix.settings.trusted-public-keys = [ "ryantrinkle.com-1:JJiAKaRv9mWgpVAz8dwewnZe0AzzEAzPkagE9SP5NWI="
+  #                                      "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
+  #                                    ];
   nix.binaryCachePublicKeys = [ "ryantrinkle.com-1:JJiAKaRv9mWgpVAz8dwewnZe0AzzEAzPkagE9SP5NWI="
                                 "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
                               ];
 
+  # nix.settings.allowed-users = [ "@wheel" "hhefesto" ];
   nix.allowedUsers =  [ "@wheel" "hhefesto" ];
+
+  # nix.settings.trusted-users = [ "root" "hhefesto" ];
   nix.trustedUsers = [ "root" "hhefesto" ];
 
   # This value determines the NixOS release with which your system is to be
