@@ -88,6 +88,7 @@
     stylish-haskell
     # python
     direnv
+    nix-direnv-flakes
     ripgrep
     sox
     # unstable.zoom-us
@@ -129,6 +130,7 @@
     vlc
     dropbox-cli
     gnome3.nautilus
+    gnome.gnome-terminal
     calibre
     # nixpkgs-19-03.taffybar
     sshpass
@@ -183,6 +185,11 @@
     # zip
     # \for laurus-nobilis
   ];
+
+  environment.pathsToLink = [
+    "/share/nix-direnv"
+  ];
+
   # TODO: see about this.
   nixpkgs.config.permittedInsecurePackages = [
     "google-chrome-81.0.4044.138"
@@ -348,7 +355,11 @@
 
   # For nix flakes
   nix.package = pkgs.nixFlakes;
-  nix.extraOptions = "experimental-features = nix-command flakes";
+  nix.extraOptions = ''
+    experimental-features = nix-command flakes
+    keep-outputs = true
+    keep-derivations = true
+  '';
 
   # Added for obrlisk installation: https://github.com/obsidiansystems/obelisk
   # nix.settings.substituters = [ "https://nixcache.reflex-frp.org"
