@@ -81,7 +81,8 @@ in
     alias sn='sudo nixos-rebuild switch'
     alias gr='grep -R --exclude='TAGS' --exclude-dir={.stack-work,dist-newstyle,result,result-2} -n'
     alias where='pwd'
-    alias nd='nix develop'
+    alias nd='nix develop -c $SHELL'
+    alias sb='sudo chmod 777 /cd /sys/class/backlight/intel_backlight/brightness'
   '';
 
   environment.systemPackages = with pkgs; [
@@ -89,7 +90,7 @@ in
     jq
     # steam
     zip
-    # teams
+    teams
     rename
     parallel
     pywal
@@ -287,7 +288,7 @@ in
     ];
   };
   services.xserver.displayManager = {
-    defaultSession = "gnome";
+    defaultSession = "none+xmonad";
     gdm.enable = true;
     sessionCommands = "${pkgs.xorg.xmodmap}/bin/xmodmap ${myCustomLayout}";
     # autoLogin.user = "hhefesto";
@@ -350,8 +351,12 @@ in
   nix.extraOptions = "experimental-features = nix-command flakes";
 
   # Added for obrlisk installation: https://github.com/obsidiansystems/obelisk
-  nix.binaryCaches = [ "https://nixcache.reflex-frp.org" ];
-  nix.binaryCachePublicKeys = [ "ryantrinkle.com-1:JJiAKaRv9mWgpVAz8dwewnZe0AzzEAzPkagE9SP5NWI=" ];
+  nix.binaryCaches = [ "https://nixcache.reflex-frp.org"
+                       "https://hydra.iohk.io"
+                     ];
+  nix.binaryCachePublicKeys = [ "ryantrinkle.com-1:JJiAKaRv9mWgpVAz8dwewnZe0AzzEAzPkagE9SP5NWI="
+                                "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
+                              ];
 
   nix.allowedUsers =  [ "@wheel" "hhefesto" ];
   nix.trustedUsers = [ "root" "hhefesto" ];

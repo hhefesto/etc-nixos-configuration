@@ -3,7 +3,7 @@
 
   # inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-20.03";
   inputs.nix.url = "github:nixos/nix/master";
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-21.11";
   # inputs.unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
   outputs = inputs@{ self, nixpkgs, ... }:
