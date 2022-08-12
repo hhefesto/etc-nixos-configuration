@@ -1,9 +1,20 @@
 { config, pkgs, lib, modulesPath, inputs, ... }:
+# { config, pkgs, lib, modulesPath, ... }:
+let
+  nvidia-offload = pkgs.writeShellScriptBin "nvidia-offload" ''
+    export __NV_PRIME_RENDER_OFFLOAD=1
+    export __NV_PRIME_RENDER_OFFLOAD_PROVIDER=NVIDIA-G0
+    export __GLX_VENDOR_LIBRARY_NAME=nvidia
+    export __VK_LAYER_NV_optimus=NVIDIA_only
+    exec "$@"
+  '';
+in
 {
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
       ./cachix.nix
+      # <nixos-hardware/dell/xps/15-9560/nvidia>
     ];
 
   # nixpkgs.overlays = [
@@ -18,6 +29,8 @@
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+
+  boot.kernelPackages = pkgs.linuxPackages_latest;
 
   networking.hostName = "olimpo"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -75,6 +88,9 @@
   '';
 
   environment.systemPackages = with pkgs; [
+    virt-manager
+    slack
+    nvidia-offload
     teams
     cmatrix
     bat
@@ -223,6 +239,7 @@
   };
 
   # programs.nm-applet.enable = true;
+  programs.dconf.enable = true;
 
   programs.light.enable = true;
 
@@ -260,6 +277,14 @@
   # sound.enable = true;
   hardware.pulseaudio.enable = true;
 
+  hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.stable;
+  hardware.nvidia.prime.offload.enable = true;
+  hardware.nvidia.prime.nvidiaBusId    = "PCI:1:0:0";
+  hardware.nvidia.prime.intelBusId     = "PCI:0:2:0";
+  hardware.nvidia.powerManagement.enable = true;
+  hardware.nvidia.powerManagement.finegrained = true;
+  hardware.nvidia.modesetting.enable = true;
+
   # List services that you want to enable:
 
   # services.hercules-ci-agent.enable = true;
@@ -271,7 +296,10 @@
 
   services.sshd.enable = true;
 
+  hardware.opengl.enable = true;
+  
   # Enable the X11 windowing system.
+  services.xserver.videoDrivers = [ "modesetting" "nvidia" ];
   services.xserver.enable = true;
   services.xserver.layout = "us";
   services.xserver.xkbOptions = "ctrl:nocaps";
@@ -299,8 +327,18 @@
                       '';
                       in "${pkgs.xorg.xmodmap}/bin/xmodmap ${myCustomLayout}";
     # autoLogin.user = "hhefesto";
+    setupCommands = ''
+      ${pkgs.xorg.xrandr}/bin/xrandr --output DP-2-1  --left-of eDP-1
+    '';
   };
   services.xserver.desktopManager.gnome.enable = true;
+  services.xserver.xrandrHeads = [
+    {
+      output = "DP-2-1";
+      primary = true;
+    }
+    "eDP-1"
+  ];
 
   services.postgresql = {
       enable = true;
@@ -317,11 +355,12 @@
       '';
     };
 
+  virtualisation.libvirtd.enable = true;
   virtualisation.docker.enable = true;
   virtualisation.virtualbox.host.enable = true;
 
   # Enable touchpad support.
-  # services.xserver.libinput.enable = true;
+  services.xserver.libinput.enable = true;
 
   # Enable the KDE Desktop Environment.
   # services.xserver.displayManager.sddm.enable = true;
@@ -362,26 +401,26 @@
   '';
 
   # Added for obrlisk installation: https://github.com/obsidiansystems/obelisk
-  # nix.settings.substituters = [ "https://nixcache.reflex-frp.org"
-  #                               "https://hydra.iohk.io"
-  #                             ];
-  nix.binaryCaches = [ "https://nixcache.reflex-frp.org"
-                       "https://hydra.iohk.io"
-                     ];
-  #
-  #
-  # nix.settings.trusted-public-keys = [ "ryantrinkle.com-1:JJiAKaRv9mWgpVAz8dwewnZe0AzzEAzPkagE9SP5NWI="
-  #                                      "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
-  #                                    ];
-  nix.binaryCachePublicKeys = [ "ryantrinkle.com-1:JJiAKaRv9mWgpVAz8dwewnZe0AzzEAzPkagE9SP5NWI="
-                                "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
+  nix.settings.substituters = [ "https://nixcache.reflex-frp.org"
+                                "https://hydra.iohk.io"
                               ];
+  # nix.binaryCaches = [ "https://nixcache.reflex-frp.org"
+  #                      "https://hydra.iohk.io"
+  #                    ];
 
-  # nix.settings.allowed-users = [ "@wheel" "hhefesto" ];
-  nix.allowedUsers =  [ "@wheel" "hhefesto" ];
 
-  # nix.settings.trusted-users = [ "root" "hhefesto" ];
-  nix.trustedUsers = [ "root" "hhefesto" ];
+  nix.settings.trusted-public-keys = [ "ryantrinkle.com-1:JJiAKaRv9mWgpVAz8dwewnZe0AzzEAzPkagE9SP5NWI="
+                                       "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
+                                     ];
+  # nix.binaryCachePublicKeys = [ "ryantrinkle.com-1:JJiAKaRv9mWgpVAz8dwewnZe0AzzEAzPkagE9SP5NWI="
+  #                               "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
+  #                             ];
+
+  nix.settings.allowed-users = [ "@wheel" "hhefesto" ];
+  # nix.allowedUsers =  [ "@wheel" "hhefesto" ];
+
+  nix.settings.trusted-users = [ "root" "hhefesto" ];
+  # nix.trustedUsers = [ "root" "hhefesto" ];
 
   # This value determines the NixOS release with which your system is to be
   # compatible, in order to avoid breaking some software such as database
