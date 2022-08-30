@@ -10,11 +10,17 @@
       cachix
       ripgrep
       fd
+      gcc
+      hack-font
+      zsh
+      teams
     ];
 
   # Use a custom configuration.nix location.
   # $ darwin-rebuild switch -I darwin-config=$HOME/.config/nixpkgs/darwin/configuration.nix
   # environment.darwinConfig = "$HOME/.config/nixpkgs/darwin/configuration.nix";
+
+  nixpkgs.config.allowUnfree = true;
 
   # Auto upgrade nix package and the daemon service.
   services.nix-daemon.enable = true;

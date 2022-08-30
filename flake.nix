@@ -7,7 +7,7 @@
 
   outputs = inputs@{ self, darwin, nixpkgs, ... }:
   {
-    darwinConfigurations.olimpo = darwin.lib.darwinSystem {
+    darwinConfigurations.ECM037LMBP-1 = darwin.lib.darwinSystem {
       system = "x86_64-darwin";
       modules = [ ./darwin-configuration.nix
       	      	];
