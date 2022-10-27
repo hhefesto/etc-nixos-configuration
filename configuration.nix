@@ -3,7 +3,6 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
-      ./cachix.nix
     ];
 
   # nixpkgs.overlays = [
@@ -75,6 +74,8 @@
   '';
 
   environment.systemPackages = with pkgs; [
+    virt-manager
+    slack
     teams
     cmatrix
     bat
@@ -138,7 +139,7 @@
     gparted
     octave
     htop
-    stack
+    # stack
     # nixops
     # skypeforlinux
     google-chrome
@@ -223,6 +224,9 @@
   };
 
   # programs.nm-applet.enable = true;
+
+  # for vir-manager: https://nixos.wiki/wiki/Virt-manager
+  programs.dconf.enable = true;
 
   programs.light.enable = true;
 
@@ -317,6 +321,9 @@
       '';
     };
 
+  # for virt-manager: https://nixos.wiki/wiki/Virt-manager
+  virtualisation.libvirtd.enable = true;
+
   virtualisation.docker.enable = true;
   virtualisation.virtualbox.host.enable = true;
 
@@ -344,7 +351,7 @@
     isNormalUser = true;
     home = "/home/hhefesto";
     description = "Daniel Herrera";
-    extraGroups = [ "video" "wheel" "networkmanager" "docker" ];
+    extraGroups = [ "video" "wheel" "networkmanager" "docker" "libvirtd" ];
     hashedPassword = "$6$/RvS0Se.iCx$A0eA/8PzgMj.Ms9ohNamfu53c9S.zdG30hEmUHLjmWP0CaXTPVA6QxGIZ6fy.abkjSOTJMAq7fFL6LUBGs4BU0";
     shell = pkgs.zsh; #"/run/current-system/sw/bin/bash";
   };
@@ -361,27 +368,19 @@
     keep-derivations = true
   '';
 
-  # Added for obrlisk installation: https://github.com/obsidiansystems/obelisk
-  # nix.settings.substituters = [ "https://nixcache.reflex-frp.org"
-  #                               "https://hydra.iohk.io"
-  #                             ];
-  nix.binaryCaches = [ "https://nixcache.reflex-frp.org"
-                       "https://hydra.iohk.io"
-                     ];
-  #
-  #
-  # nix.settings.trusted-public-keys = [ "ryantrinkle.com-1:JJiAKaRv9mWgpVAz8dwewnZe0AzzEAzPkagE9SP5NWI="
-  #                                      "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
-  #                                    ];
-  nix.binaryCachePublicKeys = [ "ryantrinkle.com-1:JJiAKaRv9mWgpVAz8dwewnZe0AzzEAzPkagE9SP5NWI="
-                                "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
+  nix.settings.trusted-public-keys = [ "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
+                                       # "telomare.cachix.org-1:H0qRjVstxtb9oyEPvDDpmPSLyJ9oViAsTgwR02ra6Dk="
+                                     ];
+
+  nix.settings.substituters = [ "https://cache.iog.io"
+                                # "https://telomare.cachix.org"
                               ];
 
-  # nix.settings.allowed-users = [ "@wheel" "hhefesto" ];
-  nix.allowedUsers =  [ "@wheel" "hhefesto" ];
+  nix.settings.allowed-users = [ "@wheel" "hhefesto" ];
+  # nix.allowedUsers =  [ "@wheel" "hhefesto" ];
 
-  # nix.settings.trusted-users = [ "root" "hhefesto" ];
-  nix.trustedUsers = [ "root" "hhefesto" ];
+  nix.settings.trusted-users = [ "root" "hhefesto" ];
+  # nix.trustedUsers = [ "root" "hhefesto" ];
 
   # This value determines the NixOS release with which your system is to be
   # compatible, in order to avoid breaking some software such as database
