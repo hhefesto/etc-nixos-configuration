@@ -3,7 +3,6 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
-      ./cachix.nix
     ];
 
   # nixpkgs.overlays = [
@@ -139,7 +138,6 @@
     gparted
     octave
     htop
-    stack
     # nixops
     # skypeforlinux
     google-chrome
