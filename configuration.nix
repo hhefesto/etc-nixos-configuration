@@ -360,27 +360,15 @@
     keep-derivations = true
   '';
 
-  # Added for obrlisk installation: https://github.com/obsidiansystems/obelisk
-  # nix.settings.substituters = [ "https://nixcache.reflex-frp.org"
-  #                               "https://hydra.iohk.io"
-  #                             ];
-  nix.binaryCaches = [ "https://nixcache.reflex-frp.org"
-                       "https://hydra.iohk.io"
-                     ];
-  #
-  #
-  # nix.settings.trusted-public-keys = [ "ryantrinkle.com-1:JJiAKaRv9mWgpVAz8dwewnZe0AzzEAzPkagE9SP5NWI="
-  #                                      "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
-  #                                    ];
-  nix.binaryCachePublicKeys = [ "ryantrinkle.com-1:JJiAKaRv9mWgpVAz8dwewnZe0AzzEAzPkagE9SP5NWI="
-                                "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
+  nix.settings.substituters = [ "https://cache.iog.io"
                               ];
 
-  # nix.settings.allowed-users = [ "@wheel" "hhefesto" ];
-  nix.allowedUsers =  [ "@wheel" "hhefesto" ];
+  nix.settings.trusted-public-keys = [ "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
+                                     ];
 
-  # nix.settings.trusted-users = [ "root" "hhefesto" ];
-  nix.trustedUsers = [ "root" "hhefesto" ];
+  nix.settings.allowed-users = [ "@wheel" "hhefesto" ];
+
+  nix.settings.trusted-users = [ "root" "hhefesto" ];
 
   # This value determines the NixOS release with which your system is to be
   # compatible, in order to avoid breaking some software such as database
@@ -390,5 +378,6 @@
 
   # Let 'nixos-version --json' know about the Git revision
   # of this flake.
+  system.stateVersion = "22.11";
   system.configurationRevision = inputs.nixpkgs.lib.mkIf (inputs.self ? rev) inputs.self.rev;
 }
