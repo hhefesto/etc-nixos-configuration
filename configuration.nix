@@ -1,5 +1,5 @@
-{ config, pkgs, lib, modulesPath, inputs, ... }:
-# { config, pkgs, lib, modulesPath, ... }:
+# { config, pkgs, lib, modulesPath, inputs, ... }:
+{ config, pkgs, lib, modulesPath, ... }:
 let
   nvidia-offload = pkgs.writeShellScriptBin "nvidia-offload" ''
     export __NV_PRIME_RENDER_OFFLOAD=1
@@ -144,7 +144,7 @@ in
     qbittorrent
     libreoffice
     vlc
-    dropbox-cli
+    # dropbox-cli
     gnome3.nautilus
     gnome.gnome-terminal
     calibre
@@ -218,14 +218,14 @@ in
 
   # services.lorri.enable = true;
 
-  systemd.user.services.dropbox = {
-    restartIfChanged = true;
-    enable = true;
-    serviceConfig = {
-      ExecStart = "${pkgs.dropbox}/bin/dropbox";
-      PassEnvironment = "DISPLAY";
-    };
-  };
+  # systemd.user.services.dropbox = {
+  #   restartIfChanged = true;
+  #   enable = true;
+  #   serviceConfig = {
+  #     ExecStart = "${pkgs.dropbox}/bin/dropbox";
+  #     PassEnvironment = "DISPLAY";
+  #   };
+  # };
 
   # TODO: turn off?
   systemd.user.services."urxvtd" = {
@@ -414,9 +414,9 @@ in
   # compatible, in order to avoid breaking some software such as database
   # servers. You should change this only after NixOS release notes say you
   # should.
-  # system.stateVersion = "20.09"; # Did you read the comment?
+  system.stateVersion = "22.05"; # Did you read the comment?
 
   # Let 'nixos-version --json' know about the Git revision
   # of this flake.
-  system.configurationRevision = inputs.nixpkgs.lib.mkIf (inputs.self ? rev) inputs.self.rev;
+  # system.configurationRevision = inputs.nixpkgs.lib.mkIf (inputs.self ? rev) inputs.self.rev;
 }
