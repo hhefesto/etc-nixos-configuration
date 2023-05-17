@@ -1,5 +1,5 @@
-# { config, pkgs, lib, modulesPath, inputs, ... }:
-{ config, pkgs, lib, modulesPath, ... }:
+{ config, pkgs, lib, modulesPath, inputs, ... }:
+# { config, pkgs, lib, modulesPath, ... }:
 let
   nvidia-offload = pkgs.writeShellScriptBin "nvidia-offload" ''
     export __NV_PRIME_RENDER_OFFLOAD=1
@@ -86,7 +86,11 @@ in
     alias nd='nix develop'
   '';
 
+  environment.loginShellInit = "xrandr --output DP-2-1 --left-of eDP-1 --primary";
+
   environment.systemPackages = with pkgs; [
+    tdesktop
+    sd
     fd
     virt-manager
     slack
@@ -95,26 +99,19 @@ in
     cmatrix
     bat
     jq
-    # steam
     zip
-    # teams
     rename
     parallel
     pywal
     stylish-haskell
-    # python
     direnv
     nix-direnv-flakes
     ripgrep
     sox
-    # unstable.zoom-us
     zoom-us
     discord
     spotifywm
-    # pgadmin
-    # pgmanage
-    # unstable.signal-desktop
-    signal-desktop
+    # signal-desktop
     unetbootin
     any-nix-shell
     texlive.combined.scheme-basic
@@ -154,20 +151,11 @@ in
     gparted
     octave
     htop
-    # stack
-    # nixops
-    # skypeforlinux
     google-chrome
-    # spotify # this loops `nixos-rebuild switch`
-    # stack2nix
-    # unstable.ghc
     ffmpeg
     xdotool
-    # cabal2nix
-    # cabal-install
     nix-prefetch-git
     xvkbd
-    # system-sendmail
     hunspell
     hunspellDicts.es-any
     hunspellDicts.es-mx
@@ -178,28 +166,16 @@ in
     aspellDicts.en-science
     aspellDicts.es
     inkscape
-    # haskellPackages.keter
-    # nixos.zathura
     unrar
     unzip
-    # teamviewer
     hack-font
     cachix
     tree
     gnumake
-    # nodejs
-    # nodePackages.yarn
-    # nixpkgs-19-03.yarn2nix
-    # nodePackages.typescript
-    # nodePackages.create-react-app
-    # for laurus-nobilis
     zlib
-    postgresql_11
     haskellPackages.yesod-bin
     msmtp
     gmp
-    # zip
-    # \for laurus-nobilis
   ];
 
   environment.pathsToLink = [
@@ -215,28 +191,6 @@ in
   fonts.fonts = with pkgs; [
     hack-font
   ];
-
-  # services.lorri.enable = true;
-
-  # systemd.user.services.dropbox = {
-  #   restartIfChanged = true;
-  #   enable = true;
-  #   serviceConfig = {
-  #     ExecStart = "${pkgs.dropbox}/bin/dropbox";
-  #     PassEnvironment = "DISPLAY";
-  #   };
-  # };
-
-  # TODO: turn off?
-  systemd.user.services."urxvtd" = {
-    enable = true;
-    description = "rxvt unicode daemon";
-    wantedBy = [ "default.target" ];
-    path = [ pkgs.rxvt_unicode ];
-    serviceConfig.Restart = "always";
-    serviceConfig.RestartSec = 2;
-    serviceConfig.ExecStart = "${pkgs.rxvt_unicode}/bin/urxvtd -q -o";
-  };
 
   # programs.nm-applet.enable = true;
   programs.dconf.enable = true;
@@ -272,6 +226,8 @@ in
 
   # Enable CUPS to print documents.
   # services.printing.enable = true;
+
+  hardware.bluetooth.enable = true;
 
   # Enable sound.
   # sound.enable = true;
@@ -327,40 +283,65 @@ in
                       '';
                       in "${pkgs.xorg.xmodmap}/bin/xmodmap ${myCustomLayout}";
     # autoLogin.user = "hhefesto";
-    setupCommands = ''
-      ${pkgs.xorg.xrandr}/bin/xrandr --output DP-2-1  --left-of eDP-1
-    '';
+    # setupCommands = ''
+    #   ${pkgs.xorg.xrandr}/bin/xrandr --output DP-2-1  --right-of eDP-1
+    # '';
   };
   services.xserver.desktopManager.gnome.enable = true;
-  services.xserver.xrandrHeads = [
-    {
-      output = "DP-2-1";
-      primary = true;
-    }
-    "eDP-1"
-  ];
+  # services.xserver.xrandrHeads = [
+  #   {
+  #     output = "DP-2-1";
+  #     primary = true;
+  #   }
+  #   "eDP-1"
+  # ];
 
-  services.postgresql = {
+  # services.postgresql = {
+  #     enable = true;
+  #     package = pkgs.postgresql_11;
+  #     enableTCPIP = true;
+  #     authentication = pkgs.lib.mkOverride 10 ''
+  #       local all all trust
+  #       host all all ::1/128 trust
+  #     '';
+  #     initialScript = pkgs.writeText "backend-initScript" ''
+  #       CREATE ROLE analyzer WITH LOGIN PASSWORD 'anapass';
+  #       CREATE DATABASE aanalyzer_yesod;
+  #       GRANT ALL PRIVILEGES ON DATABASE aanalyzer_yesod TO analyzer;
+  #     '';
+  #   };
+
+  virtualisation = {
+    docker = {
       enable = true;
-      package = pkgs.postgresql_11;
-      enableTCPIP = true;
-      authentication = pkgs.lib.mkOverride 10 ''
-        local all all trust
-        host all all ::1/128 trust
-      '';
-      initialScript = pkgs.writeText "backend-initScript" ''
-        CREATE ROLE analyzer WITH LOGIN PASSWORD 'anapass';
-        CREATE DATABASE aanalyzer_yesod;
-        GRANT ALL PRIVILEGES ON DATABASE aanalyzer_yesod TO analyzer;
-      '';
+      storageDriver = "overlay2";
+      logDriver = "json-file";
+      extraOptions = "--log-opt max-size=10m --log-opt max-file=3";
     };
-
-  virtualisation.libvirtd.enable = true;
-  virtualisation.docker.enable = true;
-  virtualisation.virtualbox.host.enable = true;
+    podman.enable = true;
+    lxd.enable = true;
+    libvirtd.enable = true;
+    anbox.enable = false;
+  };
 
   # Enable touchpad support.
   services.xserver.libinput.enable = true;
+
+  location.provider = "manual";
+  location.latitude = 20.59;
+  location.longitude = -100.39;
+  services.redshift = {
+    enable = true;
+    brightness = {
+      # Note the string values below.
+      day = "1";
+      night = "0.4";
+    };
+    temperature = {
+      day = 5500;
+      night = 3700;
+    };
+  };
 
   # Enable the KDE Desktop Environment.
   # services.xserver.displayManager.sddm.enable = true;
@@ -385,6 +366,7 @@ in
     description = "Daniel Herrera";
     extraGroups = [ "video" "wheel" "networkmanager" "docker" "libvirtd" ];
     hashedPassword = "$6$/RvS0Se.iCx$A0eA/8PzgMj.Ms9ohNamfu53c9S.zdG30hEmUHLjmWP0CaXTPVA6QxGIZ6fy.abkjSOTJMAq7fFL6LUBGs4BU0";
+    openssh.authorizedKeys.keys = [ "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCkMLqezObEnh3bNFj8QeyVFoJlRaDgO308rvfR8XE2oLFGrY8gUr6QwWt2P5sROrOskF9XuriUPPs5/jSom2uOdbwxBs1zTkdVUPIog5e81GaGNmS2BMKntD5d9GYI6YESBBBxTFEh6hFkd7GpautRfCPiwcIM1daxHEQsKNCp3fGWqonsIAfLkPgVfNQ0piXN4AR4PFpDSuAPDFlxG8q9K/P/w6OtGq/FcxDbl0e2t54ZDVj/fTqDOiKNDb5GVF1tu/IW/KzPcjLl2GFAcRYrIJaptzZOIuHWLK86jEPI+DpkmpbOWOugKXr9wG/eibdndh8w3vvPH+HUrs4OaPmkVhPkZH+899j1sFBAVE7uL+GFOt0N6GNMFKePcJQMQdkq5bGYV8HeXN6U+UQWr4+/2opmoXduIN8nS68l5GeDzyuCQ0Osa6TN47vQ8I2nd6x3E4c+fWXg908SUcaPpTRii6EU0egrjOFRFl0vwe26owCNSJjzMyto0OsexSEILyE= hhefesto@olimpo" ];
     shell = pkgs.zsh; #"/run/current-system/sw/bin/bash";
   };
 
@@ -400,23 +382,29 @@ in
     keep-derivations = true
   '';
 
-    nix.settings.substituters = [ "https://cache.iog.io"
-                                ];
-
+  nix.settings.substituters = [ "https://cache.iog.io"
+                              ];
   nix.settings.trusted-public-keys = [ "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
                                      ];
-
   nix.settings.allowed-users = [ "@wheel" "hhefesto" ];
-
   nix.settings.trusted-users = [ "root" "hhefesto" ];
+  nix.settings.sandbox = false;
+  nix.settings.auto-optimise-store = true;
+  nix.settings.allow-import-from-derivation = true;
+
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 7d";
+  };
 
   # This value determines the NixOS release with which your system is to be
   # compatible, in order to avoid breaking some software such as database
   # servers. You should change this only after NixOS release notes say you
   # should.
-  system.stateVersion = "22.05"; # Did you read the comment?
+  system.stateVersion = "22.11"; # Did you read the comment?
 
   # Let 'nixos-version --json' know about the Git revision
   # of this flake.
-  # system.configurationRevision = inputs.nixpkgs.lib.mkIf (inputs.self ? rev) inputs.self.rev;
+  system.configurationRevision = inputs.nixpkgs.lib.mkIf (inputs.self ? rev) inputs.self.rev;
 }
