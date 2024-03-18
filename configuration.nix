@@ -48,6 +48,7 @@
   nixpkgs.config.allowUnfree = true;
 
   environment.systemPackages = with pkgs; [
+    element-desktop
     brave
     inputs.devenv.packages.x86_64-linux.devenv
     sd
@@ -128,7 +129,7 @@
     tree
     gnumake
     zlib
-    postgresql_11
+    # postgresql
     haskellPackages.yesod-bin
     msmtp
     gmp
@@ -269,16 +270,22 @@
 
   services.postgresql = {
       enable = true;
-      package = pkgs.postgresql_11;
+      package = pkgs.postgresql;
       enableTCPIP = true;
+      ensureUsers.*.ensureDBOwnership = true;
       authentication = pkgs.lib.mkOverride 10 ''
-        local all all trust
-        host all all ::1/128 trust
+        #type database DBuser origin-address auth-method
+        local all      all                    trust
+        # ipv4
+        host  all      all     127.0.0.1/32   trust
+        # ipv6
+        host all       all     ::1/128        trust
       '';
       initialScript = pkgs.writeText "backend-initScript" ''
         CREATE ROLE analyzer WITH LOGIN PASSWORD 'anapass';
         CREATE DATABASE aanalyzer_yesod;
         GRANT ALL PRIVILEGES ON DATABASE aanalyzer_yesod TO analyzer;
+        GRANT ALL ON SCHEMA public TO analyzer;
       '';
     };
 
@@ -359,6 +366,7 @@
 
   nix.settings.trusted-substituters = [ "https://nixcache.reflex-frp.org"
                                         "https://cache.iog.io"
+                                        "https://telomare.cachix.org"
                                       ];
 
   nix.settings.substituters = [ "https://telomare.cachix.org"
