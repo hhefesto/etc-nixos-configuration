@@ -1,13 +1,11 @@
 {
   description = "hhefesto's system configuration";
 
-  # inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-20.03";
   inputs.nix.url = "github:nixos/nix/master";
-  # inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-21.11";
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-  # inputs.unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+  inputs.devenv.url = "github:cachix/devenv/latest";
 
-  outputs = inputs@{ self, nixpkgs, ... }:
+  outputs = inputs@{ self, nixpkgs, devenv, ... }:
   {
     nixosConfigurations.olimpo = nixpkgs.lib.nixosSystem {
       # inherit system;
