@@ -48,6 +48,13 @@
   nixpkgs.config.allowUnfree = true;
 
   environment.systemPackages = with pkgs; [
+    # python312Packages.pip
+    # python312Packages.setuptools
+    # (python312.withPackages (ps: with ps; [pip setuptools]))
+    # libsForQt5.kdenlive
+    kvmtool
+    kdenlive
+    (agda.withPackages (p: [ p.standard-library ]))
     element-desktop
     brave
     inputs.devenv.packages.x86_64-linux.devenv
@@ -130,7 +137,7 @@
     gnumake
     zlib
     # postgresql
-    haskellPackages.yesod-bin
+    # haskellPackages.yesod-bin
     msmtp
     gmp
   ];
@@ -238,9 +245,9 @@
 
   # Enable the X11 windowing system.
   services.xserver.enable = true;
-  services.xserver.layout = "us";
-  services.xserver.xkbOptions = "ctrl:nocaps";
-  services.xserver.xkbVariant = "altgr-intl";
+  services.xserver.xkb.layout = "us";
+  services.xserver.xkb.options = "ctrl:nocaps";
+  services.xserver.xkb.variant = "altgr-intl";
   services.xserver.windowManager.xmonad = {
     enable = true;
     config = pkgs.lib.readFile ./xmonad.hs;
@@ -251,8 +258,9 @@
       haskellPackages.xmonad
     ];
   };
+  services.displayManager.defaultSession = "none+xmonad";
   services.xserver.displayManager = {
-    defaultSession = "none+xmonad";
+    # defaultSession = "none+xmonad";
     gdm.enable = true;
     sessionCommands = let myCustomLayout = pkgs.writeText "xkb-layout" ''
                         ! swap Caps_Lock and Control_R
@@ -272,7 +280,7 @@
       enable = true;
       package = pkgs.postgresql;
       enableTCPIP = true;
-      ensureUsers.*.ensureDBOwnership = true;
+      # ensureUsers."analyzer".ensureDBOwnership = true;
       authentication = pkgs.lib.mkOverride 10 ''
         #type database DBuser origin-address auth-method
         local all      all                    trust
@@ -350,7 +358,7 @@
   # };
 
   # For nix flakes
-  nix.package = pkgs.nixFlakes;
+  nix.package = inputs.nix.packages.x86_64-linux.default;
   nix.extraOptions = ''
     experimental-features = nix-command flakes
     keep-outputs = true
@@ -362,15 +370,18 @@
   nix.settings.trusted-public-keys = [ "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
                                        "telomare.cachix.org-1:H0qRjVstxtb9oyEPvDDpmPSLyJ9oViAsTgwR02ra6Dk="
                                        "ryantrinkle.com-1:JJiAKaRv9mWgpVAz8dwewnZe0AzzEAzPkagE9SP5NWI="
+                                       "cardano-nix:BQ7QKgoQQAuL3Kh6pfIJ8oxrihUbUSxf6tN9SxyW608="
                                      ];
 
   nix.settings.trusted-substituters = [ "https://nixcache.reflex-frp.org"
                                         "https://cache.iog.io"
                                         "https://telomare.cachix.org"
+                                        "https://cache.staging.mlabs.city/cardano-nix"
                                       ];
 
   nix.settings.substituters = [ "https://telomare.cachix.org"
                                 "https://nixcache.reflex-frp.org"
+                                "https://cache.staging.mlabs.city/cardano-nix"
                               ];
 
   nix.settings.allowed-users = [ "@wheel" "hhefesto" ];

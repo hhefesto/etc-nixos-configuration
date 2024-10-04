@@ -7,7 +7,7 @@
   inputs.home-manager.inputs.nixpkgs.follows = "nixpkgs";
   inputs.devenv.url = "github:cachix/devenv/latest";
 
-  outputs = inputs@{ self, nixpkgs, home-manager, devenv, ... }:
+  outputs = inputs@{ self, nix, nixpkgs, home-manager, devenv, ... }:
   {
     nixosConfigurations.olimpo = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
