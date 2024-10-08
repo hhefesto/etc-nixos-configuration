@@ -18,7 +18,7 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  networking.hostName = "olimpo"; # Define your hostname.
+  networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Configure network proxy if necessary
@@ -74,32 +74,23 @@
   '';
 
   environment.systemPackages = with pkgs; [
-    virt-manager
-    slack
-    teams
     cmatrix
     bat
     jq
-    # steam
     zip
-    # teams
     rename
     parallel
     pywal
-    stylish-haskell
     # python
     direnv
     nix-direnv-flakes
     ripgrep
     sox
     # unstable.zoom-us
-    zoom-us
     discord
-    spotifywm
     # pgadmin
     # pgmanage
     # unstable.signal-desktop
-    signal-desktop
     unetbootin
     any-nix-shell
     texlive.combined.scheme-basic
@@ -117,42 +108,24 @@
     scrot
     xclip
     feh
-    # unstable.firefox
     firefox
     dmenu
     tabbed
     st
     haskellPackages.xmobar
     ranger
-    # fish
-    obs-studio
-    qbittorrent
-    libreoffice
     vlc
-    dropbox-cli
     gnome3.nautilus
     gnome.gnome-terminal
-    calibre
-    # nixpkgs-19-03.taffybar
     sshpass
     gimp
     gparted
     octave
     htop
-    # stack
-    # nixops
-    # skypeforlinux
-    google-chrome
-    # spotify # this loops `nixos-rebuild switch`
-    # stack2nix
-    # unstable.ghc
     ffmpeg
     xdotool
-    # cabal2nix
-    # cabal-install
     nix-prefetch-git
     xvkbd
-    # system-sendmail
     hunspell
     hunspellDicts.es-any
     hunspellDicts.es-mx
@@ -162,66 +135,28 @@
     aspellDicts.en-computers
     aspellDicts.en-science
     aspellDicts.es
-    inkscape
-    # haskellPackages.keter
-    # nixos.zathura
     unrar
     unzip
-    # teamviewer
     hack-font
     cachix
     tree
     gnumake
-    # nodejs
-    # nodePackages.yarn
-    # nixpkgs-19-03.yarn2nix
-    # nodePackages.typescript
-    # nodePackages.create-react-app
-    # for laurus-nobilis
     zlib
-    postgresql_11
-    haskellPackages.yesod-bin
+    postgresql
     msmtp
     gmp
-    # zip
-    # \for laurus-nobilis
   ];
 
   environment.pathsToLink = [
     "/share/nix-direnv"
   ];
 
-  # TODO: see about this.
-  nixpkgs.config.permittedInsecurePackages = [
-    "google-chrome-81.0.4044.138"
-    "openssl-1.0.2u"
-  ];
-
+  
   fonts.fonts = with pkgs; [
     hack-font
   ];
 
   # services.lorri.enable = true;
-
-  systemd.user.services.dropbox = {
-    restartIfChanged = true;
-    enable = true;
-    serviceConfig = {
-      ExecStart = "${pkgs.dropbox}/bin/dropbox";
-      PassEnvironment = "DISPLAY";
-    };
-  };
-
-  # TODO: turn off?
-  systemd.user.services."urxvtd" = {
-    enable = true;
-    description = "rxvt unicode daemon";
-    wantedBy = [ "default.target" ];
-    path = [ pkgs.rxvt_unicode ];
-    serviceConfig.Restart = "always";
-    serviceConfig.RestartSec = 2;
-    serviceConfig.ExecStart = "${pkgs.rxvt_unicode}/bin/urxvtd -q -o";
-  };
 
   # programs.nm-applet.enable = true;
 
@@ -229,8 +164,6 @@
   programs.dconf.enable = true;
 
   programs.light.enable = true;
-
-  # programs.steam.enable = true;
 
   programs.zsh = {
     enable = true;
@@ -282,6 +215,7 @@
   services.xserver.xkbVariant = "altgr-intl";
   services.xserver.windowManager.xmonad = {
     enable = true;
+    config = pkgs.lib.readFile ./xmonad.hs;
     enableContribAndExtras = true;
     extraPackages = haskellPackages:[
       haskellPackages.xmonad-contrib
