@@ -3,11 +3,10 @@
 
   inputs.nix.url = "github:nixos/nix/master";
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-  inputs.devenv.url = "github:cachix/devenv/latest";
 
-  outputs = inputs@{ self, nixpkgs, devenv, ... }:
+  outputs = inputs@{ self, nixpkgs, ... }:
   {
-    nixosConfigurations.olimpo = nixpkgs.lib.nixosSystem {
+    nixosConfigurations.delfos = nixpkgs.lib.nixosSystem {
       # inherit system;
       system = "x86_64-linux";
       # modules = [ ./configuration.nix { self1 = self; nixpkgs = nixpkgs; } ];
