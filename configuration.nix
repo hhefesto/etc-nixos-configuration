@@ -109,8 +109,8 @@
     libreoffice
     vlc
     dropbox-cli
-    gnome3.nautilus
-    gnome.gnome-terminal
+    nautilus
+    gnome-terminal
     calibre
     sshpass
     gimp
