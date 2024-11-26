@@ -52,12 +52,14 @@
     # python312Packages.setuptools
     # (python312.withPackages (ps: with ps; [pip setuptools]))
     # libsForQt5.kdenlive
+    alsa-utils
     kvmtool
     kdenlive
-    (agda.withPackages (p: [ p.standard-library ]))
+    inputs.agda.packages.x86_64-linux.default
+    # (agda.withPackages (p: [ p.standard-library ]))
     element-desktop
     brave
-    inputs.devenv.packages.x86_64-linux.devenv
+    # inputs.devenv.packages.x86_64-linux.devenv
     sd
     fd
     virt-manager
@@ -228,9 +230,7 @@
   # Enable CUPS to print documents.
   # services.printing.enable = true;
 
-  # Enable sound.
-  sound.enable = true;
-  hardware.pulseaudio.enable = true;
+  # hardware.pulseaudio.enable = true;
 
   # List services that you want to enable:
 
