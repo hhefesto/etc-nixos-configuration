@@ -100,7 +100,7 @@
     unetbootin
     any-nix-shell
     texlive.combined.scheme-basic
-    rxvt_unicode
+    # rxvt_unicode
     wget
     vim
     emacs
