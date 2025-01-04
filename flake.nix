@@ -5,10 +5,8 @@
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   inputs.home-manager.url = "github:nix-community/home-manager";
   inputs.home-manager.inputs.nixpkgs.follows = "nixpkgs";
-  # inputs.devenv.url = "github:cachix/devenv/latest";
-  inputs.agda.url = "github:agda/agda";
 
-  outputs = inputs@{ self, nix, nixpkgs, home-manager, agda, ... }:
+  outputs = inputs@{ self, nix, nixpkgs, home-manager, ... }:
   {
     nixosConfigurations.olimpo = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";

@@ -55,8 +55,8 @@
     alsa-utils
     kvmtool
     kdenlive
-    inputs.agda.packages.x86_64-linux.default
-    # (agda.withPackages (p: [ p.standard-library ]))
+    # inputs.agda.packages.x86_64-linux.default
+    (agda.withPackages (p: [ p.standard-library ]))
     element-desktop
     brave
     # inputs.devenv.packages.x86_64-linux.devenv
@@ -153,29 +153,20 @@
     hack-font
   ];
 
-  # services.lorri.enable = true;
-
-  systemd.user.services.dropbox = {
-    restartIfChanged = true;
-    enable = true;
+  systemd.extraConfig = ''
+    DefaultTimeoutStartSec=20m
+    DefaultTimeoutStopSec=20m
+    DefaultTimeoutAbortSec=20m
+  '';
+  systemd.user.services.home-manager-hhefesto = {
     serviceConfig = {
-      ExecStart = "${pkgs.dropbox}/bin/dropbox";
-      PassEnvironment = "DISPLAY";
+      TimeoutStartSec = "20m";
+      TimeoutStopSec = "20m";
+      Nice = 19;
+      IOSchedulingClass = "idle";
+      IOSchedulingPriority = 7;
     };
   };
-
-  # TODO: turn off?
-  systemd.user.services."urxvtd" = {
-    enable = true;
-    description = "rxvt unicode daemon";
-    wantedBy = [ "default.target" ];
-    path = [ pkgs.rxvt_unicode ];
-    serviceConfig.Restart = "always";
-    serviceConfig.RestartSec = 2;
-    serviceConfig.ExecStart = "${pkgs.rxvt_unicode}/bin/urxvtd -q -o";
-  };
-
-  # programs.nm-applet.enable = true;
 
   # for vir-manager: https://nixos.wiki/wiki/Virt-manager
   programs.dconf.enable = true;

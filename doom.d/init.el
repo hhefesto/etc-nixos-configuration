@@ -25,7 +25,6 @@
        ivy               ; a search engine for love and life
 
        :ui
-       (themes +gruber-darker)
        ;;deft              ; notational velocity for Emacs
        doom              ; what makes DOOM look the way it does
        doom-dashboard    ; a nifty splash screen for Emacs
@@ -160,7 +159,7 @@
        ;;scheme            ; a fully conniving family of lisps
        sh                ; she sells {ba,z,fi}sh shells on the C xor
        ;;sml
-       solidity          ; do you need a blockchain? No.
+       ;; solidity          ; do you need a blockchain? No.
        ;;swift             ; who asked for emoji variables?
        ;;terra             ; Earth and Moon in alignment for performance.
        ;;web               ; the tubes

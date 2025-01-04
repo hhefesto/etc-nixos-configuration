@@ -1,79 +1,44 @@
-{ config, pkgs, ... }:
-
-{
+{ config, pkgs, lib, ... }:
+let
+  doomRepoUrl = "https://github.com/doomemacs/doomemacs";
+  doomRevision = "master";  # or specific commit hash
+in {
   home = {
     username = "hhefesto";
     homeDirectory = "/home/hhefesto";
     stateVersion = "22.11";
-    # sessionPath = [ "${config.xdg.configHome}/emacs/bin" ];
-    # sessionVariables = {
-    #   DOOMDIR = "${config.xdg.configHome}/doom-config";
-    #   DOOMLOCALDIR = "${config.xdg.configHome}/doom-local";
-    # };
-    # packages = with pkgs; [
-    #   # DOOM Emacs dependencies
-    #   binutils
-    #   (ripgrep.override { withPCRE2 = true; })
-    #   gnutls
-    #   fd
-    #   imagemagick
-    #   zstd
-    #   nodePackages.javascript-typescript-langserver
-    #   sqlite
-    #   editorconfig-core-c
-    #   emacs-all-the-icons-fonts
-    # ];
+  };
+  home.file = {
+    ".doom.d" = {
+      source = ./doom.d;
+      recursive = true;
+    };
   };
 
-#   xdg = {
-#     enable = true;
-#     configFile = {
-#       "doom-config/config.el".text = '''
-#         ;;;     $DOOMDIR/config.el -*- lexical-binding: t; -*-
-#       ''';
-#       "doom-config/init.el".text = '''
-#         (doom! :input
-#                ;;chinese
-#                ;;japanese
-#       ''';
-#       "doom-config/packages.el".text = '''
-#         (package! flycheck)
-#       ''';
-#       "EMACS" = {
-#         source = builtins.fetchGit "https://github.com/hlissner/doom-emacs";
-#         onChange = "${pkgs.writeShellScript "doom-change" ''
-#           export DOOMDIR="${config.home.sessionVariables.DOOMDIR}"
-#           export DOOMLOCALDIR="${config.home.sessionVariables.DOOMLOCALDIR}"
-#           if [ ! -d "$DOOMLOCALDIR" ]; then
-#             ${config.xdg.configHome}/emacs/bin/doom -y install
-#           else
-#             ${config.xdg.configHome}/emacs/bin/doom -y sync -u
-#           fi
-#         ''}";
-#       };
-#     };
-#   };
+  home.activation = {
+    # installDoomEmacs = lib.hm.dag.entryAfter ["linkGeneration"] ''
+    installDoomEmacs = lib.hm.dag.entryAfter ["linkGeneration" "installPackages" "copyFonts" "postActivation"] ''
+      if [ ! -d "$HOME/.emacs.d/bin" ]; then
+        export PATH="${lib.makeBinPath [ pkgs.emacs pkgs.git ]}:$PATH"
+	
+        rm -rf $HOME/.emacs.d
 
+	echo "cloning doom emacs:"
+	${pkgs.git}/bin/git clone --depth=1 --single-branch "${doomRepoUrl}" "$HOME/.emacs.d"
+
+	echo "installing doom emacs:"
+        ("$HOME/.emacs.d/bin/doom" install --force) 2>&1 | tee /tmp/doom-install.log || {
+          echo "Failed to install Doom Emacs. Check /tmp/doom-install.log for details"
+          echo "Last few lines of the log:"
+          tail -n 20 /tmp/doom-install.log
+          exit 1
+        }
+      fi
+    '';
+  };
+  
   programs.zsh = {
     enable = true;
-    # shellInit = ''
-    #   # ssh
-    #   # export SSH_KEY_PATH="~/.ssh/dsa_id"
-    #   export SSH_AUTH_SOCK=~/.ssh/ssh-agent.$HOSTNAME.sock
-
-    #   # Verify if ssh-agent is running
-    #   ssh-add -l 2>/dev/null >/dev/null
-
-    #   # if it was running, ssh-add will use it and return 1 (no keys)
-    #   # if it was not running, it will return 2, so we proceed to execute the ssh-agent
-    #   # and tell it where to create the Unix  socket (SSH_AUTH_SOCK):
-
-    #   if [ $? -ge 2 ]; then
-    #      ssh-agent -a "$SSH_AUTH_SOCK" >/dev/null
-    #   fi
-
-    #   ssh-add ~/.ssh/xpsoasis-ed25519
-    # '';
     shellAliases = {
       cat = "bat";
       _cat = "cat";
@@ -99,6 +64,11 @@
       nd = "nix develop";
     };
   };
+
+  # Add the doom binary to your PATH
+  home.sessionPath = [ "$HOME/.emacs.d/bin" ];
+
+  programs.emacs.enable = true;
 
   programs.direnv = {
     enable = true;
