@@ -8,7 +8,7 @@
 
   outputs = inputs@{ self, nix, nixpkgs, home-manager, ... }:
   {
-    nixosConfigurations.olimpo = nixpkgs.lib.nixosSystem {
+    nixosConfigurations.delfos = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [ ./configuration.nix
                   home-manager.nixosModules.home-manager

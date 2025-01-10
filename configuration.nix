@@ -20,7 +20,7 @@
 
   boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 
-  networking.hostName = "olimpo"; # Define your hostname.
+  networking.hostName = "delfos"; # Define your hostname.
   networking.enableIPv6 = false;
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
@@ -58,7 +58,7 @@
     kdenlive
     # inputs.agda.packages.x86_64-linux.default
     (agda.withPackages (p: [ p.standard-library ]))
-    element-desktop
+    # element-desktop
     brave
     # inputs.devenv.packages.x86_64-linux.devenv
     sd
@@ -78,7 +78,7 @@
     sox
     zoom-us
     discord
-    spotifywm
+    # spotifywm
     signal-desktop
     unetbootin
     any-nix-shell
@@ -169,6 +169,13 @@
     };
   };
 
+  programs.steam = {
+    enable = true;
+    remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
+    dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
+    localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network Game Transfers
+  };
+
   # for vir-manager: https://nixos.wiki/wiki/Virt-manager
   programs.dconf.enable = true;
 
@@ -185,29 +192,29 @@
     ohMyZsh.plugins = ["git" "sudo" "colorize" "extract" "history" "postgres"];
     ohMyZsh.theme = "intheloop";
 
-    shellInit = ''
-      # ssh
-      # export SSH_KEY_PATH="~/.ssh/dsa_id"
-      export SSH_AUTH_SOCK=~/.ssh/ssh-agent.$HOSTNAME.sock
+    # shellInit = ''
+    #   # ssh
+    #   # export SSH_KEY_PATH="~/.ssh/dsa_id"
+    #   export SSH_AUTH_SOCK=~/.ssh/ssh-agent.$HOSTNAME.sock
 
-      # Verify if ssh-agent is running
-      ssh-add -l 2>/dev/null >/dev/null
+    #   # Verify if ssh-agent is running
+    #   ssh-add -l 2>/dev/null >/dev/null
 
-      # if it was running, ssh-add will use it and return 1 (no keys)
-      # if it was not running, it will return 2, so we proceed to execute the ssh-agent
-      # and tell it where to create the Unix  socket (SSH_AUTH_SOCK):
+    #   # if it was running, ssh-add will use it and return 1 (no keys)
+    #   # if it was not running, it will return 2, so we proceed to execute the ssh-agent
+    #   # and tell it where to create the Unix  socket (SSH_AUTH_SOCK):
 
-      if [ $? -ge 2 ]; then
-         ssh-agent -a "$SSH_AUTH_SOCK" >/dev/null
-      fi
+    #   if [ $? -ge 2 ]; then
+    #      ssh-agent -a "$SSH_AUTH_SOCK" >/dev/null
+    #   fi
 
-      ssh-add ~/.ssh/xpsoasis-ed25519
-    '';
-
-    # interactiveShellInit = ''
-    #   save_aliases=$(alias -L)
-    #   eval $save_aliases; unset save_aliases
+    #   ssh-add ~/.ssh/xpsoasis-ed25519
     # '';
+
+    interactiveShellInit = ''
+      save_aliases=$(alias -L)
+      eval $save_aliases; unset save_aliases
+    '';
     promptInit = ''
       any-nix-shell zsh --info-right | source /dev/stdin
     '';
@@ -221,6 +228,27 @@
 
   # Enable CUPS to print documents.
   # services.printing.enable = true;
+
+  # Enable sound.
+  # sound.enable = true;
+  hardware.pulseaudio = {
+      # enable = true;
+      enable = false;
+      # package = pkgs.pulseaudioFull;
+      # support32Bit = true;
+      # extraModules = [ pkgs.pulseaudio-modules-bt ];
+  };
+
+  hardware.bluetooth.enable = true;
+
+  # security.rtkit.enable = true;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+    jack.enable = true;
+  };
 
   # hardware.pulseaudio.enable = true;
 
@@ -314,27 +342,6 @@
   virtualisation.docker.enable = true;
   # virtualisation.virtualbox.host.enable = true;
 
-  location.provider = "manual";
-  # México:
-  location.latitude = 20.59;
-  location.longitude = -100.39;
-  # Vienna:
-  # location.latitude = 16.36;
-  # location.longitude = 48.21;
-
-  services.redshift = {
-    enable = true;
-    brightness = {
-      # Note the string values below.
-      day = "1";
-      night = "0.4";
-    };
-    temperature = {
-      day = 5500;
-      night = 3700;
-    };
-  };
-
   # Enable touchpad support.
   # services.xserver.libinput.enable = true;
 
@@ -390,25 +397,20 @@
   nix.settings.trusted-public-keys = [ "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
                                        "telomare.cachix.org-1:H0qRjVstxtb9oyEPvDDpmPSLyJ9oViAsTgwR02ra6Dk="
                                        "ryantrinkle.com-1:JJiAKaRv9mWgpVAz8dwewnZe0AzzEAzPkagE9SP5NWI="
-                                       "cardano-nix:BQ7QKgoQQAuL3Kh6pfIJ8oxrihUbUSxf6tN9SxyW608="
                                      ];
 
   nix.settings.trusted-substituters = [ "https://nixcache.reflex-frp.org"
                                         "https://cache.iog.io"
                                         "https://telomare.cachix.org"
-                                        "https://cache.staging.mlabs.city/cardano-nix"
                                       ];
 
   nix.settings.substituters = [ "https://telomare.cachix.org"
                                 "https://nixcache.reflex-frp.org"
-                                "https://cache.staging.mlabs.city/cardano-nix"
                               ];
 
   nix.settings.allowed-users = [ "@wheel" "hhefesto" ];
-  # nix.allowedUsers =  [ "@wheel" "hhefesto" ];
 
   nix.settings.trusted-users = [ "root" "hhefesto" ];
-  # nix.trustedUsers = [ "root" "hhefesto" ];
 
   # This value determines the NixOS release with which your system is to be
   # compatible, in order to avoid breaking some software such as database
@@ -418,6 +420,5 @@
 
   # Let 'nixos-version --json' know about the Git revision
   # of this flake.
-  system.stateVersion = "22.11";
-  system.configurationRevision = inputs.nixpkgs.lib.mkIf (inputs.self ? rev) inputs.self.rev;
+  # system.configurationRevision = inputs.nixpkgs.lib.mkIf (inputs.self ? rev) inputs.self.rev;
 }
