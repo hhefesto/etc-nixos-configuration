@@ -126,11 +126,7 @@
     hunspellDicts.es-any
     hunspellDicts.es-mx
     hunspellDicts.en-us
-    aspell
-    aspellDicts.en
-    aspellDicts.en-computers
-    aspellDicts.en-science
-    aspellDicts.es
+    (aspellWithDicts (dicts: with dicts; [ es en en-computers en-science ]))
     inkscape
     unrar
     unzip
@@ -231,7 +227,7 @@
 
   # Enable sound.
   # sound.enable = true;
-  hardware.pulseaudio = {
+  services.pulseaudio = {
       # enable = true;
       enable = false;
       # package = pkgs.pulseaudioFull;

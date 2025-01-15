@@ -3,6 +3,11 @@ let
   doomRepoUrl = "https://github.com/doomemacs/doomemacs";
   doomRevision = "master";  # or specific commit hash
 in {
+  home.sessionVariables = {
+    # Change this timestamp to force a rebuild
+    LAST_REBUILD = "2025-01-14";
+  };
+
   home = {
     username = "hhefesto";
     homeDirectory = "/home/hhefesto";
@@ -14,27 +19,26 @@ in {
       recursive = true;
     };
   };
-
   home.activation = {
-    # installDoomEmacs = lib.hm.dag.entryAfter ["linkGeneration"] ''
     installDoomEmacs = lib.hm.dag.entryAfter ["linkGeneration" "installPackages" "copyFonts" "postActivation"] ''
+      echo "Checking for existing doom emacs installation"
       if [ ! -d "$HOME/.emacs.d/bin" ]; then
         export PATH="${lib.makeBinPath [ pkgs.emacs pkgs.git ]}:$PATH"
 	
         rm -rf $HOME/.emacs.d
 
-	echo "cloning doom emacs:"
-	${pkgs.git}/bin/git clone --depth=1 --single-branch "${doomRepoUrl}" "$HOME/.emacs.d"
+      echo "cloning doom emacs:"
+      ${pkgs.git}/bin/git clone --depth=1 --single-branch "${doomRepoUrl}" "$HOME/.emacs.d"
 
-	echo "installing doom emacs:"
-        ("$HOME/.emacs.d/bin/doom" install --force) 2>&1 | tee /tmp/doom-install.log || {
-          echo "Failed to install Doom Emacs. Check /tmp/doom-install.log for details"
-          echo "Last few lines of the log:"
-          tail -n 20 /tmp/doom-install.log
-          exit 1
-        }
-      fi
-    '';
+      echo "installing doom emacs:"
+            ("$HOME/.emacs.d/bin/doom" install --force) 2>&1 | tee /tmp/doom-install.log || {
+              echo "Failed to install Doom Emacs. Check /tmp/doom-install.log for details"
+              echo "Last few lines of the log:"
+              tail -n 20 /tmp/doom-install.log
+              exit 1
+            }
+          fi
+        '';
   };
   
   programs.zsh = {
@@ -58,7 +62,7 @@ in {
       xclip = "xclip -selection c";
       please = "sudo";
       n = "nix-shell shell.nix";
-      sn = "sudo nixos-rebuild switch";
+      sn = "sudo nixos-rebuild -v switch";
       gr = "grep -R --exclude='TAGS' --exclude-dir={.stack-work,dist-newstyle,result,result-2} -n";
       where = "pwd";
       nd = "nix develop";
@@ -66,7 +70,8 @@ in {
   };
 
   # Add the doom binary to your PATH
-  home.sessionPath = [ "$HOME/.emacs.d/bin" ];
+  home.sessionPath = [ "$HOME/.emacs.d/bin"
+                     ];
 
   programs.emacs.enable = true;
 
@@ -108,4 +113,47 @@ in {
   programs.xmobar.enable = true;
   programs.xmobar.extraConfig = pkgs.lib.readFile ./xmobarrc;
   programs.home-manager.enable = true;
+
+  home.packages = with pkgs; [
+    gnome-themes-extra
+    adw-gtk3  # Add this for better Adwaita theme support
+  ];
+
+  gtk = {
+    enable = true;
+
+    theme = {
+      name = "adw-gtk3-dark";  # Using adw-gtk3 instead of plain Adwaita
+      package = pkgs.adw-gtk3;
+    };
+
+    gtk3.extraConfig = {
+      gtk-application-prefer-dark-theme = true;
+    };
+
+    gtk4.extraConfig = {
+      gtk-application-prefer-dark-theme = true;
+    };
+  };
+
+  dconf.settings = {
+    "org/gnome/desktop/interface" = {
+      color-scheme = "prefer-dark";
+      gtk-theme = "adw-gtk3-dark";
+      enable-hot-corners = false;
+    };
+
+    # These additional settings help ensure dark mode consistency
+    "org/gnome/shell/extensions/user-theme" = {
+      name = "adw-gtk3-dark";
+    };
+
+    "org/gtk/settings/file-chooser" = {
+      theme-variant = "dark";
+    };
+
+    "org/gnome/nautilus/preferences" = {
+      theme-variant = "dark";
+    };
+  };
 }
