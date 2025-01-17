@@ -2,25 +2,27 @@
 
 import           System.IO
 import           XMonad
-import           XMonad.Actions.WindowGo          (runOrRaise)
+-- import           XMonad.Actions.WindowGo          (runOrRaise)
 import           XMonad.Hooks.DynamicLog
+import           XMonad.Hooks.EwmhDesktops        (ewmh)
 import           XMonad.Hooks.ManageDocks
 import           XMonad.Layout.IndependentScreens
 import           XMonad.Layout.MouseResizableTile
 import           XMonad.Layout.Spacing
 import           XMonad.Util.Brightness
 import           XMonad.Util.EZConfig             (additionalKeysP)
-import           XMonad.Util.Run                  (spawnPipe, unsafeSpawn)
+import           XMonad.Util.Run                  (spawnPipe)
+import           XMonad.Util.SpawnOnce            (spawnOnce)
 
 myStartupHook :: X ()
 myStartupHook = do
-  unsafeSpawn "feh --bg-scale ~/Pictures/wallpaper.png &"
-  runOrRaise "gnome-terminal" (className =? "Gnome-terminal")
-  runOrRaise "emacs" (className =? "Emacs")
-  runOrRaise "nautilus" (className =? "Org.gnome.Nautilus")
-  runOrRaise "firefox" (className =? "firefox-default")
-  runOrRaise "signal-desktop" (className =? "Signal")
-  unsafeSpawn "env XDG_CURRENT_DESKTOP=GNOME gnome-control-center"
+  spawnOnce "feh --bg-scale ~/Pictures/wallpaper.png &"
+  spawnOnce "gnome-terminal"
+  spawnOnce "emacs"
+  spawnOnce "nautilus"
+  spawnOnce "firefox"
+  spawnOnce "signal-desktop"
+  spawnOnce "env XDG_CURRENT_DESKTOP=GNOME gnome-control-center"
 
 myModMask            = mod4Mask                        -- Sets modkey to super/windows key
 myTerminal           = "gnome-terminal"
@@ -33,7 +35,7 @@ mySpacing = spacingRaw True (Border 0 10 10 10) True (Border 10 10 10 10) True
 
 myManageHook = composeAll
    [ className =? "Emacs" --> doShift "1"
-   , className =? "firefox-default" --> doShift "2"
+   , className =? "firefox" --> doShift "2"
    , className =? "Org.gnome.Nautilus" --> doShift "3"
    , className =? "Gnome-control-center" --> doShift "4"
    , className =? "Signal" --> doShift "6"
@@ -42,7 +44,7 @@ myManageHook = composeAll
 
 main = do
     xmproc <- spawnPipe "xmobar"
-    xmonad . docks $ def
+    xmonad . ewmh . docks $ def
         { manageHook = myManageHook <+> manageHook def
         , layoutHook = avoidStruts . mySpacing $ layoutHook def
         , handleEventHook = handleEventHook def -- <+> docksEventHook
