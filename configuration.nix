@@ -367,12 +367,12 @@
   nix.settings.trusted-substituters = [ "https://nixcache.reflex-frp.org"
                                         "https://cache.iog.io"
                                         "https://telomare.cachix.org"
-                                        "https://cache.staging.mlabs.city/cardano-nix"
+                                        # "https://cache.staging.mlabs.city/cardano-nix"
                                       ];
 
   nix.settings.substituters = [ "https://telomare.cachix.org"
                                 "https://nixcache.reflex-frp.org"
-                                "https://cache.staging.mlabs.city/cardano-nix"
+                                # "https://cache.staging.mlabs.city/cardano-nix"
                               ];
 
   nix.settings.allowed-users = [ "@wheel" "hhefesto" ];
