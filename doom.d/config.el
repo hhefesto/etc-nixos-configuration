@@ -123,7 +123,9 @@
   (setq haskell-mode-stylish-haskell-path "stylish-haskell")
   (setq haskell-hoogle-url "https://www.stackage.org/lts/hoogle?q=%s"))
 
+;; brings agda2-mode-path into scope
+(load "~/.doom.d/agda-mode-path.el")
 (use-package agda2-mode
-  :load-path "/nix/store/bf0583pjkymyivklm561w3xxl4xfaa98-Agda-2.7.0.1-data/share/ghc-9.6.6/x86_64-linux-ghc-9.6.6/Agda-2.7.0.1/emacs-mode"
+  :load-path agda2-mode-path
   :config
   (setq agda2-program-name "agda"))

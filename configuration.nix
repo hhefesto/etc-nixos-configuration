@@ -1,20 +1,10 @@
-{ config, pkgs, lib, modulesPath, inputs, ... }:
+{ config, pkgs, lib, modulesPath, inputs, myAgda, ... }:
 {
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
     ];
 
-  # nixpkgs.overlays = [
-  #   (final: prev: {
-  #      unstable = final.unstable;
-  #      # zoom-us = final.unstable.zoom-us;
-  #    }
-  #   )
-  # ];
-  # nixpkgs.overlays = [ inputs.unstable.overlay ];
-
-  # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
@@ -22,45 +12,17 @@
 
   networking.hostName = "delfos"; # Define your hostname.
   networking.enableIPv6 = false;
-  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
-  # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-
-  # Select internationalisation properties.
-  # i18n = {
-  #   consoleFont = "Lat2-Terminus16";
-  #   consoleKeyMap = "us";
-  #   defaultLocale = "en_US.UTF-8";
-  # };
-
-  # Set your time zone.
   time.timeZone = "America/Mexico_City";
-  # time.timeZone = "Europe/Vienna";
 
-  # environment.variables = {
-  #   TERMINAL = [ "st" ];
-  #   OH_MY_ZSH = [ "${pkgs.oh-my-zsh}/share/oh-my-zsh" ];
-  # };
-
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
   nixpkgs.config.allowUnfree = true;
 
   environment.systemPackages = with pkgs; [
-    # python312Packages.pip
-    # python312Packages.setuptools
-    # (python312.withPackages (ps: with ps; [pip setuptools]))
-    # libsForQt5.kdenlive
     alsa-utils
     kvmtool
     kdenlive
-    # inputs.agda.packages.x86_64-linux.default
-    (agda.withPackages (p: [ p.standard-library ]))
-    # element-desktop
+    myAgda
     brave
-    # inputs.devenv.packages.x86_64-linux.devenv
     sd
     fd
     virt-manager
@@ -78,7 +40,6 @@
     sox
     zoom-us
     discord
-    # spotifywm
     signal-desktop
     unetbootin
     any-nix-shell
@@ -86,9 +47,6 @@
     vim
     emacs
     emacs-all-the-icons-fonts
-    # ((emacsPackagesFor emacs).emacsWithPackages (epkgs: [ epkgs.vterm ]))
-    # (emacs.emacsWithPackages
-    #   (epkgs: [epkgs.emacs-libvterm]))
     tmux
     curl
     gist
@@ -135,8 +93,6 @@
     tree
     gnumake
     zlib
-    # postgresql
-    # haskellPackages.yesod-bin
     msmtp
     gmp
   ];
