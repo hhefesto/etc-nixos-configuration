@@ -1,17 +1,22 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, myAgda, ... }:
 let
   doomRepoUrl = "https://github.com/doomemacs/doomemacs";
   doomRevision = "master";  # or specific commit hash
+  agdaModePath = import ./get-agda-mode-path.nix { inherit myAgda pkgs; };
 in {
   home.sessionVariables = {
     # Change this timestamp to force a rebuild
     LAST_REBUILD = "2025-01-14";
   };
-
   home = {
     username = "hhefesto";
     homeDirectory = "/home/hhefesto";
     stateVersion = "22.11";
+  };
+  home.file.".doom.d/agda-mode-path.el" = {
+    text = ''
+      (setq agda2-mode-path "${agdaModePath}")
+    '';
   };
   home.file = {
     ".doom.d" = {

@@ -7,23 +7,24 @@
   inputs.home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
   outputs = inputs@{ self, nix, nixpkgs, home-manager, ... }:
-  {
+  let
+    system = "x86_64-linux";
+    pkgs = nixpkgs.legacyPackages.${system};
+    myAgda = pkgs.agda.withPackages (p: [ p.standard-library p.agda-categories ]);
+  in {
     nixosConfigurations.olimpo = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
+      inherit system;
       modules = [ ./configuration.nix
                   home-manager.nixosModules.home-manager
                   {
                     home-manager.useGlobalPkgs = true;
                     home-manager.useUserPackages = true;
                     home-manager.users.hhefesto = import ./home.nix;
-
-                    # Optionally, use home-manager.extraSpecialArgs to pass
-                    # arguments to home.nix
+                    home-manager.extraSpecialArgs = { inherit myAgda; };
                   }
 
                 ];
-      specialArgs = { inherit inputs; };
+      specialArgs = { inherit inputs myAgda; };
     };
-
   };
 }
