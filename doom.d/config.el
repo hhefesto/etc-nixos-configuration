@@ -124,6 +124,6 @@
   (setq haskell-hoogle-url "https://www.stackage.org/lts/hoogle?q=%s"))
 
 (use-package agda2-mode
-  :load-path "/nix/store/8fkvkwvbssa4ssrp4cac50fqicirrnl2-Agda-2.7.0-data/share/ghc-9.6.6/x86_64-linux-ghc-9.6.6/Agda-2.7.0/emacs-mode"
+  :load-path "/nix/store/bf0583pjkymyivklm561w3xxl4xfaa98-Agda-2.7.0.1-data/share/ghc-9.6.6/x86_64-linux-ghc-9.6.6/Agda-2.7.0.1/emacs-mode"
   :config
   (setq agda2-program-name "agda"))

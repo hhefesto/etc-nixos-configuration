@@ -20,7 +20,7 @@
 
   boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 
-  networking.hostName = "delfos"; # Define your hostname.
+  networking.hostName = "olimpo"; # Define your hostname.
   networking.enableIPv6 = false;
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
