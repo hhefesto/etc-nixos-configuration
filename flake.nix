@@ -1,12 +1,12 @@
 {
   description = "hhefesto's system configuration";
 
-  inputs.nix.url = "github:nixos/nix/master";
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+  inputs.determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
+  inputs.nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/*";
   inputs.home-manager.url = "github:nix-community/home-manager";
   inputs.home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
-  outputs = inputs@{ self, nix, nixpkgs, home-manager, ... }:
+  outputs = inputs@{ self, determinate, nixpkgs, home-manager, ... }:
   let
     system = "x86_64-linux";
     pkgs = nixpkgs.legacyPackages.${system};
@@ -14,7 +14,8 @@
   in {
     nixosConfigurations.olimpo = nixpkgs.lib.nixosSystem {
       inherit system;
-      modules = [ ./configuration.nix
+      modules = [ determinate.nixosModules.default
+                  ./configuration.nix
                   home-manager.nixosModules.home-manager
                   {
                     home-manager.useGlobalPkgs = true;

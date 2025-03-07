@@ -20,7 +20,7 @@
   environment.systemPackages = with pkgs; [
     alsa-utils
     kvmtool
-    kdenlive
+    kdePackages.kdenlive
     myAgda
     brave
     sd
@@ -183,13 +183,13 @@
 
   # Enable sound.
   # sound.enable = true;
-  services.pulseaudio = {
-      # enable = true;
-      enable = false;
-      # package = pkgs.pulseaudioFull;
-      # support32Bit = true;
-      # extraModules = [ pkgs.pulseaudio-modules-bt ];
-  };
+  # services.pulseaudio = {
+  #     # enable = true;
+  #     enable = false;
+  #     # package = pkgs.pulseaudioFull;
+  #     # support32Bit = true;
+  #     # extraModules = [ pkgs.pulseaudio-modules-bt ];
+  # };
 
   hardware.bluetooth.enable = true;
 
@@ -337,7 +337,7 @@
   };
 
   # For nix flakes
-  nix.package = inputs.nix.packages.x86_64-linux.default;
+  # nix.package = inputs.nix.packages.x86_64-linux.default;
   nix.extraOptions = ''
     experimental-features = nix-command flakes
     keep-outputs = true
@@ -368,7 +368,7 @@
   # compatible, in order to avoid breaking some software such as database
   # servers. You should change this only after NixOS release notes say you
   # should.
-  system.stateVersion = "23.11"; # Did you read the comment?
+  system.stateVersion = "24.11"; # Did you read the comment?
 
   # Let 'nixos-version --json' know about the Git revision
   # of this flake.
