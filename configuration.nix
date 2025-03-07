@@ -39,7 +39,7 @@
     ripgrep
     sox
     zoom-us
-    discord
+    discord-ptb
     signal-desktop
     unetbootin
     any-nix-shell
