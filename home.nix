@@ -6,7 +6,7 @@ let
 in {
   home.sessionVariables = {
     # Change this timestamp to force a rebuild
-    LAST_REBUILD = "2025-01-14";
+    LAST_REBUILD = "2025-04-28-2";
   };
   home = {
     username = "hhefesto";
@@ -51,12 +51,6 @@ in {
     shellAliases = {
       cat = "bat";
       _cat = "cat";
-      crun = "cabal new-run";
-      ct = "cabal new-test";
-      cr = "cabal new-repl";
-      cb = "cabal new-build";
-      tr = "cd ~/src/telomare && cabal new-run telomare-mini-repl -- --haskell";
-      telomare-repl = "cd ~/src/telomare && cabal new-run telomare-mini-repl -- --haskell";
       gs = "git status";
       ga = "git add -A";
       gd = "git diff";
@@ -66,11 +60,11 @@ in {
       sendmail = "/run/current-system/sw/bin/msmtp --debug --from=default --file=/etc/msmtp/laurus -t";
       xclip = "xclip -selection c";
       please = "sudo";
-      n = "nix-shell shell.nix";
+      n = "nix -Lv";
+      nd = "nix -Lv develop -c zsh";
       sn = "sudo nixos-rebuild -v switch";
       gr = "grep -R --exclude='TAGS' --exclude-dir={.stack-work,dist-newstyle,result,result-2} -n";
       where = "pwd";
-      nd = "nix develop";
     };
   };
 

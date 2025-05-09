@@ -2,7 +2,6 @@
 
 import           System.IO
 import           XMonad
--- import           XMonad.Actions.WindowGo          (runOrRaise)
 import           XMonad.Hooks.DynamicLog
 import           XMonad.Hooks.EwmhDesktops        (ewmh)
 import           XMonad.Hooks.ManageDocks
@@ -16,11 +15,11 @@ import           XMonad.Util.SpawnOnce            (spawnOnce)
 
 myStartupHook :: X ()
 myStartupHook = do
+  spawnOnce "nautilus"
+  spawnOnce "brave"
   spawnOnce "feh --bg-scale ~/Pictures/wallpaper.png &"
   spawnOnce "gnome-terminal"
   spawnOnce "emacs"
-  spawnOnce "nautilus"
-  spawnOnce "firefox"
   spawnOnce "signal-desktop"
   spawnOnce "env XDG_CURRENT_DESKTOP=GNOME gnome-control-center"
 
@@ -35,7 +34,7 @@ mySpacing = spacingRaw True (Border 0 10 10 10) True (Border 10 10 10 10) True
 
 myManageHook = composeAll
    [ className =? "Emacs" --> doShift "1"
-   , className =? "firefox" --> doShift "2"
+   , className =? "brave-browser" --> doShift "2"
    , className =? "Org.gnome.Nautilus" --> doShift "3"
    , className =? "Gnome-control-center" --> doShift "4"
    , className =? "Signal" --> doShift "6"

@@ -4,8 +4,11 @@
 ;; To install a package with Doom you must declare them here and run 'doom sync'
 ;; on the command line, then restart Emacs for the changes to take effect -- or
 ;; use 'M-x doom/reload'.
-
+;; (use-package all-the-icons
+;;   :if (display-graphic-p))
+;; (package! justl :recipe (:host github :repo "psibi/justl"))
 ;; (package! flycheck-haskell)
+(package! all-the-icons)
 (package! flycheck)
 ;; (package! dante)
 ;; (package! eglot)
@@ -33,11 +36,11 @@
 (package! yasnippet)
 (package! counsel)
 (package! prettify-utils ; simplify messing with prettify-mode
-  :recipe (:host github :repo "Ilazki/prettify-utils.el") :pin "8b783d316c...")
-(package! theme-magic :pin "844c4311bd...")
-(package! keycast :pin "a912c4db1b...")
-(package! flyspell-lazy :pin "3ebf68cc9e...")
-(package! info-colors :pin "47ee73cc19...")
+  :recipe (:host github :repo "Ilazki/prettify-utils.el"))
+(package! theme-magic)
+(package! keycast)
+(package! flyspell-lazy)
+(package! info-colors)
 (package! centaur-tabs)
 (package! company-tabnine)
 (package! awesome-pair :recipe (:host github :repo "manateelazycat/awesome-pair"))

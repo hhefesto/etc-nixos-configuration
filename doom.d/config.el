@@ -129,3 +129,11 @@
   :load-path agda2-mode-path
   :config
   (setq agda2-program-name "agda"))
+
+(use-package! justl
+  :commands justl
+  :config
+  (setq justl-preview-directory default-directory))
+
+(use-package all-the-icons
+  :if (display-graphic-p))

@@ -103,6 +103,8 @@
   ];
 
   fonts.packages = with pkgs; [
+    (nerdfonts.override { fonts = [ "FiraCode" "DroidSansMono" "Iosevka" ]; })
+    # emacs-all-the-icons-fonts
     hack-font
   ];
 
@@ -120,6 +122,21 @@
       IOSchedulingPriority = 7;
     };
   };
+
+  # Set Brave as default browser system-wide
+  xdg.mime.defaultApplications = {
+    "text/html" = "brave-browser.desktop";
+    "x-scheme-handler/http" = "brave-browser.desktop";
+    "x-scheme-handler/https" = "brave-browser.desktop";
+    "x-scheme-handler/about" = "brave-browser.desktop";
+    "x-scheme-handler/unknown" = "brave-browser.desktop";
+  };
+
+  # # Install Brave browser
+  # programs.brave = {
+  #   enable = true;
+  #   # You can add extensions or other browser settings here
+  # };
 
   programs.steam = {
     enable = true;
@@ -144,24 +161,25 @@
     ohMyZsh.plugins = ["git" "sudo" "colorize" "extract" "history" "postgres"];
     ohMyZsh.theme = "intheloop";
 
-    # shellInit = ''
-    #   # ssh
-    #   # export SSH_KEY_PATH="~/.ssh/dsa_id"
-    #   export SSH_AUTH_SOCK=~/.ssh/ssh-agent.$HOSTNAME.sock
+    shellInit = ''
+      # ssh
+      # export SSH_KEY_PATH="~/.ssh/dsa_id"
+      export SSH_AUTH_SOCK=~/.ssh/ssh-agent.$HOSTNAME.sock
 
-    #   # Verify if ssh-agent is running
-    #   ssh-add -l 2>/dev/null >/dev/null
+      # Verify if ssh-agent is running
+      ssh-add -l 2>/dev/null >/dev/null
 
-    #   # if it was running, ssh-add will use it and return 1 (no keys)
-    #   # if it was not running, it will return 2, so we proceed to execute the ssh-agent
-    #   # and tell it where to create the Unix  socket (SSH_AUTH_SOCK):
+      # if it was running, ssh-add will use it and return 1 (no keys)
+      # if it was not running, it will return 2, so we proceed to execute the ssh-agent
+      # and tell it where to create the Unix  socket (SSH_AUTH_SOCK):
 
-    #   if [ $? -ge 2 ]; then
-    #      ssh-agent -a "$SSH_AUTH_SOCK" >/dev/null
-    #   fi
+      if [ $? -ge 2 ]; then
+         ssh-agent -a "$SSH_AUTH_SOCK" >/dev/null
+      fi
 
-    #   ssh-add ~/.ssh/xpsoasis-ed25519
-    # '';
+      ssh-add ~/.ssh/xpsoasis-ed25519
+      ssh-add ~/.ssh/tt-test
+    '';
 
     interactiveShellInit = ''
       save_aliases=$(alias -L)
@@ -250,26 +268,26 @@
   };
   services.xserver.desktopManager.gnome.enable = true;
 
-  services.postgresql = {
-      enable = true;
-      package = pkgs.postgresql;
-      enableTCPIP = true;
-      # ensureUsers."analyzer".ensureDBOwnership = true;
-      authentication = pkgs.lib.mkOverride 10 ''
-        #type database DBuser origin-address auth-method
-        local all      all                    trust
-        # ipv4
-        host  all      all     127.0.0.1/32   trust
-        # ipv6
-        host all       all     ::1/128        trust
-      '';
-      initialScript = pkgs.writeText "backend-initScript" ''
-        CREATE ROLE analyzer WITH LOGIN PASSWORD 'anapass';
-        CREATE DATABASE aanalyzer_yesod;
-        GRANT ALL PRIVILEGES ON DATABASE aanalyzer_yesod TO analyzer;
-        GRANT ALL ON SCHEMA public TO analyzer;
-      '';
-    };
+  # services.postgresql = {
+  #     enable = true;
+  #     package = pkgs.postgresql;
+  #     enableTCPIP = true;
+  #     # ensureUsers."analyzer".ensureDBOwnership = true;
+  #     authentication = pkgs.lib.mkOverride 10 ''
+  #       #type database DBuser origin-address auth-method
+  #       local all      all                    trust
+  #       # ipv4
+  #       host  all      all     127.0.0.1/32   trust
+  #       # ipv6
+  #       host all       all     ::1/128        trust
+  #     '';
+  #     initialScript = pkgs.writeText "backend-initScript" ''
+  #       CREATE ROLE analyzer WITH LOGIN PASSWORD 'anapass';
+  #       CREATE DATABASE aanalyzer_yesod;
+  #       GRANT ALL PRIVILEGES ON DATABASE aanalyzer_yesod TO analyzer;
+  #       GRANT ALL ON SCHEMA public TO analyzer;
+  #     '';
+  #   };
 
   location.provider = "manual";
   location.latitude = 20.59;
@@ -338,31 +356,43 @@
 
   # For nix flakes
   # nix.package = inputs.nix.packages.x86_64-linux.default;
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
   nix.extraOptions = ''
-    experimental-features = nix-command flakes
+    netrc-file = /etc/nix/netrc
     keep-outputs = true
     keep-derivations = true
     accept-flake-config = true
     allow-import-from-derivation = true
   '';
 
-  nix.settings.trusted-public-keys = [ "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
+  nix.settings.trusted-public-keys = [ "tontinetrust-roboactuary.cachix.org-1:V23wn6i7/4OLXjsZBuMxzgb6sQMixTG3tNO1nOYeRDo="
+                                       "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
                                        "telomare.cachix.org-1:H0qRjVstxtb9oyEPvDDpmPSLyJ9oViAsTgwR02ra6Dk="
                                        "ryantrinkle.com-1:JJiAKaRv9mWgpVAz8dwewnZe0AzzEAzPkagE9SP5NWI="
                                      ];
 
-  nix.settings.trusted-substituters = [ "https://nixcache.reflex-frp.org"
+  nix.settings.trusted-substituters = [ "https://tontinetrust-roboactuary.cachix.org"
+                                        "https://nixcache.reflex-frp.org"
                                         "https://cache.iog.io"
                                         "https://telomare.cachix.org"
                                       ];
 
-  nix.settings.substituters = [ "https://telomare.cachix.org"
+  nix.settings.substituters = [ "https://tontinetrust-roboactuary.cachix.org"
+                                "https://telomare.cachix.org"
                                 "https://nixcache.reflex-frp.org"
+                                "https://cache.iog.io"
                               ];
 
+  # Binary Cache for Haskell.nix
+  nix.binaryCachePublicKeys = [
+    "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
+  ];
+  nix.binaryCaches = [
+    "https://cache.iog.io"
+  ];
   nix.settings.allowed-users = [ "@wheel" "hhefesto" ];
 
-  nix.settings.trusted-users = [ "root" "hhefesto" ];
+  nix.settings.trusted-users = [ "hhefesto" ];
 
   # This value determines the NixOS release with which your system is to be
   # compatible, in order to avoid breaking some software such as database

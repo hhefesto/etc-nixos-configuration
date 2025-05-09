@@ -14,8 +14,8 @@
   in {
     nixosConfigurations.olimpo = nixpkgs.lib.nixosSystem {
       inherit system;
-      modules = [ determinate.nixosModules.default
-                  ./configuration.nix
+      modules = [ ./configuration.nix
+                  # determinate.nixosModules.default
                   home-manager.nixosModules.home-manager
                   {
                     home-manager.useGlobalPkgs = true;
