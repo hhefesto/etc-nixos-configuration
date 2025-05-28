@@ -104,8 +104,17 @@
 
   fonts.packages = with pkgs; [
     (nerdfonts.override { fonts = [ "FiraCode" "DroidSansMono" "Iosevka" ]; })
-    # emacs-all-the-icons-fonts
+    noto-fonts-cjk-sans
+    ipafont
+    kochi-substitute
+    font-awesome
     hack-font
+  ];
+  fonts.fontconfig.enable = true;
+  fonts.enableDefaultPackages = true;
+  i18n.supportedLocales = [
+    "en_US.UTF-8/UTF-8"
+    "ja_JP.UTF-8/UTF-8"
   ];
 
   systemd.extraConfig = ''
@@ -179,6 +188,7 @@
 
       ssh-add ~/.ssh/xpsoasis-ed25519
       ssh-add ~/.ssh/tt-test
+      ssh-add ~/.ssh/ed25519-rumble-tt-ra
     '';
 
     interactiveShellInit = ''
