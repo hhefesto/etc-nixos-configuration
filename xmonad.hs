@@ -8,7 +8,6 @@ import           XMonad.Hooks.ManageDocks
 import           XMonad.Layout.IndependentScreens
 import           XMonad.Layout.MouseResizableTile
 import           XMonad.Layout.Spacing
-import           XMonad.Util.Brightness
 import           XMonad.Util.EZConfig             (additionalKeysP)
 import           XMonad.Util.Run                  (spawnPipe)
 import           XMonad.Util.SpawnOnce            (spawnOnce)
@@ -59,9 +58,9 @@ main = do
         , terminal           = myTerminal
         } `additionalKeysP`
         [ ("<Print>", spawn "scrot -e \'mv $f ~/Pictures/Screenshots\'")
-        , ("M-u", liftIO $ change (\i -> i - 10) >> pure ()) -- decrease brightness
-        , ("M-i", liftIO $ change (\i -> i + 10) >> pure ()) -- increase brightness
-        , ("M-y", setBrightness 1) -- set to minimum brightness
+        , ("M-u", spawn "brightnessctl set 5%-") -- decrease brightness
+        , ("M-i", spawn "brightnessctl set +5%") -- increase brightness
+        -- , ("M-y", setBrightness 1) -- set to minimum brightness
         , ("M-j", spawn "amixer -q sset Master 2%-")
         , ("M-k", spawn "amixer -q sset Master 2%+")
         , ("M-m", spawn "amixer set Master toggle")

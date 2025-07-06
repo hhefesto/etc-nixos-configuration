@@ -18,6 +18,8 @@
   nixpkgs.config.allowUnfree = true;
 
   environment.systemPackages = with pkgs; [
+    insomnia
+    brightnessctl
     alsa-utils
     kvmtool
     kdePackages.kdenlive
@@ -103,13 +105,13 @@
   ];
 
   fonts.packages = with pkgs; [
-    (nerdfonts.override { fonts = [ "FiraCode" "DroidSansMono" "Iosevka" ]; })
     noto-fonts-cjk-sans
     ipafont
     kochi-substitute
     font-awesome
     hack-font
-  ];
+  ] ++ builtins.filter lib.attrsets.isDerivation (builtins.attrValues pkgs.nerd-fonts);
+
   fonts.fontconfig.enable = true;
   fonts.enableDefaultPackages = true;
   i18n.supportedLocales = [
@@ -189,6 +191,8 @@
       ssh-add ~/.ssh/xpsoasis-ed25519
       ssh-add ~/.ssh/tt-test
       ssh-add ~/.ssh/ed25519-rumble-tt-ra
+      ssh-add ~/.ssh/id_ed25519
+      ssh-add ~/.ssh/github-runner-key
     '';
 
     interactiveShellInit = ''
@@ -315,7 +319,7 @@
     };
   };
 
-
+  boot.kernelModules = [ "kvm-amd" ];
   # for virt-manager: https://nixos.wiki/wiki/Virt-manager
   virtualisation.libvirtd.enable = true;
 
@@ -349,7 +353,7 @@
     isNormalUser = true;
     home = "/home/hhefesto";
     description = "Daniel Herrera";
-    extraGroups = [ "video" "wheel" "networkmanager" "docker" "libvirtd" ];
+    extraGroups = [ "video" "wheel" "networkmanager" "docker" "libvirtd" "kvm" ];
     hashedPassword = "$6$/RvS0Se.iCx$A0eA/8PzgMj.Ms9ohNamfu53c9S.zdG30hEmUHLjmWP0CaXTPVA6QxGIZ6fy.abkjSOTJMAq7fFL6LUBGs4BU0";
     openssh.authorizedKeys.keys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJcDIsto/6GS7XwTl+uVo4ABeRlRjDwAU0HHy8irqLaB hhefesto@olimpo" ];
     shell = pkgs.zsh; #"/run/current-system/sw/bin/bash";
@@ -368,7 +372,6 @@
   # nix.package = inputs.nix.packages.x86_64-linux.default;
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
   nix.extraOptions = ''
-    netrc-file = /etc/nix/netrc
     keep-outputs = true
     keep-derivations = true
     accept-flake-config = true
@@ -393,13 +396,6 @@
                                 "https://cache.iog.io"
                               ];
 
-  # Binary Cache for Haskell.nix
-  nix.binaryCachePublicKeys = [
-    "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
-  ];
-  nix.binaryCaches = [
-    "https://cache.iog.io"
-  ];
   nix.settings.allowed-users = [ "@wheel" "hhefesto" ];
 
   nix.settings.trusted-users = [ "hhefesto" ];
@@ -408,7 +404,7 @@
   # compatible, in order to avoid breaking some software such as database
   # servers. You should change this only after NixOS release notes say you
   # should.
-  system.stateVersion = "24.11"; # Did you read the comment?
+  system.stateVersion = "25.05"; # Did you read the comment?
 
   # Let 'nixos-version --json' know about the Git revision
   # of this flake.
