@@ -6,7 +6,7 @@ let
 in {
   home.sessionVariables = {
     # Change this timestamp to force a rebuild
-    LAST_REBUILD = "2025-01-14";
+    LAST_REBUILD = "2025-03-13";
   };
   home = {
     username = "hhefesto";

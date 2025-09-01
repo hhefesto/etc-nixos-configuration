@@ -10,17 +10,28 @@
 
   boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 
-  networking.hostName = "delfos"; # Define your hostname.
+  # TODO: put in its own module
+  networking.hostName = "delfos";
   networking.enableIPv6 = false;
 
   time.timeZone = "America/Mexico_City";
 
   nixpkgs.config.allowUnfree = true;
+  # nixpkgs.overlays = [
+  #   (self: super: {
+  #     # bash = (super.bash.override { withManpages = false; });
+  #     bash = super.bash.overrideAttrs (oldAttrs: {
+  #       version = "5.2p26"; # Try an earlier patch version
+  #       # You may need to adjust the source URL and hash accordingly
+  #     });
+  #   })
+  # ];
 
   environment.systemPackages = with pkgs; [
+    # (bash.override { withManpages = false; })
     alsa-utils
     kvmtool
-    kdenlive
+    kdePackages.kdenlive
     myAgda
     brave
     sd
@@ -39,7 +50,7 @@
     ripgrep
     sox
     zoom-us
-    discord
+    discord-ptb
     signal-desktop
     unetbootin
     any-nix-shell
@@ -106,11 +117,6 @@
     hack-font
   ];
 
-  systemd.extraConfig = ''
-    DefaultTimeoutStartSec=20m
-    DefaultTimeoutStopSec=20m
-    DefaultTimeoutAbortSec=20m
-  '';
   systemd.user.services.home-manager-hhefesto = {
     serviceConfig = {
       TimeoutStartSec = "20m";
@@ -144,24 +150,25 @@
     ohMyZsh.plugins = ["git" "sudo" "colorize" "extract" "history" "postgres"];
     ohMyZsh.theme = "intheloop";
 
-    # shellInit = ''
-    #   # ssh
-    #   # export SSH_KEY_PATH="~/.ssh/dsa_id"
-    #   export SSH_AUTH_SOCK=~/.ssh/ssh-agent.$HOSTNAME.sock
+    shellInit = ''
+      # ssh
+      # export SSH_KEY_PATH="~/.ssh/dsa_id"
+      export SSH_AUTH_SOCK=~/.ssh/ssh-agent.$HOSTNAME.sock
 
-    #   # Verify if ssh-agent is running
-    #   ssh-add -l 2>/dev/null >/dev/null
+      # Verify if ssh-agent is running
+      ssh-add -l 2>/dev/null >/dev/null
 
-    #   # if it was running, ssh-add will use it and return 1 (no keys)
-    #   # if it was not running, it will return 2, so we proceed to execute the ssh-agent
-    #   # and tell it where to create the Unix  socket (SSH_AUTH_SOCK):
+      # if it was running, ssh-add will use it and return 1 (no keys)
+      # if it was not running, it will return 2, so we proceed to execute the ssh-agent
+      # and tell it where to create the Unix  socket (SSH_AUTH_SOCK):
 
-    #   if [ $? -ge 2 ]; then
-    #      ssh-agent -a "$SSH_AUTH_SOCK" >/dev/null
-    #   fi
+      if [ $? -ge 2 ]; then
+         ssh-agent -a "$SSH_AUTH_SOCK" >/dev/null
+      fi
 
-    #   ssh-add ~/.ssh/xpsoasis-ed25519
-    # '';
+      ssh-add ~/.ssh/tt-test
+      ssh-add ~/.ssh/github-runner-key
+    '';
 
     interactiveShellInit = ''
       save_aliases=$(alias -L)
@@ -180,16 +187,6 @@
 
   # Enable CUPS to print documents.
   # services.printing.enable = true;
-
-  # Enable sound.
-  # sound.enable = true;
-  services.pulseaudio = {
-      # enable = true;
-      enable = false;
-      # package = pkgs.pulseaudioFull;
-      # support32Bit = true;
-      # extraModules = [ pkgs.pulseaudio-modules-bt ];
-  };
 
   hardware.bluetooth.enable = true;
 
@@ -327,6 +324,7 @@
     shell = pkgs.zsh; #"/run/current-system/sw/bin/bash";
   };
 
+  # nix.package = inputs.nix.packages.x86_64-linux.default;
   nix.settings.auto-optimise-store = true;
   nix.settings.allow-import-from-derivation = true;
 
@@ -336,8 +334,8 @@
     options = "--delete-older-than 7d";
   };
 
+  # experimental-features = nix-command flakes
   # For nix flakes
-  nix.package = inputs.nix.packages.x86_64-linux.default;
   nix.extraOptions = ''
     experimental-features = nix-command flakes
     keep-outputs = true
@@ -346,17 +344,20 @@
     allow-import-from-derivation = true
   '';
 
-  nix.settings.trusted-public-keys = [ "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
+  nix.settings.trusted-public-keys = [ "tontinetrust-roboactuary.cachix.org-1:V23wn6i7/4OLXjsZBuMxzgb6sQMixTG3tNO1nOYeRDo="
+                                       "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
                                        "telomare.cachix.org-1:H0qRjVstxtb9oyEPvDDpmPSLyJ9oViAsTgwR02ra6Dk="
                                        "ryantrinkle.com-1:JJiAKaRv9mWgpVAz8dwewnZe0AzzEAzPkagE9SP5NWI="
                                      ];
 
-  nix.settings.trusted-substituters = [ "https://nixcache.reflex-frp.org"
+  nix.settings.trusted-substituters = [ "https://tontinetrust-roboactuary.cachix.org"
+                                        "https://nixcache.reflex-frp.org"
                                         "https://cache.iog.io"
                                         "https://telomare.cachix.org"
                                       ];
 
-  nix.settings.substituters = [ "https://telomare.cachix.org"
+  nix.settings.substituters = [ "https://tontinetrust-roboactuary.cachix.org"
+                                "https://telomare.cachix.org"
                                 "https://nixcache.reflex-frp.org"
                               ];
 
@@ -368,7 +369,7 @@
   # compatible, in order to avoid breaking some software such as database
   # servers. You should change this only after NixOS release notes say you
   # should.
-  system.stateVersion = "23.11"; # Did you read the comment?
+  system.stateVersion = "24.11"; # Did you read the comment?
 
   # Let 'nixos-version --json' know about the Git revision
   # of this flake.
