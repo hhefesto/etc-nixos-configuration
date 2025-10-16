@@ -29,6 +29,7 @@
 
   environment.systemPackages = with pkgs; [
     # (bash.override { withManpages = false; })
+    tesseract
     alsa-utils
     kvmtool
     kdePackages.kdenlive
@@ -117,15 +118,15 @@
     hack-font
   ];
 
-  systemd.user.services.home-manager-hhefesto = {
-    serviceConfig = {
-      TimeoutStartSec = "20m";
-      TimeoutStopSec = "20m";
-      Nice = 19;
-      IOSchedulingClass = "idle";
-      IOSchedulingPriority = 7;
-    };
-  };
+  # systemd.user.services.home-manager-hhefesto = {
+  #   serviceConfig = {
+  #     TimeoutStartSec = "20m";
+  #     TimeoutStopSec = "20m";
+  #     Nice = 19;
+  #     IOSchedulingClass = "idle";
+  #     IOSchedulingPriority = 7;
+  #   };
+  # };
 
   programs.steam = {
     enable = true;
@@ -221,8 +222,9 @@
   services.xserver.xkb.variant = "altgr-intl";
   services.xserver.windowManager.xmonad = {
     enable = true;
+    # enableConfiguredRecompile = true;
     config = pkgs.lib.readFile ./xmonad.hs;
-    enableContribAndExtras = true;
+    # enableContribAndExtras = true;
     extraPackages = haskellPackages:[
       haskellPackages.xmonad-contrib
       haskellPackages.xmonad-extras
@@ -233,16 +235,19 @@
   services.xserver.displayManager = {
     # defaultSession = "none+xmonad";
     gdm.enable = true;
-    sessionCommands = let myCustomLayout = pkgs.writeText "xkb-layout" ''
-                        ! swap Caps_Lock and Control_R
-                        remove Lock = Caps_Lock
-                        remove Control = Control_R
-                        keysym Control_R = Caps_Lock
-                        keysym Caps_Lock = Control_R
-                        add Lock = Caps_Lock
-                        add Control = Control_R
-                      '';
-                      in "${pkgs.xorg.xmodmap}/bin/xmodmap ${myCustomLayout}";
+    sessionCommands =
+      let myCustomLayout = pkgs.writeText "xkb-layout" ''
+          ! swap Caps_Lock and Control_R
+          remove Lock = Caps_Lock
+          remove Control = Control_R
+          keysym Control_R = Caps_Lock
+          keysym Caps_Lock = Control_R
+          add Lock = Caps_Lock
+          add Control = Control_R
+        '';
+      in ''
+        ${pkgs.xorg.xmodmap}/bin/xmodmap ${myCustomLayout}
+      '';
     # autoLogin.user = "hhefesto";
   };
   services.xserver.desktopManager.gnome.enable = true;
@@ -323,6 +328,16 @@
     openssh.authorizedKeys.keys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJcDIsto/6GS7XwTl+uVo4ABeRlRjDwAU0HHy8irqLaB hhefesto@olimpo" ];
     shell = pkgs.zsh; #"/run/current-system/sw/bin/bash";
   };
+  users.extraUsers.moper = {
+    createHome = true;
+    isNormalUser = true;
+    home = "/home/moper";
+    description = "Oswaldo";
+    extraGroups = [ "video" "wheel" "networkmanager" "docker" "libvirtd" ];
+    hashedPassword = "$6$61SFKMZLJxncDvqK$J/U1oNhjgtsr8Wv8vv9VdqWlmcP2f6eP5SBgN5UoJVRf2Hfpp5CIYcyZiAcC7etbu0j21zuAvE5q2S27GkPJ/1";
+    openssh.authorizedKeys.keys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJcDIsto/6GS7XwTl+uVo4ABeRlRjDwAU0HHy8irqLaB hhefesto@olimpo" ];
+    shell = pkgs.zsh; #"/run/current-system/sw/bin/bash";
+  };
 
   # nix.package = inputs.nix.packages.x86_64-linux.default;
   nix.settings.auto-optimise-store = true;
@@ -361,9 +376,9 @@
                                 "https://nixcache.reflex-frp.org"
                               ];
 
-  nix.settings.allowed-users = [ "@wheel" "hhefesto" ];
+  nix.settings.allowed-users = [ "@wheel" "hhefesto" "moper" ];
 
-  nix.settings.trusted-users = [ "root" "hhefesto" ];
+  nix.settings.trusted-users = [ "root" "hhefesto" "moper" ];
 
   # This value determines the NixOS release with which your system is to be
   # compatible, in order to avoid breaking some software such as database

@@ -12,6 +12,7 @@ import           XMonad.Layout.Spacing
 import           XMonad.Util.EZConfig             (additionalKeysP)
 import           XMonad.Util.Run                  (spawnPipe)
 import           XMonad.Util.SpawnOnce            (spawnOnce)
+import qualified Debug.Trace as Debug (trace)
 
 myStartupHook :: X ()
 myStartupHook = do
@@ -42,26 +43,45 @@ myManageHook = composeAll
    ]
 
 main = do
-    xmproc <- spawnPipe "xmobar"
-    xmonad . ewmh . docks $ def
-        { manageHook = myManageHook <+> manageHook def
-        , layoutHook = avoidStruts . mySpacing $ layoutHook def
-        , handleEventHook = handleEventHook def -- <+> docksEventHook
-        , logHook = dynamicLogWithPP xmobarPP
-                        { ppOutput = hPutStrLn xmproc
-                        , ppTitle = xmobarColor "darkgreen" "" . shorten 20
-                        }
-        , startupHook        = myStartupHook
-        , modMask            = myModMask     -- Rebind Mod to the Windows key
-        , borderWidth        = myBorderWidth
-        , normalBorderColor  = myNormalBorderColor
-        , focusedBorderColor = myFocusedBorderColor
-        , terminal           = myTerminal
-        } `additionalKeysP`
-        [ ("<Print>", spawn "scrot -e \'mv $f ~/Pictures/Screenshots\'")
-        , ("M-u", spawn "brightnessctl set 5%-") -- decrease brightness
-        , ("M-i", spawn "brightnessctl set +5%") -- increase brightness
-        , ("M-j", spawn "amixer -q sset Master 2%-")
-        , ("M-k", spawn "amixer -q sset Master 2%+")
-        , ("M-m", spawn "amixer set Master toggle")
-        ]
+  -- xmproc <- spawnPipe "tee -a ~/.cache/xmonad/xmobar.log | xmobar"
+  xmproc <- spawnPipe "tee -a ~/.xmobar.log | xmobar"
+  xmonad . ewmh . docks $ def
+      { manageHook = myManageHook <+> manageHook def
+      , layoutHook = avoidStruts . mySpacing $ layoutHook def
+      , handleEventHook = handleEventHook def -- <+> docksEventHook
+      , logHook = dynamicLogWithPP xmobarPP
+                      { ppOutput = hPutStrLn xmproc
+                      , ppTitle = xmobarColor "darkgreen" "" . shorten 20
+                      }
+      , startupHook        = myStartupHook
+      , modMask            = myModMask     -- Rebind Mod to the Windows key
+      , borderWidth        = myBorderWidth
+      , normalBorderColor  = myNormalBorderColor
+      , focusedBorderColor = myFocusedBorderColor
+      , terminal           = myTerminal
+      } `additionalKeysP`
+      [ ("M-q", restart "xmonad" True)
+      , ("<Print>", spawn "scrot -e \'mv $f ~/Pictures/Screenshots\'")
+      , ("M-i", spawn $ unwords
+          [ "bash -c '"
+          , "exec 2>>~/.cache/xmonad/ocrshot.log;"
+          , "set -x;"
+          , "echo \"=== OCR attempt at $(date) ===\" >>~/.cache/xmonad/ocrshot.log;"
+          , "mkdir -p ~/.cache/xmonad;"
+          , "sleep 0.2;"
+          , "scrot -s -o /tmp/ocr.png"
+          , "&& tesseract /tmp/ocr.png - | xclip -selection clipboard"
+          , "&& rm -f /tmp/ocr.png;"
+          , "EXIT=$?;"
+          , "echo \"Exit code: $EXIT\" >>~/.cache/xmonad/ocrshot.log;"
+          , "echo \"===\" >>~/.cache/xmonad/ocrshot.log"
+          , "'"
+          ]
+        )
+      -- , ("M-c", spawn "scrot -s /tmp/ocr.png && tesseract /tmp/ocr.png - | xclip -selection clipboard && rm /tmp/ocr.png")
+      -- , ("M-u", spawn "brightnessctl set 5%-") -- decrease brightness
+      -- , ("M-i", spawn "brightnessctl set +5%") -- increase brightness
+      , ("M-j", spawn "amixer -q sset Master 2%-")
+      , ("M-k", spawn "amixer -q sset Master 2%+")
+      , ("M-m", spawn "amixer set Master toggle")
+      ]

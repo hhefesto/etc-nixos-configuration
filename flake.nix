@@ -23,6 +23,7 @@
                     home-manager.useGlobalPkgs = true;
                     home-manager.useUserPackages = true;
                     home-manager.users.hhefesto = import ./home.nix;
+		                home-manager.users.moper = import ./home-moper.nix;
                     home-manager.extraSpecialArgs = { inherit myAgda; };
                   }
 
