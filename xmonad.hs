@@ -1,6 +1,8 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
 import           System.IO
+import           XMonad.Main                      (launch)
+import           XMonad.Core                      (Directories(..))
 import           XMonad
 import           XMonad.Hooks.DynamicLog
 import           XMonad.Hooks.EwmhDesktops        (ewmh)
@@ -42,13 +44,19 @@ myManageHook = composeAll
 
 main = do
     xmproc <- spawnPipe "xmobar"
-    xmonad . ewmh . docks $ def
+    let dirs = Directories
+                { cfgDir = "$HOME/.config/xmonad"        -- Directory containing xmonad.hs
+                , dataDir = "$HOME/.local/share/xmonad"  -- For xmonad's data files
+                , cacheDir = "$HOME/.cache/xmonad" -- For xmonad's cache files
+                }
+    (flip launch) dirs . ewmh . docks $ def
+    -- xmonad . ewmh . docks $ def
         { manageHook = myManageHook <+> manageHook def
         , layoutHook = avoidStruts . mySpacing $ layoutHook def
         , handleEventHook = handleEventHook def -- <+> docksEventHook
         , logHook = dynamicLogWithPP xmobarPP
                         { ppOutput = hPutStrLn xmproc
-                        , ppTitle = xmobarColor "darkgreen" "" . shorten 20
+                        , ppTitle = xmobarColor "green" "" . shorten 50
                         }
         , startupHook        = myStartupHook
         , modMask            = myModMask     -- Rebind Mod to the Windows key
@@ -58,10 +66,12 @@ main = do
         , terminal           = myTerminal
         } `additionalKeysP`
         [ ("<Print>", spawn "scrot -e \'mv $f ~/Pictures/Screenshots\'")
-        , ("M-u", spawn "brightnessctl set 5%-") -- decrease brightness
-        , ("M-i", spawn "brightnessctl set +5%") -- increase brightness
+        , ("M-c", spawn "scrot -s /tmp/ocr.png && tesseract /tmp/ocr.png - | xclip -selection clipboard && rm /tmp/ocr.png")
+        -- , ("M-u", spawn "brightnessctl set 5%-") -- decrease brightness
+        -- , ("M-i", spawn "brightnessctl set +5%") -- increase brightness
         -- , ("M-y", setBrightness 1) -- set to minimum brightness
         , ("M-j", spawn "amixer -q sset Master 2%-")
         , ("M-k", spawn "amixer -q sset Master 2%+")
         , ("M-m", spawn "amixer set Master toggle")
+        , ("M-q", restart "xmonad" True)
         ]

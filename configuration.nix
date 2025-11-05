@@ -18,6 +18,7 @@
   nixpkgs.config.allowUnfree = true;
 
   environment.systemPackages = with pkgs; [
+    tesseract
     insomnia
     brightnessctl
     alsa-utils
@@ -256,6 +257,7 @@
   services.xserver.xkb.variant = "altgr-intl";
   services.xserver.windowManager.xmonad = {
     enable = true;
+    enableConfiguredRecompile = true;
     config = pkgs.lib.readFile ./xmonad.hs;
     enableContribAndExtras = true;
     extraPackages = haskellPackages:[
@@ -268,16 +270,21 @@
   services.xserver.displayManager = {
     # defaultSession = "none+xmonad";
     gdm.enable = true;
-    sessionCommands = let myCustomLayout = pkgs.writeText "xkb-layout" ''
-                        ! swap Caps_Lock and Control_R
-                        remove Lock = Caps_Lock
-                        remove Control = Control_R
-                        keysym Control_R = Caps_Lock
-                        keysym Caps_Lock = Control_R
-                        add Lock = Caps_Lock
-                        add Control = Control_R
-                      '';
-                      in "${pkgs.xorg.xmodmap}/bin/xmodmap ${myCustomLayout}";
+    sessionCommands =
+      let myCustomLayout = pkgs.writeText "xkb-layout" ''
+        ! swap Caps_Lock and Control_R
+        remove Lock = Caps_Lock
+        remove Control = Control_R
+        keysym Control_R = Caps_Lock
+        keysym Caps_Lock = Control_R
+        add Lock = Caps_Lock
+        add Control = Control_R
+      '';
+      in ''
+        ${pkgs.xorg.xmodmap}/bin/xmodmap ${myCustomLayout}
+        exec >>"$HOME/.xsession.log" 2>&1
+        echo "[XSESSION] Started at $(date)"
+      '';
     # autoLogin.user = "hhefesto";
   };
   services.xserver.desktopManager.gnome.enable = true;
@@ -306,18 +313,18 @@
   location.provider = "manual";
   location.latitude = 20.59;
   location.longitude = -100.39;
-  services.redshift = {
-    enable = true;
-    brightness = {
-      # Note the string values below.
-      day = "1";
-      night = "0.4";
-    };
-    temperature = {
-      day = 5500;
-      night = 3700;
-    };
-  };
+  # services.redshift = {
+  #   enable = true;
+  #   brightness = {
+  #     # Note the string values below.
+  #     day = "1";
+  #     night = "0.4";
+  #   };
+  #   temperature = {
+  #     day = 5500;
+  #     night = 3700;
+  #   };
+  # };
 
   boot.kernelModules = [ "kvm-amd" ];
   # for virt-manager: https://nixos.wiki/wiki/Virt-manager
