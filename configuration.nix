@@ -106,6 +106,7 @@
   ];
 
   fonts.packages = with pkgs; [
+    source-code-pro
     noto-fonts-cjk-sans
     ipafont
     kochi-substitute

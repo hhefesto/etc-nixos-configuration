@@ -13,39 +13,51 @@ in {
     homeDirectory = "/home/hhefesto";
     stateVersion = "22.11";
   };
-  home.file.".doom.d/agda-mode-path.el" = {
+  home.file.".agda-mode-path.el" = {
     text = ''
       (setq agda2-mode-path "${agdaModePath}")
     '';
   };
-  home.file = {
-    ".doom.d" = {
-      source = ./doom.d;
-      recursive = true;
-    };
+  home.file.".spacemacs" = {
+    source = ./spacemacs;
   };
+  # home.file = {
+  #   ".doom.d" = {
+  #     source = ./doom.d;
+  #     recursive = true;
+  #   };
+  # };
   home.activation = {
-    installDoomEmacs = lib.hm.dag.entryAfter ["linkGeneration" "installPackages" "copyFonts" "postActivation"] ''
-      echo "Checking for existing doom emacs installation"
-      if [ ! -d "$HOME/.emacs.d/bin" ]; then
-        export PATH="${lib.makeBinPath [ pkgs.emacs pkgs.git ]}:$PATH"
-	
-        rm -rf $HOME/.emacs.d
+    installSpacemacs = lib.hm.dag.entryAfter ["linkGeneration" "installPackages" "copyFonts" "postActivation"] ''
+      ${pkgs.git}/bin/git -C "$HOME/.emacs.d" remote -v 2>/dev/null | ${pkgs.ripgrep}/bin/rg -q 'spacemacs' || {
+        if [ -e "$HOME/.emacs.d" ]; then
+	  rm -rf "$HOME/.emacs.d.bak"
+          mv "$HOME/.emacs.d" "$HOME/.emacs.d.bak"
+        fi
+        ${pkgs.git}/bin/git clone https://github.com/syl20bnr/spacemacs "$HOME/.emacs.d"
+      }
+      '';
+    # installDoomEmacs = lib.hm.dag.entryAfter ["linkGeneration" "installPackages" "copyFonts" "postActivation"] ''
+    #   echo "Checking for existing doom emacs installation"
+    #   if [ ! -d "$HOME/.emacs.d/bin" ]; then
+    #     export PATH="${lib.makeBinPath [ pkgs.emacs pkgs.git ]}:$PATH"
 
-      echo "cloning doom emacs:"
-      ${pkgs.git}/bin/git clone --depth=1 --single-branch "${doomRepoUrl}" "$HOME/.emacs.d"
+    #     rm -rf $HOME/.emacs.d
 
-      echo "installing doom emacs:"
-            ("$HOME/.emacs.d/bin/doom" install --force) 2>&1 | tee /tmp/doom-install.log || {
-              echo "Failed to install Doom Emacs. Check /tmp/doom-install.log for details"
-              echo "Last few lines of the log:"
-              tail -n 20 /tmp/doom-install.log
-              exit 1
-            }
-          fi
-        '';
+    #   echo "cloning doom emacs:"
+    #   ${pkgs.git}/bin/git clone --depth=1 --single-branch "${doomRepoUrl}" "$HOME/.emacs.d"
+
+    #   echo "installing doom emacs:"
+    #         ("$HOME/.emacs.d/bin/doom" install --force) 2>&1 | tee /tmp/doom-install.log || {
+    #           echo "Failed to install Doom Emacs. Check /tmp/doom-install.log for details"
+    #           echo "Last few lines of the log:"
+    #           tail -n 20 /tmp/doom-install.log
+    #           exit 1
+    #         }
+    #       fi
+    #     '';
   };
-  
+
   programs.zsh = {
     enable = true;
     shellAliases = {
@@ -72,7 +84,18 @@ in {
   home.sessionPath = [ "$HOME/.emacs.d/bin"
                      ];
 
-  programs.emacs.enable = true;
+  programs.emacs = {
+    enable = true;
+    extraPackages = epkgs: [
+      epkgs.spinner
+      epkgs.paradox
+      epkgs.lsp-mode
+      epkgs.lsp-ui
+      epkgs.lsp-treemacs
+      epkgs.helm-lsp
+      epkgs.origami
+    ];
+  };
 
   programs.direnv = {
     enable = true;
