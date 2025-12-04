@@ -1,7 +1,7 @@
 Config {
 
    -- appearance
-     font =         "Bitstream Vera Sans Mono 20"
+     font =         "Bitstream Vera Sans Mono 13"
    , bgColor =      "black"
    , fgColor =      "#646464"
    , position =     BottomH 50
@@ -11,8 +11,7 @@ Config {
    -- layout
    , sepChar =  "%"   -- delineator between plugin names and straight text
    , alignSep = "}{"  -- separator between left-right alignment
-   , template = "%UnsafeStdinReader% || %multicpu% }{ %multicoretemp% || %dynnetwork% || %memory% | %swap% || %date% "
-
+   , template = "%StdinReader% || %multicpu% }{ %multicoretemp% || %dynnetwork% || %memory% | %swap% || %date% || %battery% "
    -- general behavior
    , lowerOnStart =     True    -- send to bottom of window stack on start
    , hideOnStart =      False   -- start with window unmapped (hidden)
@@ -46,7 +45,7 @@ Config {
                              ] 10
 
         -- cpu activity monitor
-        , Run MultiCpu       [ "--template" , "Cpu: <total0>%|<total1>%|<total2>%|<total3>|<total4>%|<total5>%|<total6>|<total7>%|<total8>%|<total9>|<total10>%|<total11>%|<total12>|<total13>%|<total14>%|<total15>%"
+        , Run MultiCpu       [ "--template" , "Cpu: <total0>%|<total1>%|<total2>%|<total3>|<total4>%|<total5>%|<total6>|<total7>%"
                              , "--Low"      , "50"         -- units: %
                              , "--High"     , "85"         -- units: %
                              , "--low"      , "darkgreen"
@@ -80,21 +79,21 @@ Config {
         -- swap monitor
         , Run Swap           [] 10
         -- battery monitor
-        -- , Run Battery        [ "--template" , "Batt: <acstatus>"
-        --                      , "--Low"      , "10"        -- units: %
-        --                      , "--High"     , "80"        -- units: %
-        --                      , "--low"      , "darkred"
-        --                      , "--normal"   , "darkorange"
-        --                      , "--high"     , "darkgreen"
-        --
-        --                      , "--" -- battery specific options
-        --                                -- discharging status
-        --                                , "-o"	, "<left>% (<timeleft>)"
-        --                                -- AC "on" status
-        --                                , "-O"	, "<fc=#dAA520>Charging</fc>"
-        --                                -- charged status
-        --                                , "-i"	, "<fc=#006000>Charged</fc>"
-        --                      ] 50
+        , Run Battery        [ "--template" , "Batt: <acstatus>"
+                             , "--Low"      , "10"        -- units: %
+                             , "--High"     , "80"        -- units: %
+                             , "--low"      , "darkred"
+                             , "--normal"   , "darkorange"
+                             , "--high"     , "darkgreen"
+
+                             , "--" -- battery specific options
+                                       -- discharging status
+                                       , "-o"	, "<left>% (<timeleft>)"
+                                       -- AC "on" status
+                                       , "-O"	, "<fc=#dAA520>Charging</fc>"
+                                       -- charged status
+                                       , "-i"	, "<fc=#006000>Charged</fc>"
+                             ] 50
 
         -- time and date indicator
         --   (%F = y-m-d date, %a = day of week, %T = h:m:s time)
@@ -104,6 +103,6 @@ Config {
         , Run Kbd            [ ("us(dvorak)" , "<fc=#00008B>DV</fc>")
                              , ("us"         , "<fc=#8B0000>US</fc>")
                              ]
-        , Run UnsafeStdinReader
+        , Run StdinReader
         ]
    }

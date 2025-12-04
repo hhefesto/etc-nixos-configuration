@@ -1,6 +1,6 @@
 (setq user-full-name "Daniel Herrera Rendón")
 (setq user-mail-address "daniel.herrera.rendon@gmail.com")
-(setq doom-font (font-spec :family "Hack" :size 32)) ;; desktop
+(setq doom-font (font-spec :family "Hack" :size 24))
 (setq doom-theme 'gruber-darker)
 (setq org-directory "~/org/")
 (setq display-line-numbers-type t)

@@ -4,61 +4,59 @@ let
   doomRevision = "master";  # or specific commit hash
   agdaModePath = import ./get-agda-mode-path.nix { inherit myAgda pkgs; };
 in {
+  home.sessionVariables = {
+    # Change this timestamp to force a rebuild
+    LAST_REBUILD = "2025-03-13";
+  };
   home = {
-    username = "hhefesto";
-    homeDirectory = "/home/hhefesto";
+    username = "moper";
+    homeDirectory = "/home/moper";
     stateVersion = "22.11";
   };
-  home.file.".agda-mode-path.el" = {
+  home.file.".doom.d/agda-mode-path.el" = {
     text = ''
       (setq agda2-mode-path "${agdaModePath}")
     '';
   };
-  home.file.".spacemacs" = {
-    source = ./spacemacs;
+  home.file = {
+    ".doom.d" = {
+      source = ./doom.d;
+      recursive = true;
+    };
   };
-  # home.file = {
-  #   ".doom.d" = {
-  #     source = ./doom.d;
-  #     recursive = true;
-  #   };
-  # };
   home.activation = {
-    installSpacemacs = lib.hm.dag.entryAfter ["linkGeneration" "installPackages" "copyFonts" "postActivation"] ''
-      ${pkgs.git}/bin/git -C "$HOME/.emacs.d" remote -v 2>/dev/null | ${pkgs.ripgrep}/bin/rg -q 'spacemacs' || {
-        if [ -e "$HOME/.emacs.d" ]; then
-	  rm -rf "$HOME/.emacs.d.bak"
-          mv "$HOME/.emacs.d" "$HOME/.emacs.d.bak"
-        fi
-        ${pkgs.git}/bin/git clone https://github.com/syl20bnr/spacemacs "$HOME/.emacs.d"
-      }
-      '';
-    # installDoomEmacs = lib.hm.dag.entryAfter ["linkGeneration" "installPackages" "copyFonts" "postActivation"] ''
-    #   echo "Checking for existing doom emacs installation"
-    #   if [ ! -d "$HOME/.emacs.d/bin" ]; then
-    #     export PATH="${lib.makeBinPath [ pkgs.emacs pkgs.git ]}:$PATH"
+    installDoomEmacs = lib.hm.dag.entryAfter ["linkGeneration" "installPackages" "copyFonts" "postActivation"] ''
+      echo "Checking for existing doom emacs installation"
+      if [ ! -d "$HOME/.emacs.d/bin" ]; then
+        export PATH="${lib.makeBinPath [ pkgs.emacs pkgs.git ]}:$PATH"
+	
+        rm -rf $HOME/.emacs.d
 
-    #     rm -rf $HOME/.emacs.d
+      echo "cloning doom emacs:"
+      ${pkgs.git}/bin/git clone --depth=1 --single-branch "${doomRepoUrl}" "$HOME/.emacs.d"
 
-    #   echo "cloning doom emacs:"
-    #   ${pkgs.git}/bin/git clone --depth=1 --single-branch "${doomRepoUrl}" "$HOME/.emacs.d"
-
-    #   echo "installing doom emacs:"
-    #         ("$HOME/.emacs.d/bin/doom" install --force) 2>&1 | tee /tmp/doom-install.log || {
-    #           echo "Failed to install Doom Emacs. Check /tmp/doom-install.log for details"
-    #           echo "Last few lines of the log:"
-    #           tail -n 20 /tmp/doom-install.log
-    #           exit 1
-    #         }
-    #       fi
-    #     '';
+      echo "installing doom emacs:"
+            ("$HOME/.emacs.d/bin/doom" install --force) 2>&1 | tee /tmp/doom-install.log || {
+              echo "Failed to install Doom Emacs. Check /tmp/doom-install.log for details"
+              echo "Last few lines of the log:"
+              tail -n 20 /tmp/doom-install.log
+              exit 1
+            }
+          fi
+        '';
   };
-
+  
   programs.zsh = {
     enable = true;
     shellAliases = {
       cat = "bat";
       _cat = "cat";
+      crun = "cabal new-run";
+      ct = "cabal new-test";
+      cr = "cabal new-repl";
+      cb = "cabal new-build";
+      tr = "cd ~/src/telomare && cabal new-run telomare-mini-repl -- --haskell";
+      telomare-repl = "cd ~/src/telomare && cabal new-run telomare-mini-repl -- --haskell";
       gs = "git status";
       ga = "git add -A";
       gd = "git diff";
@@ -68,11 +66,11 @@ in {
       sendmail = "/run/current-system/sw/bin/msmtp --debug --from=default --file=/etc/msmtp/laurus -t";
       xclip = "xclip -selection c";
       please = "sudo";
-      n = "nix -Lv";
-      nd = "nix -Lv develop -c zsh";
+      n = "nix-shell shell.nix";
       sn = "sudo nixos-rebuild -v switch";
       gr = "grep -R --exclude='TAGS' --exclude-dir={.stack-work,dist-newstyle,result,result-2} -n";
       where = "pwd";
+      nd = "nix develop";
     };
   };
 
@@ -80,18 +78,7 @@ in {
   home.sessionPath = [ "$HOME/.emacs.d/bin"
                      ];
 
-  programs.emacs = {
-    enable = true;
-    extraPackages = epkgs: [
-      epkgs.spinner
-      epkgs.paradox
-      epkgs.lsp-mode
-      epkgs.lsp-ui
-      epkgs.lsp-treemacs
-      epkgs.helm-lsp
-      epkgs.origami
-    ];
-  };
+  programs.emacs.enable = true;
 
   programs.direnv = {
     enable = true;
@@ -101,8 +88,8 @@ in {
 
   programs.git = {
     enable = true;
-    userEmail = "hhefesto@rdataa.com";
-    userName = "hhefesto";
+    userEmail = "mopertico@rdataa.com";
+    userName = "moper";
 
     extraConfig = {
       core = {

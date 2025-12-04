@@ -13,14 +13,17 @@ import           XMonad.Layout.Spacing
 import           XMonad.Util.EZConfig             (additionalKeysP)
 import           XMonad.Util.Run                  (spawnPipe)
 import           XMonad.Util.SpawnOnce            (spawnOnce)
+import qualified Debug.Trace as Debug (trace)
 
 myStartupHook :: X ()
 myStartupHook = do
   spawnOnce "nautilus"
   spawnOnce "brave"
   spawnOnce "feh --bg-scale ~/Pictures/wallpaper.png &"
+  spawnOnce "brave"
   spawnOnce "gnome-terminal"
   spawnOnce "emacs"
+  spawnOnce "nautilus"
   spawnOnce "signal-desktop"
   spawnOnce "env XDG_CURRENT_DESKTOP=GNOME gnome-control-center"
 
@@ -37,6 +40,7 @@ myManageHook = composeAll
    [ className =? "Emacs" --> doShift "1"
    , className =? "brave-browser" --> doShift "2"
    , className =? "Org.gnome.Nautilus" --> doShift "3"
+   , className =? "Emacs" --> doShift "1"
    , className =? "Gnome-control-center" --> doShift "4"
    , className =? "Signal" --> doShift "6"
    , manageDocks
@@ -75,3 +79,4 @@ main = do
         , ("M-m", spawn "amixer set Master toggle")
         , ("M-q", restart "xmonad" True)
         ]
+

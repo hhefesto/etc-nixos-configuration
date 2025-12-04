@@ -10,17 +10,26 @@
 
   boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 
-  networking.hostName = "olimpo"; # Define your hostname.
+  # TODO: put in its own module
+  networking.hostName = "delfos";
   networking.enableIPv6 = false;
 
   time.timeZone = "America/Mexico_City";
 
   nixpkgs.config.allowUnfree = true;
+  # nixpkgs.overlays = [
+  #   (self: super: {
+  #     # bash = (super.bash.override { withManpages = false; });
+  #     bash = super.bash.overrideAttrs (oldAttrs: {
+  #       version = "5.2p26"; # Try an earlier patch version
+  #       # You may need to adjust the source URL and hash accordingly
+  #     });
+  #   })
+  # ];
 
   environment.systemPackages = with pkgs; [
-    tesseract
-    insomnia
     brightnessctl
+    tesseract
     alsa-utils
     kvmtool
     kdePackages.kdenlive
@@ -121,20 +130,15 @@
     "ja_JP.UTF-8/UTF-8"
   ];
 
-  systemd.extraConfig = ''
-    DefaultTimeoutStartSec=20m
-    DefaultTimeoutStopSec=20m
-    DefaultTimeoutAbortSec=20m
-  '';
-  systemd.user.services.home-manager-hhefesto = {
-    serviceConfig = {
-      TimeoutStartSec = "20m";
-      TimeoutStopSec = "20m";
-      Nice = 19;
-      IOSchedulingClass = "idle";
-      IOSchedulingPriority = 7;
-    };
-  };
+  # systemd.user.services.home-manager-hhefesto = {
+  #   serviceConfig = {
+  #     TimeoutStartSec = "20m";
+  #     TimeoutStopSec = "20m";
+  #     Nice = 19;
+  #     IOSchedulingClass = "idle";
+  #     IOSchedulingPriority = 7;
+  #   };
+  # };
 
   # Set Brave as default browser system-wide
   xdg.mime.defaultApplications = {
@@ -174,29 +178,6 @@
     ohMyZsh.plugins = ["git" "sudo" "colorize" "extract" "history" "postgres"];
     ohMyZsh.theme = "intheloop";
 
-    shellInit = ''
-      # ssh
-      # export SSH_KEY_PATH="~/.ssh/dsa_id"
-      export SSH_AUTH_SOCK=~/.ssh/ssh-agent.$HOSTNAME.sock
-
-      # Verify if ssh-agent is running
-      ssh-add -l 2>/dev/null >/dev/null
-
-      # if it was running, ssh-add will use it and return 1 (no keys)
-      # if it was not running, it will return 2, so we proceed to execute the ssh-agent
-      # and tell it where to create the Unix  socket (SSH_AUTH_SOCK):
-
-      if [ $? -ge 2 ]; then
-         ssh-agent -a "$SSH_AUTH_SOCK" >/dev/null
-      fi
-
-      ssh-add ~/.ssh/xpsoasis-ed25519
-      ssh-add ~/.ssh/tt-test
-      ssh-add ~/.ssh/ed25519-rumble-tt-ra
-      ssh-add ~/.ssh/id_ed25519
-      ssh-add ~/.ssh/github-runner-key
-    '';
-
     interactiveShellInit = ''
       save_aliases=$(alias -L)
       eval $save_aliases; unset save_aliases
@@ -214,16 +195,6 @@
 
   # Enable CUPS to print documents.
   # services.printing.enable = true;
-
-  # Enable sound.
-  # sound.enable = true;
-  # services.pulseaudio = {
-  #     # enable = true;
-  #     enable = false;
-  #     # package = pkgs.pulseaudioFull;
-  #     # support32Bit = true;
-  #     # extraModules = [ pkgs.pulseaudio-modules-bt ];
-  # };
 
   hardware.bluetooth.enable = true;
 
@@ -258,9 +229,8 @@
   services.xserver.xkb.variant = "altgr-intl";
   services.xserver.windowManager.xmonad = {
     enable = true;
-    enableConfiguredRecompile = true;
     config = pkgs.lib.readFile ./xmonad.hs;
-    enableContribAndExtras = true;
+    # enableContribAndExtras = true;
     extraPackages = haskellPackages:[
       haskellPackages.xmonad-contrib
       haskellPackages.xmonad-extras
@@ -283,9 +253,8 @@
       '';
       in ''
         ${pkgs.xorg.xmodmap}/bin/xmodmap ${myCustomLayout}
-        exec >>"$HOME/.xsession.log" 2>&1
-        echo "[XSESSION] Started at $(date)"
       '';
+
     # autoLogin.user = "hhefesto";
   };
   services.xserver.desktopManager.gnome.enable = true;
@@ -366,7 +335,18 @@
     openssh.authorizedKeys.keys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJcDIsto/6GS7XwTl+uVo4ABeRlRjDwAU0HHy8irqLaB hhefesto@olimpo" ];
     shell = pkgs.zsh; #"/run/current-system/sw/bin/bash";
   };
+  users.extraUsers.moper = {
+    createHome = true;
+    isNormalUser = true;
+    home = "/home/moper";
+    description = "Oswaldo";
+    extraGroups = [ "video" "wheel" "networkmanager" "docker" "libvirtd" ];
+    hashedPassword = "$6$61SFKMZLJxncDvqK$J/U1oNhjgtsr8Wv8vv9VdqWlmcP2f6eP5SBgN5UoJVRf2Hfpp5CIYcyZiAcC7etbu0j21zuAvE5q2S27GkPJ/1";
+    openssh.authorizedKeys.keys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJcDIsto/6GS7XwTl+uVo4ABeRlRjDwAU0HHy8irqLaB hhefesto@olimpo" ];
+    shell = pkgs.zsh; #"/run/current-system/sw/bin/bash";
+  };
 
+  # nix.package = inputs.nix.packages.x86_64-linux.default;
   nix.settings.auto-optimise-store = true;
   nix.settings.allow-import-from-derivation = true;
 
@@ -376,9 +356,10 @@
     options = "--delete-older-than 7d";
   };
 
+  # experimental-features = nix-command flakes
   # For nix flakes
-  # nix.package = inputs.nix.packages.x86_64-linux.default;
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
   nix.extraOptions = ''
     keep-outputs = true
     keep-derivations = true
@@ -404,9 +385,10 @@
                                 "https://cache.iog.io"
                               ];
 
-  nix.settings.allowed-users = [ "@wheel" "hhefesto" ];
+  nix.settings.allowed-users = [ "@wheel" "hhefesto" "moper" ];
 
-  nix.settings.trusted-users = [ "hhefesto" ];
+  nix.settings.trusted-users = [ "root" "hhefesto" ];
+
 
   # This value determines the NixOS release with which your system is to be
   # compatible, in order to avoid breaking some software such as database
