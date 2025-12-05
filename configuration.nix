@@ -47,7 +47,7 @@
     parallel
     pywal
     direnv
-    nix-direnv-flakes
+    nix-direnv
     ripgrep
     sox
     zoom-us

@@ -7,14 +7,13 @@
   # inputs.nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/*";
   inputs.home-manager.url = "github:nix-community/home-manager";
   inputs.home-manager.inputs.nixpkgs.follows = "nixpkgs";
-  inputs.tontine-system.url = "git+ssh://git@github.com/TontineTrust/raDeploy.git";
   inputs.agenix = {
     url = "github:ryantm/agenix";
     inputs.nixpkgs.follows = "nixpkgs";
   };
 
 
-  outputs = inputs@{ self, determinate, nixpkgs, home-manager, tontine-system, ... }:
+  outputs = inputs@{ self, determinate, nixpkgs, home-manager, ... }:
   let
     system = "x86_64-linux";
     pkgs = nixpkgs.legacyPackages.${system};
