@@ -599,18 +599,30 @@ before packages are loaded."
                     (cons '("\\.hs\\'" . haskell-mode)
                           (assq-delete-all "\\.hs\\'" auto-mode-alist)))))
 
-  (load "~/src/telomare/emacs-telomare-mode/telomare-mode-spacemacs.el")
+  ;; Load telomare mode if it exists
+  (let ((telomare-file "~/src/telomare/emacs-telomare-mode/telomare-mode-spacemacs.el"))
+    (if (file-exists-p telomare-file)
+        (load telomare-file)
+      (message "Telomare mode file not found: %s" telomare-file)))
 
   ;; 1) Bring agda2-mode-path (coming from Home Manager) into scope:
-  (load "~/.agda-mode-path.el")
+  (load "~/.agda-mode-path.el" t)
   (add-to-list 'load-path agda2-mode-path)
-  ;; or (load "~/.spacemacs.agda-mode-path.el") if you chose that variant
 
-  ;; 2) Load agda2-mode from that path
-  (use-package agda2-mode
-    :mode ("\\.agda\\'" . agda2-mode)
-    :config
-    (setq agda2-program-name "agda")))
+  (if (not (boundp 'agda2-mode-path))
+      (message "Warning: agda2-mode-path not defined, skipping Agda configuration")
+    ;; Variable exists, proceed
+    (add-to-list 'load-path agda2-mode-path)
+
+    (use-package agda2  ; Changed from agda2-mode to agda2
+      :mode ("\\.agda\\'" . agda2-mode)
+      :config
+      (setq agda2-program-name "agda")))
+  ;; (use-package agda2-mode
+  ;;   :mode ("\\.agda\\'" . agda2-mode)
+  ;;   :config
+  ;;   (setq agda2-program-name "agda"))
+  )
 
 
 ;; Do not write anything past this comment. This is where Emacs will

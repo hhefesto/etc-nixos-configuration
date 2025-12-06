@@ -69,7 +69,7 @@ in {
       please = "sudo";
       n = "nix -Lv";
       nd = "nix -Lv develop -c zsh";
-      sn = "sudo nixos-rebuild -v switch --flake /home/hhefesto/etc-nixos-configuration";
+      sn = "sudo nixos-rebuild -v switch --flake /home/hhefesto/src/etc-nixos-configuration";
       gr = "grep -R --exclude='TAGS' --exclude-dir={.stack-work,dist-newstyle,result,result-2} -n";
       where = "pwd";
     };
