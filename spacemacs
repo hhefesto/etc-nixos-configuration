@@ -43,9 +43,6 @@ This function should only modify configuration layer settings."
      ;; markdown
      multiple-cursors
      org
-     ;; (shell :variables
-     ;;        shell-default-height 30
-     ;;        shell-default-position 'bottom)
      shell-scripts
      spell-checking
      syntax-checking
@@ -572,6 +569,12 @@ This function is called at the very end of Spacemacs startup, after layer
 configuration.
 Put your configuration code here, except for variables that should be set
 before packages are loaded."
+  (setq lsp-log-io t)  ; Log all LSP communication
+  (setq lsp-print-performance t)
+  (setq lsp-print-io t)
+  (setq lsp-trace t)  ; Set to 'messages' or 'verbose'
+  ;; (setq lsp-response-timeout 10)  ; Increase timeout
+
   (use-package direnv
     :ensure t
     :config
@@ -582,22 +585,22 @@ before packages are loaded."
     ;; Optional: add custom keybinding for holy-mode
     (global-set-key (kbd "C-c d") 'direnv-update-environment))
   ;; Remove git-lsp associations for .hs files if they exist
-  (setq auto-mode-alist
-        (seq-remove (lambda (pair)
-                      (and (string-match "\\.hs\\'" (car pair))
-                           (not (eq (cdr pair) 'haskell-mode))))
-                    auto-mode-alist))
-  ;; Force haskell-mode for .hs files
-  (require 'haskell-mode)
-  (add-to-list 'auto-mode-alist '("\\.hs\\'" . haskell-mode))
-  (add-to-list 'auto-mode-alist '("\\.lhs\\'" . literate-haskell-mode))
-  (add-to-list 'auto-mode-alist '("\\.cabal\\'" . haskell-cabal-mode))
-  (add-to-list 'auto-mode-alist '("\\.hsc\\'" . haskell-mode))
-  (add-hook 'after-init-hook
-            (lambda ()
-              (setq auto-mode-alist
-                    (cons '("\\.hs\\'" . haskell-mode)
-                          (assq-delete-all "\\.hs\\'" auto-mode-alist)))))
+  ;; (setq auto-mode-alist
+  ;;       (seq-remove (lambda (pair)
+  ;;                     (and (string-match "\\.hs\\'" (car pair))
+  ;;                          (not (eq (cdr pair) 'haskell-mode))))
+  ;;                   auto-mode-alist))
+  ;; ;; Force haskell-mode for .hs files
+  ;; (require 'haskell-mode)
+  ;; (add-to-list 'auto-mode-alist '("\\.hs\\'" . haskell-mode))
+  ;; (add-to-list 'auto-mode-alist '("\\.lhs\\'" . literate-haskell-mode))
+  ;; (add-to-list 'auto-mode-alist '("\\.cabal\\'" . haskell-cabal-mode))
+  ;; (add-to-list 'auto-mode-alist '("\\.hsc\\'" . haskell-mode))
+  ;; (add-hook 'after-init-hook
+  ;;           (lambda ()
+  ;;             (setq auto-mode-alist
+  ;;                   (cons '("\\.hs\\'" . haskell-mode)
+  ;;                         (assq-delete-all "\\.hs\\'" auto-mode-alist)))))
 
   (load "~/src/telomare/emacs-telomare-mode/telomare-mode-spacemacs.el")
 

@@ -18,6 +18,7 @@
   nixpkgs.config.allowUnfree = true;
 
   environment.systemPackages = with pkgs; [
+    localsend
     tesseract
     insomnia
     brightnessctl
@@ -207,8 +208,8 @@
   };
 
   # Open ports in the firewall.
-  networking.firewall.allowedTCPPorts = [ 3000 5432 587 5938 ];
-  networking.firewall.allowedUDPPorts = [ 5938 ];
+  networking.firewall.allowedTCPPorts = [ 3000 5432 587 5938 53317 ];
+  networking.firewall.allowedUDPPorts = [ 5938 53317 ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
 
@@ -386,20 +387,17 @@
     allow-import-from-derivation = true
   '';
 
-  nix.settings.trusted-public-keys = [ "tontinetrust-roboactuary.cachix.org-1:V23wn6i7/4OLXjsZBuMxzgb6sQMixTG3tNO1nOYeRDo="
-                                       "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
+  nix.settings.trusted-public-keys = [ "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
                                        "telomare.cachix.org-1:H0qRjVstxtb9oyEPvDDpmPSLyJ9oViAsTgwR02ra6Dk="
                                        "ryantrinkle.com-1:JJiAKaRv9mWgpVAz8dwewnZe0AzzEAzPkagE9SP5NWI="
                                      ];
 
-  nix.settings.trusted-substituters = [ "https://tontinetrust-roboactuary.cachix.org"
-                                        "https://nixcache.reflex-frp.org"
+  nix.settings.trusted-substituters = [ "https://nixcache.reflex-frp.org"
                                         "https://cache.iog.io"
                                         "https://telomare.cachix.org"
                                       ];
 
-  nix.settings.substituters = [ "https://tontinetrust-roboactuary.cachix.org"
-                                "https://telomare.cachix.org"
+  nix.settings.substituters = [ "https://telomare.cachix.org"
                                 "https://nixcache.reflex-frp.org"
                                 "https://cache.iog.io"
                               ];
