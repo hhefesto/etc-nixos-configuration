@@ -18,6 +18,7 @@
   nixpkgs.config.allowUnfree = true;
 
   environment.systemPackages = with pkgs; [
+    claude-code
     localsend
     tesseract
     insomnia
@@ -39,7 +40,7 @@
     parallel
     pywal
     direnv
-    nix-direnv-flakes
+    nix-direnv
     ripgrep
     sox
     zoom-us
@@ -122,11 +123,11 @@
     "ja_JP.UTF-8/UTF-8"
   ];
 
-  systemd.extraConfig = ''
-    DefaultTimeoutStartSec=20m
-    DefaultTimeoutStopSec=20m
-    DefaultTimeoutAbortSec=20m
-  '';
+  # systemd.extraConfig = ''
+  #   DefaultTimeoutStartSec=20m
+  #   DefaultTimeoutStopSec=20m
+  #   DefaultTimeoutAbortSec=20m
+  # '';
   systemd.user.services.home-manager-hhefesto = {
     serviceConfig = {
       TimeoutStartSec = "20m";
@@ -177,25 +178,18 @@
 
     shellInit = ''
       # ssh
-      # export SSH_KEY_PATH="~/.ssh/dsa_id"
-      export SSH_AUTH_SOCK=~/.ssh/ssh-agent.$HOSTNAME.sock
-
-      # Verify if ssh-agent is running
-      ssh-add -l 2>/dev/null >/dev/null
 
       # if it was running, ssh-add will use it and return 1 (no keys)
       # if it was not running, it will return 2, so we proceed to execute the ssh-agent
       # and tell it where to create the Unix  socket (SSH_AUTH_SOCK):
 
-      if [ $? -ge 2 ]; then
-         ssh-agent -a "$SSH_AUTH_SOCK" >/dev/null
+      ssh-add -l >/dev/null 2>&1
+      if [ $? -eq 2 ]; then
+        eval "$(ssh-agent -s)"
       fi
 
       ssh-add ~/.ssh/xpsoasis-ed25519
-      ssh-add ~/.ssh/tt-test
-      ssh-add ~/.ssh/ed25519-rumble-tt-ra
       ssh-add ~/.ssh/id_ed25519
-      ssh-add ~/.ssh/github-runner-key
     '';
 
     interactiveShellInit = ''

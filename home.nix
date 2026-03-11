@@ -2,7 +2,9 @@
 let
   # doomRepoUrl = "https://github.com/doomemacs/doomemacs";
   # doomRevision = "master";  # or specific commit hash
-  agdaModePath = import ./get-agda-mode-path.nix { inherit myAgda pkgs; };
+  agdaModePath = pkgs.lib.readFile (pkgs.runCommand "agda-mode-location" {} ''
+    dirname "$(${myAgda}/bin/agda-mode locate)" | tr -d '\n' > $out
+  '');
 in {
   # home.sessionVariables = {
   #   # Change this timestamp to force a rebuild
