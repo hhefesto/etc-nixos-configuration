@@ -10,9 +10,10 @@
     url = "github:ryantm/agenix";
     inputs.nixpkgs.follows = "nixpkgs";
   };
+  inputs.claude-code-nix.url = "github:sadjow/claude-code-nix";
 
 
-  outputs = inputs@{ self, determinate, nixpkgs, home-manager, tontine-system, ... }:
+  outputs = inputs@{ self, determinate, nixpkgs, home-manager, tontine-system, claude-code-nix, ... }:
   let
     system = "x86_64-linux";
     pkgs = nixpkgs.legacyPackages.${system};
@@ -30,6 +31,9 @@
                     home-manager.users.hhefesto = import ./home.nix;
                     home-manager.extraSpecialArgs = { inherit myAgda; };
                   }
+                  {
+                    nixpkgs.overlays = [ claude-code-nix.overlays.default ];
+                  }
                 ];
       specialArgs = { inherit inputs myAgda; };
     };
@@ -45,6 +49,9 @@
           home-manager.useUserPackages = true;
           home-manager.users.hhefesto = import ./home.nix;
           home-manager.extraSpecialArgs = { inherit myAgda; };
+        }
+        {
+          nixpkgs.overlays = [ claude-code-nix.overlays.default ];
         }
 
         # Add server services from tontine-system

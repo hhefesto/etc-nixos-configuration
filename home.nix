@@ -71,12 +71,11 @@ in {
       gc = "git commit -am";
       gcs = "git commit -am \"squash\"";
       gbs = "git --no-pager branch --sort -committerdate";
-      sendmail = "/run/current-system/sw/bin/msmtp --debug --from=default --file=/etc/msmtp/laurus -t";
       xclip = "xclip -selection c";
       please = "sudo";
       n = "nix -Lv";
       nd = "nix -Lv develop -c zsh";
-      sn = "sudo nixos-rebuild -v switch";
+      sn = "sudo nixos-rebuild -v switch --flake ~/src/etc-nixos-configuration";
       gr = "grep -R --exclude='TAGS' --exclude-dir={.stack-work,dist-newstyle,result,result-2} -n";
       where = "pwd";
     };

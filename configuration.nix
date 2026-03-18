@@ -55,6 +55,7 @@
     emacs-all-the-icons-fonts
     tmux
     curl
+    gh
     gist
     git
     lambda-mod-zsh-theme
@@ -385,16 +386,19 @@
   nix.settings.trusted-public-keys = [ "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
                                        "telomare.cachix.org-1:H0qRjVstxtb9oyEPvDDpmPSLyJ9oViAsTgwR02ra6Dk="
                                        "ryantrinkle.com-1:JJiAKaRv9mWgpVAz8dwewnZe0AzzEAzPkagE9SP5NWI="
+                                       "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
                                      ];
 
   nix.settings.trusted-substituters = [ "https://nixcache.reflex-frp.org"
                                         "https://cache.iog.io"
                                         "https://telomare.cachix.org"
+                                        "https://claude-code.cachix.org"
                                       ];
 
   nix.settings.substituters = [ "https://telomare.cachix.org"
                                 "https://nixcache.reflex-frp.org"
                                 "https://cache.iog.io"
+                                "https://claude-code.cachix.org"
                               ];
 
   nix.settings.allowed-users = [ "@wheel" "hhefesto" ];
