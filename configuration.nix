@@ -18,6 +18,7 @@
   nixpkgs.config.allowUnfree = true;
 
   environment.systemPackages = with pkgs; [
+    opencode
     claude-code
     localsend
     tesseract
