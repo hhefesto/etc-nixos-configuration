@@ -33,7 +33,8 @@ This function should only modify configuration layer settings."
 
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(nixos
+   '(yaml
+     nixos
      auto-completion
      better-defaults
      emacs-lisp
@@ -604,16 +605,43 @@ before packages are loaded."
 
   (load "~/src/telomare/emacs-telomare-mode/telomare-mode-spacemacs.el")
 
-  ;; 1) Bring agda2-mode-path (coming from Home Manager) into scope:
-  (load "~/.agda-mode-path.el")
-  (add-to-list 'load-path agda2-mode-path)
-  ;; or (load "~/.spacemacs.agda-mode-path.el") if you chose that variant
+  (defun my/maybe-activate-agda-mode ()
+    "Activate agda2-mode for Agda files using the project's direnv environment.
+Deferred via idle-timer. Derives the agda2.el path directly from the
+agda-mode binary path to avoid shell-command-to-string timing issues."
+    (when (and (buffer-file-name)
+               (string-match-p "\\.l?agda\\(?:\\.md\\)?\\'" (buffer-file-name))
+               (not (eq major-mode 'agda2-mode)))
+      (let ((buf (current-buffer)))
+        (run-with-idle-timer
+         0 nil         (lambda ()
+                         (when (buffer-live-p buf)
+                           (with-current-buffer buf
+                             (ignore-errors (direnv-update-directory-environment default-directory))
+                             (when (not (eq major-mode 'agda2-mode))
+                               (let* ((agda-mode-bin (executable-find "agda-mode"))
+                                      (agda2-el (when agda-mode-bin
+                                                  (car (last
+                                                        (seq-filter
+                                                         (lambda (l) (string-suffix-p ".el" l))
+                                                         (split-string
+                                                          (shell-command-to-string
+                                                           (concat agda-mode-bin " locate"))
+                                                          "\n" t)))))))
+                                 (if (and agda2-el (file-exists-p agda2-el))
+                                     (progn
+                                       (add-to-list 'load-path (file-name-directory agda2-el))
+                                       (unless (featurep 'agda2-mode)
+                                         (load-file agda2-el))
+                                       (agda2-mode)
+                                       (let ((stdlib (getenv "AGDA_STDLIB")))
+                                         (when stdlib
+                                           (setq-local agda2-program-args
+                                                       (list "-i" stdlib)))))
+                                   (message "agda2-mode: locate failed (bin=%s locate=%s)"
+                                            agda-mode-bin agda2-el)))))))))))
 
-  ;; 2) Load agda2-mode from that path
-  (use-package agda2-mode
-    :mode ("\\.agda\\'" . agda2-mode)
-    :config
-    (setq agda2-program-name "agda")))
+  (add-hook 'find-file-hook #'my/maybe-activate-agda-mode))
 
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -658,7 +686,7 @@ This function is called at the very end of Spacemacs initialization."
          toc-org transient treemacs-icons-dired treemacs-magit treemacs-persp
          treemacs-projectile treepy undo-fu-session uuidgen vi-tilde-fringe
          volatile-highlights wgrep winum with-editor writeroom-mode ws-butler yaml
-         yasnippet yasnippet-snippets)))
+         yaml-mode yasnippet yasnippet-snippets)))
   (custom-set-faces
    ;; custom-set-faces was added by Custom.
    ;; If you edit it by hand, you could mess it up, so be careful.

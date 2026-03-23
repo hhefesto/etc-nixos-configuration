@@ -10,13 +10,16 @@
     inputs.nixpkgs.follows = "nixpkgs";
   };
   inputs.claude-code-nix.url = "github:sadjow/claude-code-nix";
+  inputs.spacemacs = {
+    url = "github:syl20bnr/spacemacs";
+    flake = false;
+  };
 
 
   outputs = inputs@{ self, determinate, nixpkgs, home-manager, claude-code-nix, ... }:
   let
     system = "x86_64-linux";
     pkgs = nixpkgs.legacyPackages.${system};
-    myAgda = pkgs.agda.withPackages (p: [ p.standard-library p.agda-categories ]);
   in {
     nixosConfigurations.olimpo = nixpkgs.lib.nixosSystem {
       inherit system;
@@ -27,13 +30,13 @@
                     home-manager.useGlobalPkgs = true;
                     home-manager.useUserPackages = true;
                     home-manager.users.hhefesto = import ./home.nix;
-                    home-manager.extraSpecialArgs = { inherit myAgda; };
+                    home-manager.extraSpecialArgs = { spacemacs = inputs.spacemacs; };
                   }
                   {
                     nixpkgs.overlays = [ claude-code-nix.overlays.default ];
                   }
                 ];
-      specialArgs = { inherit inputs myAgda; };
+      specialArgs = { inherit inputs; };
     };
 
   };

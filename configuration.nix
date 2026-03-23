@@ -1,4 +1,4 @@
-{ config, pkgs, lib, modulesPath, inputs, myAgda, ... }:
+{ config, pkgs, lib, modulesPath, inputs, ... }:
 {
   imports =
     [ # Include the results of the hardware scan.
@@ -22,12 +22,12 @@
     claude-code
     localsend
     tesseract
+    poppler-utils
     insomnia
     brightnessctl
     alsa-utils
     kvmtool
     kdePackages.kdenlive
-    myAgda
     brave
     sd
     fd
