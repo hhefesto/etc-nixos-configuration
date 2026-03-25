@@ -1,17 +1,12 @@
-{ config, pkgs, lib, modulesPath, inputs, myAgda, ... }:
+{ config, pkgs, lib, modulesPath, inputs, xmonadShortenLength ? 50, ... }:
 {
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-    ];
+  # Hardware configuration and hostname are in per-machine modules (delfos.nix / olimpo.nix)
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
   boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 
-  # TODO: put in its own module
-  networking.hostName = "delfos";
   networking.enableIPv6 = false;
 
   time.timeZone = "America/Mexico_City";
@@ -21,14 +16,14 @@
   environment.systemPackages = with pkgs; [
     opencode
     claude-code
-    emacsPackages.claude-code
-    xev
-    brightnessctl
+    localsend
     tesseract
+    poppler-utils
+    insomnia
+    brightnessctl
     alsa-utils
     kvmtool
     kdePackages.kdenlive
-    myAgda
     brave
     sd
     fd
@@ -56,6 +51,7 @@
     emacs-all-the-icons-fonts
     tmux
     curl
+    gh
     gist
     git
     lambda-mod-zsh-theme
@@ -70,7 +66,7 @@
     st
     haskellPackages.xmobar
     ranger
-    # obs-studio
+    obs-studio
     qbittorrent
     libreoffice
     vlc
@@ -125,15 +121,20 @@
     "ja_JP.UTF-8/UTF-8"
   ];
 
-  # systemd.user.services.home-manager-hhefesto = {
-  #   serviceConfig = {
-  #     TimeoutStartSec = "20m";
-  #     TimeoutStopSec = "20m";
-  #     Nice = 19;
-  #     IOSchedulingClass = "idle";
-  #     IOSchedulingPriority = 7;
-  #   };
-  # };
+  # systemd.extraConfig = ''
+  #   DefaultTimeoutStartSec=20m
+  #   DefaultTimeoutStopSec=20m
+  #   DefaultTimeoutAbortSec=20m
+  # '';
+  systemd.user.services.home-manager-hhefesto = {
+    serviceConfig = {
+      TimeoutStartSec = "20m";
+      TimeoutStopSec = "20m";
+      Nice = 19;
+      IOSchedulingClass = "idle";
+      IOSchedulingPriority = 7;
+    };
+  };
 
   # Set Brave as default browser system-wide
   xdg.mime.defaultApplications = {
@@ -150,14 +151,6 @@
   #   # You can add extensions or other browser settings here
   # };
 
-  programs.obs-studio = {
-    enable = true;
-
-    plugins = with pkgs.obs-studio-plugins; [
-      obs-backgroundremoval
-    ];
-  };
-
   programs.steam = {
     enable = true;
     remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
@@ -167,6 +160,8 @@
 
   # for vir-manager: https://nixos.wiki/wiki/Virt-manager
   programs.dconf.enable = true;
+
+  programs.light.enable = true;
 
   # programs.steam.enable = true;
   programs.nix-index.enableZshIntegration = true;
@@ -179,6 +174,22 @@
     ohMyZsh.plugins = ["git" "sudo" "colorize" "extract" "history" "postgres"];
     ohMyZsh.theme = "intheloop";
 
+    shellInit = ''
+      # ssh
+
+      # if it was running, ssh-add will use it and return 1 (no keys)
+      # if it was not running, it will return 2, so we proceed to execute the ssh-agent
+      # and tell it where to create the Unix  socket (SSH_AUTH_SOCK):
+
+      ssh-add -l >/dev/null 2>&1
+      if [ $? -eq 2 ]; then
+        eval "$(ssh-agent -s)"
+      fi
+
+      ssh-add ~/.ssh/xpsoasis-ed25519
+      ssh-add ~/.ssh/id_ed25519
+    '';
+
     interactiveShellInit = ''
       save_aliases=$(alias -L)
       eval $save_aliases; unset save_aliases
@@ -189,13 +200,23 @@
   };
 
   # Open ports in the firewall.
-  networking.firewall.allowedTCPPorts = [ 3000 5432 587 5938 ];
-  networking.firewall.allowedUDPPorts = [ 5938 ];
+  networking.firewall.allowedTCPPorts = [ 3000 5432 587 5938 53317 ];
+  networking.firewall.allowedUDPPorts = [ 5938 53317 ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
 
   # Enable CUPS to print documents.
   # services.printing.enable = true;
+
+  # Enable sound.
+  # sound.enable = true;
+  # services.pulseaudio = {
+  #     # enable = true;
+  #     enable = false;
+  #     # package = pkgs.pulseaudioFull;
+  #     # support32Bit = true;
+  #     # extraModules = [ pkgs.pulseaudio-modules-bt ];
+  # };
 
   hardware.bluetooth.enable = true;
 
@@ -230,8 +251,9 @@
   services.xserver.xkb.variant = "altgr-intl";
   services.xserver.windowManager.xmonad = {
     enable = true;
-    config = pkgs.lib.readFile ./xmonad.hs;
-    # enableContribAndExtras = true;
+    enableConfiguredRecompile = true;
+    config = builtins.replaceStrings ["@xmonadShortenLength@"] ["${toString xmonadShortenLength}"] (pkgs.lib.readFile ./xmonad.hs);
+    enableContribAndExtras = true;
     extraPackages = haskellPackages:[
       haskellPackages.xmonad-contrib
       haskellPackages.xmonad-extras
@@ -239,26 +261,24 @@
     ];
   };
   services.displayManager.defaultSession = "none+xmonad";
-  services.xserver.displayManager = {
-    # defaultSession = "none+xmonad";
-    gdm.enable = true;
-    sessionCommands =
-      let myCustomLayout = pkgs.writeText "xkb-layout" ''
-        ! swap Caps_Lock and Control_R
-        remove Lock = Caps_Lock
-        remove Control = Control_R
-        keysym Control_R = Caps_Lock
-        keysym Caps_Lock = Control_R
-        add Lock = Caps_Lock
-        add Control = Control_R
-      '';
-      in ''
-        ${pkgs.xorg.xmodmap}/bin/xmodmap ${myCustomLayout}
-      '';
-
-    # autoLogin.user = "hhefesto";
-  };
-  services.xserver.desktopManager.gnome.enable = true;
+  services.displayManager.gdm.enable = true;
+  services.xserver.displayManager.sessionCommands =
+    let myCustomLayout = pkgs.writeText "xkb-layout" ''
+      ! swap Caps_Lock and Control_R
+      remove Lock = Caps_Lock
+      remove Control = Control_R
+      keysym Control_R = Caps_Lock
+      keysym Caps_Lock = Control_R
+      add Lock = Caps_Lock
+      add Control = Control_R
+    '';
+    in ''
+      ${pkgs.xorg.xmodmap}/bin/xmodmap ${myCustomLayout}
+      exec >>"$HOME/.xsession.log" 2>&1
+      echo "[XSESSION] Started at $(date)"
+    '';
+  # services.xserver.displayManager.autoLogin.user = "hhefesto";
+  services.desktopManager.gnome.enable = true;
 
   # services.postgresql = {
   #     enable = true;
@@ -297,7 +317,6 @@
   #   };
   # };
 
-  boot.kernelModules = [ "kvm-amd" ];
   # for virt-manager: https://nixos.wiki/wiki/Virt-manager
   virtualisation.libvirtd.enable = true;
 
@@ -311,10 +330,10 @@
   # services.xserver.displayManager.sddm.enable = true;
   # services.xserver.desktopManager.plasma5.enable = true;
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
+  # Define a user account. Don't forget to set a password with 'passwd'.
   # users.users.jane = {
   #   isNormalUser = true;
-  #   extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+  #   extraGroups = [ "wheel" ]; # Enable 'sudo' for the user.
   # };
 
   # $6$JuZni5Aqesp.z5yj$KUO2eAgrma2FXDWWIBqGfOSLf65twcIj4SHFiv7MIGRcaHQxx1nZ.vXmyE5MKq0WS7OwyfdEr8D0URhDt161A/
@@ -336,18 +355,7 @@
     openssh.authorizedKeys.keys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJcDIsto/6GS7XwTl+uVo4ABeRlRjDwAU0HHy8irqLaB hhefesto@olimpo" ];
     shell = pkgs.zsh; #"/run/current-system/sw/bin/bash";
   };
-  users.extraUsers.moper = {
-    createHome = true;
-    isNormalUser = true;
-    home = "/home/moper";
-    description = "Oswaldo";
-    extraGroups = [ "video" "wheel" "networkmanager" "docker" "libvirtd" ];
-    hashedPassword = "$6$61SFKMZLJxncDvqK$J/U1oNhjgtsr8Wv8vv9VdqWlmcP2f6eP5SBgN5UoJVRf2Hfpp5CIYcyZiAcC7etbu0j21zuAvE5q2S27GkPJ/1";
-    openssh.authorizedKeys.keys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJcDIsto/6GS7XwTl+uVo4ABeRlRjDwAU0HHy8irqLaB hhefesto@olimpo" ];
-    shell = pkgs.zsh; #"/run/current-system/sw/bin/bash";
-  };
 
-  # nix.package = inputs.nix.packages.x86_64-linux.default;
   nix.settings.auto-optimise-store = true;
   nix.settings.allow-import-from-derivation = true;
 
@@ -357,10 +365,9 @@
     options = "--delete-older-than 7d";
   };
 
-  # experimental-features = nix-command flakes
   # For nix flakes
+  # nix.package = inputs.nix.packages.x86_64-linux.default;
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
-
   nix.extraOptions = ''
     keep-outputs = true
     keep-derivations = true
@@ -368,28 +375,27 @@
     allow-import-from-derivation = true
   '';
 
-  nix.settings.trusted-public-keys = [ "tontinetrust-roboactuary.cachix.org-1:V23wn6i7/4OLXjsZBuMxzgb6sQMixTG3tNO1nOYeRDo="
-                                       "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
+  nix.settings.trusted-public-keys = [ "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
                                        "telomare.cachix.org-1:H0qRjVstxtb9oyEPvDDpmPSLyJ9oViAsTgwR02ra6Dk="
                                        "ryantrinkle.com-1:JJiAKaRv9mWgpVAz8dwewnZe0AzzEAzPkagE9SP5NWI="
+                                       "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
                                      ];
 
-  nix.settings.trusted-substituters = [ "https://tontinetrust-roboactuary.cachix.org"
-                                        "https://nixcache.reflex-frp.org"
+  nix.settings.trusted-substituters = [ "https://nixcache.reflex-frp.org"
                                         "https://cache.iog.io"
                                         "https://telomare.cachix.org"
+                                        "https://claude-code.cachix.org"
                                       ];
 
-  nix.settings.substituters = [ "https://tontinetrust-roboactuary.cachix.org"
-                                "https://telomare.cachix.org"
+  nix.settings.substituters = [ "https://telomare.cachix.org"
                                 "https://nixcache.reflex-frp.org"
                                 "https://cache.iog.io"
+                                "https://claude-code.cachix.org"
                               ];
 
-  nix.settings.allowed-users = [ "@wheel" "hhefesto" "moper" ];
+  nix.settings.allowed-users = [ "@wheel" "hhefesto" ];
 
-  nix.settings.trusted-users = [ "root" "hhefesto" ];
-
+  nix.settings.trusted-users = [ "hhefesto" ];
 
   # This value determines the NixOS release with which your system is to be
   # compatible, in order to avoid breaking some software such as database
