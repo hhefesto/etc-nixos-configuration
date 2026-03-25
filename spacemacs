@@ -424,7 +424,7 @@ It should only modify the values of Spacemacs settings."
    ;;   :size-limit-kb 1000)
    ;; When used in a plist, `visual' takes precedence over `relative'.
    ;; (default nil)
-   dotspacemacs-line-numbers nil
+   dotspacemacs-line-numbers t
 
    ;; Code folding method. Possible values are `evil', `origami' and `vimish'.
    ;; (default 'evil)
@@ -599,30 +599,18 @@ before packages are loaded."
                     (cons '("\\.hs\\'" . haskell-mode)
                           (assq-delete-all "\\.hs\\'" auto-mode-alist)))))
 
-  ;; Load telomare mode if it exists
-  (let ((telomare-file "~/src/telomare/emacs-telomare-mode/telomare-mode-spacemacs.el"))
-    (if (file-exists-p telomare-file)
-        (load telomare-file)
-      (message "Telomare mode file not found: %s" telomare-file)))
+  (load "~/src/telomare/emacs-telomare-mode/telomare-mode-spacemacs.el")
 
   ;; 1) Bring agda2-mode-path (coming from Home Manager) into scope:
-  (load "~/.agda-mode-path.el" t)
+  (load "~/.agda-mode-path.el")
   (add-to-list 'load-path agda2-mode-path)
+  ;; or (load "~/.spacemacs.agda-mode-path.el") if you chose that variant
 
-  (if (not (boundp 'agda2-mode-path))
-      (message "Warning: agda2-mode-path not defined, skipping Agda configuration")
-    ;; Variable exists, proceed
-    (add-to-list 'load-path agda2-mode-path)
-
-    (use-package agda2  ; Changed from agda2-mode to agda2
-      :mode ("\\.agda\\'" . agda2-mode)
-      :config
-      (setq agda2-program-name "agda")))
-  ;; (use-package agda2-mode
-  ;;   :mode ("\\.agda\\'" . agda2-mode)
-  ;;   :config
-  ;;   (setq agda2-program-name "agda"))
-  )
+  ;; 2) Load agda2-mode from that path
+  (use-package agda2-mode
+    :mode ("\\.agda\\'" . agda2-mode)
+    :config
+    (setq agda2-program-name "agda")))
 
 
 ;; Do not write anything past this comment. This is where Emacs will

@@ -10,10 +10,12 @@ import           XMonad.Hooks.ManageDocks
 import           XMonad.Layout.IndependentScreens
 import           XMonad.Layout.MouseResizableTile
 import           XMonad.Layout.Spacing
-import           XMonad.Util.EZConfig             (additionalKeysP)
+import           XMonad.Util.EZConfig             (additionalKeysP
+                                                  ,additionalKeys
+                                                  )
 import           XMonad.Util.Run                  (spawnPipe)
 import           XMonad.Util.SpawnOnce            (spawnOnce)
-import qualified Debug.Trace as Debug (trace)
+import qualified Debug.Trace as Debug
 
 myStartupHook :: X ()
 myStartupHook = do
@@ -48,19 +50,13 @@ myManageHook = composeAll
 
 main = do
     xmproc <- spawnPipe "xmobar"
-    let dirs = Directories
-                { cfgDir = "$HOME/.config/xmonad"        -- Directory containing xmonad.hs
-                , dataDir = "$HOME/.local/share/xmonad"  -- For xmonad's data files
-                , cacheDir = "$HOME/.cache/xmonad" -- For xmonad's cache files
-                }
-    (flip launch) dirs . ewmh . docks $ def
-    -- xmonad . ewmh . docks $ def
+    xmonad . ewmh . docks $ def
         { manageHook = myManageHook <+> manageHook def
         , layoutHook = avoidStruts . mySpacing $ layoutHook def
         , handleEventHook = handleEventHook def -- <+> docksEventHook
         , logHook = dynamicLogWithPP xmobarPP
                         { ppOutput = hPutStrLn xmproc
-                        , ppTitle = xmobarColor "green" "" . shorten 50
+                        , ppTitle = xmobarColor "green" "" . shorten 30
                         }
         , startupHook        = myStartupHook
         , modMask            = myModMask     -- Rebind Mod to the Windows key
@@ -71,12 +67,11 @@ main = do
         } `additionalKeysP`
         [ ("<Print>", spawn "scrot -e \'mv $f ~/Pictures/Screenshots\'")
         , ("M-c", spawn "scrot -s /tmp/ocr.png && tesseract /tmp/ocr.png - | xclip -selection clipboard && rm /tmp/ocr.png")
-        -- , ("M-u", spawn "brightnessctl set 5%-") -- decrease brightness
-        -- , ("M-i", spawn "brightnessctl set +5%") -- increase brightness
-        -- , ("M-y", setBrightness 1) -- set to minimum brightness
+        , ("<XF86MonBrightnessUp>", spawn "brightnessctl set 5%+")
+        , ("<XF86MonBrightnessDown>", spawn "brightnessctl set 5%-")
+        , ("M-y", spawn "brightnessctl set 1") -- set to minimum brightness
         , ("M-j", spawn "amixer -q sset Master 2%-")
         , ("M-k", spawn "amixer -q sset Master 2%+")
         , ("M-m", spawn "amixer set Master toggle")
         , ("M-q", restart "xmonad" True)
         ]
-

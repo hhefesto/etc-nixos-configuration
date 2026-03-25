@@ -17,17 +17,12 @@
   time.timeZone = "America/Mexico_City";
 
   nixpkgs.config.allowUnfree = true;
-  # nixpkgs.overlays = [
-  #   (self: super: {
-  #     # bash = (super.bash.override { withManpages = false; });
-  #     bash = super.bash.overrideAttrs (oldAttrs: {
-  #       version = "5.2p26"; # Try an earlier patch version
-  #       # You may need to adjust the source URL and hash accordingly
-  #     });
-  #   })
-  # ];
 
   environment.systemPackages = with pkgs; [
+    opencode
+    claude-code
+    emacsPackages.claude-code
+    xev
     brightnessctl
     tesseract
     alsa-utils
@@ -75,7 +70,7 @@
     st
     haskellPackages.xmobar
     ranger
-    obs-studio
+    # obs-studio
     qbittorrent
     libreoffice
     vlc
@@ -155,6 +150,14 @@
   #   # You can add extensions or other browser settings here
   # };
 
+  programs.obs-studio = {
+    enable = true;
+
+    plugins = with pkgs.obs-studio-plugins; [
+      obs-backgroundremoval
+    ];
+  };
+
   programs.steam = {
     enable = true;
     remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
@@ -164,8 +167,6 @@
 
   # for vir-manager: https://nixos.wiki/wiki/Virt-manager
   programs.dconf.enable = true;
-
-  programs.light.enable = true;
 
   # programs.steam.enable = true;
   programs.nix-index.enableZshIntegration = true;
