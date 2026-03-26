@@ -58,6 +58,7 @@
         nixosConfigurations.olimpo = mkHost {
           hostModule = ./olimpo.nix;
           xmobarrc = ./xmobarrc-olimpo;
+          extraSpecialArgs = { xmonadShortenLength = 50; };
         };
       };
 
