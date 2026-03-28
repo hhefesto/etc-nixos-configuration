@@ -14,13 +14,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     claude-code-nix.url = "github:sadjow/claude-code-nix";
+    opencode.url = "github:anomalyco/opencode?ref=dev";
     spacemacs = {
       url = "github:syl20bnr/spacemacs";
       flake = false;
     };
   };
 
-  outputs = inputs@{ self, flake-parts, nixpkgs, home-manager, claude-code-nix, ... }:
+  outputs = inputs@{ self, flake-parts, nixpkgs, home-manager, claude-code-nix, opencode, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [ "x86_64-linux" ];
 
@@ -43,7 +44,30 @@
               };
             }
             {
-              nixpkgs.overlays = [ claude-code-nix.overlays.default ];
+              nixpkgs.overlays = [
+                claude-code-nix.overlays.default
+                (final: prev: {
+                  bun = opencode.inputs.nixpkgs.legacyPackages.${system}.bun;
+                })
+                opencode.overlays.default
+                (final: prev: {
+                  opencode = prev.opencode.overrideAttrs (old: {
+                    postConfigure = (old.postConfigure or "") + ''
+                      patchShebangs node_modules
+                      patchShebangs packages
+
+                      if [ -e packages/app/node_modules/.bin/vite ]; then
+                        vite_target=$(readlink -f packages/app/node_modules/.bin/vite || true)
+                        if [ -n "$vite_target" ]; then
+                          substituteInPlace "$vite_target" --replace /usr/bin/env ${prev.coreutils}/bin/env
+                        else
+                          substituteInPlace packages/app/node_modules/.bin/vite --replace /usr/bin/env ${prev.coreutils}/bin/env
+                        fi
+                      fi
+                    '';
+                  });
+                })
+              ];
             }
           ];
           specialArgs = { inherit inputs; } // extraSpecialArgs;
