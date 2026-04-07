@@ -58,6 +58,8 @@
     oh-my-zsh
     zsh
     scrot
+    libnotify
+    dunst
     xclip
     feh
     firefox

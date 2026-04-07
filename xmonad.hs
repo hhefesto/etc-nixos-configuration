@@ -14,6 +14,7 @@ import           XMonad.Util.SpawnOnce            (spawnOnce)
 
 myStartupHook :: X ()
 myStartupHook = do
+  spawnOnce "dunst"
   spawnOnce "nautilus"
   spawnOnce "brave"
   spawnOnce "feh --bg-scale ~/Pictures/wallpaper.png &"
@@ -57,13 +58,14 @@ main = do
         , focusedBorderColor = myFocusedBorderColor
         , terminal           = myTerminal
         } `additionalKeysP`
-        [ ("<Print>", spawn "scrot -e \'mv $f ~/Pictures/Screenshots\'")
+        [ ("<Print>", spawn "scrot -e \'mv $f ~/Pictures/Screenshots && notify-send Screenshot $f\'")
+        , ("M-<Print>", spawn "scrot -s -e \'mv $f ~/Pictures/Screenshots\' || notify-send 'scrot failed'")
         , ("M-c", spawn "scrot -s /tmp/ocr.png && tesseract /tmp/ocr.png - | xclip -selection clipboard && rm /tmp/ocr.png")
         , ("<XF86MonBrightnessUp>", spawn "brightnessctl set 5%+")
         , ("<XF86MonBrightnessDown>", spawn "brightnessctl set 5%-")
         , ("M-y", spawn "brightnessctl set 1") -- set to minimum brightness
-        , ("M-j", spawn "amixer -q sset Master 2%-")
-        , ("M-k", spawn "amixer -q sset Master 2%+")
+        , ("M-j", spawn "amixer -q sset Master 2%- && notify-send Volume \"$(amixer get Master | grep -o '[0-9]*%' | head -1)\"")
+        , ("M-k", spawn "amixer -q sset Master 2%+ && notify-send Volume \"$(amixer get Master | grep -o '[0-9]*%' | head -1)\"")
         , ("M-m", spawn "amixer set Master toggle")
-        , ("M-q", restart "xmonad" True)
+        , ("M-q", restart "/run/current-system/sw/bin/xmonad" True)
         ]
