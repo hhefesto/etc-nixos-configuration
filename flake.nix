@@ -13,6 +13,7 @@
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    expedientes.url = "git+file:///home/hhefesto/src/expedientes";
     claude-code-nix.url = "github:sadjow/claude-code-nix";
     opencode.url = "github:anomalyco/opencode?ref=dev";
     spacemacs = {
