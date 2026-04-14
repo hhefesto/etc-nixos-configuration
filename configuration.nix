@@ -276,6 +276,7 @@
     '';
     in ''
       ${pkgs.xorg.xmodmap}/bin/xmodmap ${myCustomLayout}
+      ${pkgs.dbus}/bin/dbus-update-activation-environment --systemd --all
       exec >>"$HOME/.xsession.log" 2>&1
       echo "[XSESSION] Started at $(date)"
     '';

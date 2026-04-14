@@ -14,7 +14,6 @@ import           XMonad.Util.SpawnOnce            (spawnOnce)
 
 myStartupHook :: X ()
 myStartupHook = do
-  spawnOnce "dunst"
   spawnOnce "nautilus"
   spawnOnce "brave"
   spawnOnce "feh --bg-scale ~/Pictures/wallpaper.png &"
@@ -58,8 +57,8 @@ main = do
         , focusedBorderColor = myFocusedBorderColor
         , terminal           = myTerminal
         } `additionalKeysP`
-        [ ("<Print>", spawn "scrot -e \'mv $f ~/Pictures/Screenshots && notify-send Screenshot $f\'")
-        , ("M-<Print>", spawn "scrot -s -e \'mv $f ~/Pictures/Screenshots\' || notify-send 'scrot failed'")
+        [ ("<Print>", spawn "sh -lc 'mkdir -p ~/Pictures/Screenshots; f=~/Pictures/Screenshots/$(date +%Y-%m-%d_%H-%M-%S).png; scrot \"$f\"; s=$?; echo $(date) scrot=$s file=$f >> /tmp/xmonad-print.log; env | grep -E \\\"DBUS|XDG_RUNTIME_DIR|DISPLAY\\\" >> /tmp/xmonad-print.log; if [ $s -eq 0 ]; then notify-send Screenshot \"$f\"; n=$?; echo notify=$n >> /tmp/xmonad-print.log; else notify-send \"scrot failed\"; n=$?; echo notify=$n >> /tmp/xmonad-print.log; fi'")
+        , ("M-<Print>", spawn "sh -lc 'mkdir -p ~/Pictures/Screenshots; f=~/Pictures/Screenshots/$(date +%Y-%m-%d_%H-%M-%S).png; scrot -s \"$f\"; s=$?; echo $(date) scrot=$s file=$f >> /tmp/xmonad-print.log; env | grep -E \\\"DBUS|XDG_RUNTIME_DIR|DISPLAY\\\" >> /tmp/xmonad-print.log; if [ $s -eq 0 ]; then notify-send Screenshot \"$f\"; n=$?; echo notify=$n >> /tmp/xmonad-print.log; else notify-send \"scrot failed\"; n=$?; echo notify=$n >> /tmp/xmonad-print.log; fi'")
         , ("M-c", spawn "scrot -s /tmp/ocr.png && tesseract /tmp/ocr.png - | xclip -selection clipboard && rm /tmp/ocr.png")
         , ("<XF86MonBrightnessUp>", spawn "brightnessctl set 5%+")
         , ("<XF86MonBrightnessDown>", spawn "brightnessctl set 5%-")

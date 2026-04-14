@@ -95,6 +95,8 @@
   programs.xmobar.extraConfig = builtins.readFile xmobarrc;
   programs.home-manager.enable = true;
 
+  services.dunst.enable = true;
+
   home.packages = with pkgs; [
     gnome-themes-extra
     adw-gtk3  # Add this for better Adwaita theme support
@@ -123,6 +125,15 @@
       color-scheme = "prefer-dark";
       gtk-theme = "adw-gtk3-dark";
       enable-hot-corners = false;
+    };
+
+    "org/gnome/settings-daemon/plugins/media-keys" = {
+      screenshot = [];
+      window-screenshot = [];
+      area-screenshot = [];
+      screenshot-clip = [];
+      window-screenshot-clip = [];
+      area-screenshot-clip = [];
     };
 
     # These additional settings help ensure dark mode consistency
