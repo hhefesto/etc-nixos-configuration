@@ -14,6 +14,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     expedientes.url = "git+file:///home/hhefesto/src/expedientes";
+    cfo-as-a-service.url = "path:/home/hhefesto/src/cfo-as-a-service";
     claude-code-nix.url = "github:sadjow/claude-code-nix";
     opencode.url = "github:anomalyco/opencode?ref=dev";
     spacemacs = {
@@ -28,9 +29,20 @@
 
       flake = let
         system = "x86_64-linux";
+        cfoLocalDeployment = {
+          "frontend-port" = 8083;
+          "backend-port" = 3033;
+          "database-port" = 5432;
+          "nginx-port" = 8082;
+          "server-name" = "cfo.local";
+          "backend-package" = inputs."cfo-as-a-service".packages.${system}.cfo-backend;
+          "frontend-static" = inputs."cfo-as-a-service".packages.${system}.cfo-frontend-static;
+        };
+
         mkHost = { hostModule, xmobarrc, extraSpecialArgs ? {} }: nixpkgs.lib.nixosSystem {
           inherit system;
           modules = [
+            ((import "${inputs."cfo-as-a-service"}/nixosModules/cfo-as-a-service.nix") cfoLocalDeployment)
             hostModule
             ./configuration.nix
             # determinate.nixosModules.default
