@@ -107,13 +107,15 @@
     ohMyZsh.theme = "intheloop";
 
     shellInit = ''
-      ssh-add -l >/dev/null 2>&1
-      if [ $? -eq 2 ]; then
-        eval "$(ssh-agent -s)"
-      fi
+      if [[ -o interactive ]]; then
+        ssh-add -l >/dev/null 2>&1
+        if [ $? -eq 2 ]; then
+          eval "$(ssh-agent -s)" >/dev/null
+        fi
 
-      ssh-add ~/.ssh/xpsoasis-ed25519
-      ssh-add ~/.ssh/id_ed25519
+        ssh-add -q ~/.ssh/xpsoasis-ed25519
+        ssh-add -q ~/.ssh/id_ed25519
+      fi
     '';
 
     interactiveShellInit = ''
