@@ -1,4 +1,4 @@
-{ config, pkgs, inputs, ... }:
+{ config, lib, pkgs, inputs, ... }:
 let
   system = pkgs.stdenv.hostPlatform.system;
   cfoDbPassword = "change-this-cfo-password";
@@ -11,6 +11,8 @@ in
     inputs.expedientes.nixosModules.frontend
     inputs.expedientes.nixosModules.nginx
   ];
+
+  services.nginx.recommendedGzipSettings = lib.mkForce false;
 
   age.secrets.expedientes-db-password = {
     file = inputs.expedientes + "/secrets/expedientes-db-password.age";

@@ -1,10 +1,12 @@
-{ pkgs, inputs, ... }:
+{ lib, pkgs, inputs, ... }:
 let
   system = pkgs.stdenv.hostPlatform.system;
   cfoDbPassword = "cfo-local-password";
 in
 {
   imports = [ ./expedientes-local.nix ];
+
+  services.nginx.recommendedGzipSettings = lib.mkForce false;
 
   services.cfo.profile = {
     enable = true;
