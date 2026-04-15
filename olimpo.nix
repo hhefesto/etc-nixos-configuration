@@ -1,9 +1,6 @@
-{ config, lib, pkgs, inputs, ... }:
+{ ... }:
 {
-  imports = [
-    ./hardware-configuration-olimpo.nix
-    ./expedientes-local.nix
-  ];
+  imports = [ ./hardware-configuration-olimpo.nix ];
 
   networking.hostName = "olimpo";
 }
