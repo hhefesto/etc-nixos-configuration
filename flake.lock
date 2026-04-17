@@ -80,8 +80,8 @@
         "reflex-platform": "reflex-platform"
       },
       "locked": {
-        "lastModified": 1776274133,
-        "narHash": "sha256-u5ysIx9EopsxCNMtDpUsoCmjvFA0IRUhbS5PbVU6+O4=",
+        "lastModified": 1776291477,
+        "narHash": "sha256-ypMbQ1V3OlcKcRSkIPB/faE/2h0RpytQ8z0AdGBqIuo=",
         "path": "/home/hhefesto/src/cfo-as-a-service",
         "type": "path"
       },
@@ -96,11 +96,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1776225939,
-        "narHash": "sha256-u/9MUPeJKgp94UlTniH4wGkwcWylyyTWtcnKeIVlVto=",
+        "lastModified": 1776291222,
+        "narHash": "sha256-yvYYIaG+x7z+MH7EMFeB+d2AOM6AKboc8tlB9QTfBSM=",
         "owner": "sadjow",
         "repo": "claude-code-nix",
-        "rev": "9dc007803e0661cf32db77e0c50e219c08b1eeb0",
+        "rev": "d3bf650c30533fdae9b0bd06fe05aa15beeee40e",
         "type": "github"
       },
       "original": {
@@ -723,11 +723,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1775888245,
-        "narHash": "sha256-nwASzrRDD1JBEu/o8ekKYEXm/oJW6EMCzCRdrwcLe90=",
+        "lastModified": 1776255774,
+        "narHash": "sha256-psVTpH6PK3q1htMJpmdz1hLF5pQgEshu7gQWgKO6t6Y=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "13043924aaa7375ce482ebe2494338e058282925",
+        "rev": "566acc07c54dc807f91625bb286cb9b321b5f42a",
         "type": "github"
       },
       "original": {
@@ -1059,8 +1059,8 @@
         "reflex-platform": "reflex-platform_3"
       },
       "locked": {
-        "lastModified": 1776134134,
-        "narHash": "sha256-xCBmPX8W78OT/EjXQuGu1fdHsb0mCOC2yg3cshGEyZA=",
+        "lastModified": 1776352388,
+        "narHash": "sha256-hw7FG9Fk4unB5q/0mAVsSjzwbpQUCa5mCxqnU+ICWUI=",
         "path": "/home/hhefesto/src/wedding-website",
         "type": "path"
       },
