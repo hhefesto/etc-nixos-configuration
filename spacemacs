@@ -67,7 +67,7 @@ This function should only modify configuration layer settings."
    dotspacemacs-frozen-packages '()
 
    ;; A list of packages that will not be installed and loaded.
-   dotspacemacs-excluded-packages '()
+   dotspacemacs-excluded-packages '(hybrid-mode)
 
    ;; Defines the behaviour of Spacemacs when installing packages.
    ;; Possible values are `used-only', `used-but-keep-unused' and `all'.
@@ -585,6 +585,10 @@ before packages are loaded."
     (setq direnv-use-faces-in-summary t)
     ;; Optional: add custom keybinding for holy-mode
     (global-set-key (kbd "C-c d") 'direnv-update-environment))
+
+  (global-set-key [control] #'ignore)
+  (when (bound-and-true-p hybrid-mode)
+    (hybrid-mode -1))
   ;; Remove git-lsp associations for .hs files if they exist
   ;; (setq auto-mode-alist
   ;;       (seq-remove (lambda (pair)

@@ -6,15 +6,17 @@
     stateVersion = "22.11";
   };
   home.activation = {
-    installSpacemacs = lib.hm.dag.entryAfter ["writeBoundary"] ''
-      if [ ! -f "$HOME/.spacemacs" ]; then
-        cp ${./spacemacs} "$HOME/.spacemacs"
-        chmod 644 "$HOME/.spacemacs"
-      fi
+    installSpacemacs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      install -Dm644 ${./spacemacs} "$HOME/.spacemacs"
+
       if [ ! -d "$HOME/.emacs.d" ]; then
         cp -r ${spacemacs} "$HOME/.emacs.d"
-        chmod -R u+w "$HOME/.emacs.d/"
+      else
+        cp -r ${spacemacs}/. "$HOME/.emacs.d/"
       fi
+
+      chmod -R u+w "$HOME/.emacs.d/"
+      printf '%s\n' ${spacemacs} > "$HOME/.emacs.d/.nix-spacemacs-src"
     '';
   };
 

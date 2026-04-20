@@ -21,7 +21,7 @@
     cfo-as-a-service.url = "path:/home/hhefesto/src/cfo-as-a-service";
     wedding-page.url = "path:/home/hhefesto/src/wedding-website";
     claude-code-nix.url = "github:sadjow/claude-code-nix";
-    opencode.url = "github:anomalyco/opencode/4f967d5bc05d545fde9deccdb632276ec642722e";
+    opencode.url = "github:anomalyco/opencode";
     spacemacs = {
       url = "github:syl20bnr/spacemacs";
       flake = false;
