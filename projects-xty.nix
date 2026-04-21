@@ -6,10 +6,6 @@ in
 {
   imports = [
     inputs.agenix.nixosModules.default
-    inputs.expedientes.nixosModules.database
-    inputs.expedientes.nixosModules.backend
-    inputs.expedientes.nixosModules.frontend
-    inputs.expedientes.nixosModules.nginx
   ];
 
   services.nginx.recommendedGzipSettings = lib.mkForce false;
@@ -35,34 +31,16 @@ in
     mode = "0400";
   };
 
-  services.expedientes.database = {
-    enable = true;
-    passwordFile = config.age.secrets.expedientes-db-password.path;
-  };
+  # Wire agenix-decrypted secret paths into the expedientes sub-module options.
+  # The stack itself (ports, packages, nginx, tmpfiles) is provided by expedientesXty
+  # in flake.nix via nixosModules.expedientes.
+  services.expedientes.database.passwordFile =
+    config.age.secrets.expedientes-db-password.path;
 
-  services.expedientes.backend = {
-    enable = true;
-    package = inputs.expedientes.packages.${system}.expedientes-backend;
-    htmlDir = "/var/lib/expedientes/html";
-    databaseUrlFile = config.age.secrets.expedientes-backend-env.path;
-    passwordHashFile = config.age.secrets.expedientes-password-hash.path;
-  };
-
-  services.expedientes.frontend = {
-    enable = true;
-    staticRoot = inputs.expedientes.packages.${system}.expedientes-frontend-static;
-  };
-
-  services.expedientes.nginx = {
-    enable = true;
-    serverName = "_";
-    port = 80;
-  };
-
-  systemd.tmpfiles.rules = [
-    "d /var/lib/expedientes      0755 root root -"
-    "d /var/lib/expedientes/html 0755 root root -"
-  ];
+  services.expedientes.backend.databaseUrlFile  =
+    config.age.secrets.expedientes-backend-env.path;
+  services.expedientes.backend.passwordHashFile =
+    config.age.secrets.expedientes-password-hash.path;
 
   services.cfo.profile = {
     enable = true;

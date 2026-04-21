@@ -266,11 +266,11 @@
         "reflex-platform": "reflex-platform_2"
       },
       "locked": {
-        "lastModified": 1776460485,
-        "narHash": "sha256-pGdu371hJU6vHtwrwDUNAnzjvijfCLtuJOe3yiu45Gg=",
+        "lastModified": 1776800800,
+        "narHash": "sha256-ldSPSkvzqTLmKZXIX3YLpaHZ78lJgq2qXGehP4bJUTA=",
         "ref": "refs/heads/master",
-        "rev": "ec625c19e5e38020ca1377d5009a0104cdf765f9",
-        "revCount": 11,
+        "rev": "242b2db84f310e52135bb43cf0ce632d88163fb8",
+        "revCount": 13,
         "type": "git",
         "url": "file:///home/hhefesto/src/expedientes"
       },

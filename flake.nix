@@ -48,6 +48,32 @@
 
         cfo = (import "${inputs."cfo-as-a-service"}/nixosModules/cfo-as-a-service.nix") null;
 
+        expedientesModule = { ports, databaseName, startingBackup ? null }:
+          (import "${inputs.expedientes}/nixosModules/expedientes.nix") {
+            inherit ports databaseName startingBackup;
+            packages = {
+              backend        = inputs.expedientes.packages.${system}.expedientes-backend;
+              frontendStatic = inputs.expedientes.packages.${system}.expedientes-frontend-static;
+            };
+          };
+
+        expedientesOlimpo = expedientesModule {
+          ports        = { nginx = 80; backend = 3000; database = 5432; };
+          databaseName = "expedientes";
+          startingBackup = {
+            dump = "/home/hhefesto/.local/share/expedientes/restore/var/lib/expedientes-backup/staging/expedientes.dump";
+            html = "/home/hhefesto/.local/share/expedientes/restore/html";
+          };
+        };
+        expedientesDelfos = expedientesModule {
+          ports        = { nginx = 80; backend = 3000; database = 5432; };
+          databaseName = "expedientes";
+        };
+        expedientesXty = expedientesModule {
+          ports        = { nginx = 80; backend = 3000; database = 5432; };
+          databaseName = "expedientes";
+        };
+
         mkHost = { hostModules, extraSpecialArgs ? {} }: nixpkgs.lib.nixosSystem {
           inherit system;
           modules = hostModules;
@@ -60,7 +86,9 @@
             ./projects-desktop.nix
             ./configuration.nix
             ./configuration-gui.nix
+            inputs.agenix.nixosModules.default
             cfo
+            expedientesDelfos
             (home-manager-module { xmobarrc = ./xmobarrc-delfos; })
           ];
           extraSpecialArgs = { xmonadShortenLength = 26; };
@@ -72,7 +100,9 @@
             ./projects-desktop.nix
             ./configuration.nix
             ./configuration-gui.nix
+            inputs.agenix.nixosModules.default
             cfo
+            expedientesOlimpo
             (home-manager-module { xmobarrc = ./xmobarrc-olimpo; })
           ];
           extraSpecialArgs = { xmonadShortenLength = 50; };
@@ -84,6 +114,7 @@
             ./projects-xty.nix
             ./configuration.nix
             cfo
+            expedientesXty
           ];
         };
 

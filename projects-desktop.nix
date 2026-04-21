@@ -1,10 +1,29 @@
-{ lib, pkgs, inputs, ... }:
+{ config, lib, pkgs, inputs, ... }:
 let
   system = pkgs.stdenv.hostPlatform.system;
   cfoDbPassword = "cfo-local-password";
 in
 {
-  imports = [ ./expedientes-local.nix ];
+  # Use the admin key (already a recipient in expedientes/secrets/secrets.nix)
+  # as the agenix identity so desktop hosts can decrypt expedientes secrets.
+  age.identityPaths = [ "/home/hhefesto/.ssh/hetzner_ed25519" ];
+
+  age.secrets.expedientes-password-hash = {
+    file  = inputs.expedientes + "/secrets/expedientes-password-hash.age";
+    owner = "root";
+    group = "root";
+    mode  = "0400";
+  };
+
+  services.expedientes.backend.passwordHashFile =
+    config.age.secrets.expedientes-password-hash.path;
+
+  # Allow the expedientes backend (DynamicUser) to connect as the expedientes
+  # role over TCP without a password — dev desktops have no db secret file.
+  services.postgresql.authentication = lib.mkAfter ''
+    host all expedientes 127.0.0.1/32 trust
+    host all expedientes ::1/128      trust
+  '';
 
   services.nginx.recommendedGzipSettings = lib.mkForce false;
 
