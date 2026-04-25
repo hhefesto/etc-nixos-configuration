@@ -1,0 +1,75 @@
+{ pkgs, ... }:
+{
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
+
+  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
+
+  networking.enableIPv6 = false;
+  time.timeZone = "America/Mexico_City";
+
+  nixpkgs.config.allowUnfree = true;
+
+  services.openssh.enable = true;
+  services.sshd.enable = true;
+
+  programs.zsh.enable = true;
+
+  users.mutableUsers = false;
+  users.users.root.initialHashedPassword = "$6$/RvS0Se.iCx$A0eA/8PzgMj.Ms9ohNamfu53c9S.zdG30hEmUHLjmWP0CaXTPVA6QxGIZ6fy.abkjSOTJMAq7fFL6LUBGs4BU0";
+  users.users.hhefesto.initialHashedPassword = "$6$/RvS0Se.iCx$A0eA/8PzgMj.Ms9ohNamfu53c9S.zdG30hEmUHLjmWP0CaXTPVA6QxGIZ6fy.abkjSOTJMAq7fFL6LUBGs4BU0";
+
+  users.extraUsers.hhefesto = {
+    createHome = true;
+    isNormalUser = true;
+    home = "/home/hhefesto";
+    description = "Daniel Herrera";
+    extraGroups = [ "wheel" ];
+    hashedPassword = "$6$/RvS0Se.iCx$A0eA/8PzgMj.Ms9ohNamfu53c9S.zdG30hEmUHLjmWP0CaXTPVA6QxGIZ6fy.abkjSOTJMAq7fFL6LUBGs4BU0";
+    openssh.authorizedKeys.keys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJcDIsto/6GS7XwTl+uVo4ABeRlRjDwAU0HHy8irqLaB hhefesto@olimpo" ];
+    shell = pkgs.zsh;
+  };
+
+  nix.settings.auto-optimise-store = true;
+  nix.settings.allow-import-from-derivation = true;
+
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 7d";
+  };
+
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.extraOptions = ''
+    keep-outputs = true
+    keep-derivations = true
+    accept-flake-config = true
+    allow-import-from-derivation = true
+  '';
+
+  nix.settings.trusted-public-keys = [
+    "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
+    "telomare.cachix.org-1:H0qRjVstxtb9oyEPvDDpmPSLyJ9oViAsTgwR02ra6Dk="
+    "ryantrinkle.com-1:JJiAKaRv9mWgpVAz8dwewnZe0AzzEAzPkagE9SP5NWI="
+    "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
+  ];
+
+  nix.settings.trusted-substituters = [
+    "https://nixcache.reflex-frp.org"
+    "https://cache.iog.io"
+    "https://telomare.cachix.org"
+    "https://claude-code.cachix.org"
+  ];
+
+  nix.settings.substituters = [
+    "https://telomare.cachix.org"
+    "https://nixcache.reflex-frp.org"
+    "https://cache.iog.io"
+    "https://claude-code.cachix.org"
+  ];
+
+  nix.settings.allowed-users = [ "@wheel" "hhefesto" ];
+  nix.settings.trusted-users = [ "hhefesto" ];
+
+  system.stateVersion = "25.05";
+}

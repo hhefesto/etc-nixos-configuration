@@ -1,7 +1,6 @@
 { config, lib, pkgs, inputs, ... }:
 let
   system = pkgs.stdenv.hostPlatform.system;
-  cfoDbPassword = "change-this-cfo-password";
 in
 {
   imports = [
@@ -42,33 +41,10 @@ in
   services.expedientes.backend.passwordHashFile =
     config.age.secrets.expedientes-password-hash.path;
 
-  services.cfo.profile = {
-    enable = true;
-    mode = "production";
-    serverName = "cfo.xty";
-
-    ports = {
-      frontend = 8083;
-      backend = 3033;
-      database = 5432;
-      nginx = 8082;
-    };
-
-    packages = {
-      backend = inputs."cfo-as-a-service".packages.${system}.cfo-backend;
-      frontendStatic = inputs."cfo-as-a-service".packages.${system}.cfo-frontend-static;
-    };
-
-    secrets = {
-      dbPasswordFile = pkgs.writeText "cfo-db-password" cfoDbPassword;
-      backendEnvFile = pkgs.writeText "cfo-backend-env" ''
-        DATABASE_URL=postgres://cfo:${cfoDbPassword}@localhost:5432/cfo
-      '';
-    };
-
-    tls.enableACME = false;
-    tls.forceSSL = false;
-  };
+  systemd.services.expedientes-seed.after =
+    lib.mkAfter [ "postgresql-setup.service" ];
+  systemd.services.expedientes-seed.requires =
+    lib.mkAfter [ "postgresql-setup.service" ];
 
   services.nginx.virtualHosts."wedding.xty" = {
     listen = [
@@ -79,5 +55,9 @@ in
     locations."/".tryFiles = "$uri $uri/ /index.html";
   };
 
-  networking.firewall.allowedTCPPorts = [ 80 8082 8084 ];
+  systemd.tmpfiles.rules = [
+    "d /var/lib/expedientes-bootstrap 0700 root root -"
+  ];
+
+  networking.firewall.allowedTCPPorts = [ 80 8084 ];
 }

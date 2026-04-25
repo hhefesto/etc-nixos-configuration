@@ -48,9 +48,9 @@
 
         cfo = (import "${inputs."cfo-as-a-service"}/nixosModules/cfo-as-a-service.nix") null;
 
-        expedientesModule = { ports, databaseName, startingBackup ? null }:
+        expedientesModule = { ports, databaseName, startingBackup ? null, htmlDir ? "/var/lib/expedientes/html" }:
           (import "${inputs.expedientes}/nixosModules/expedientes.nix") {
-            inherit ports databaseName startingBackup;
+            inherit ports databaseName startingBackup htmlDir;
             packages = {
               backend        = inputs.expedientes.packages.${system}.expedientes-backend;
               frontendStatic = inputs.expedientes.packages.${system}.expedientes-frontend-static;
@@ -60,9 +60,9 @@
         expedientesOlimpo = expedientesModule {
           ports        = { nginx = 80; backend = 3000; database = 5432; };
           databaseName = "expedientes";
+          htmlDir      = null;
           startingBackup = {
             dump = "/home/hhefesto/.local/share/expedientes/restore/var/lib/expedientes-backup/staging/expedientes.dump";
-            html = "/home/hhefesto/.local/share/expedientes/restore/html";
           };
         };
         expedientesDelfos = expedientesModule {
@@ -72,6 +72,10 @@
         expedientesXty = expedientesModule {
           ports        = { nginx = 80; backend = 3000; database = 5432; };
           databaseName = "expedientes";
+          htmlDir      = null;
+          startingBackup = {
+            dump = "/var/lib/expedientes-bootstrap/expedientes.dump";
+          };
         };
 
         mkHost = { hostModules, extraSpecialArgs ? {} }: nixpkgs.lib.nixosSystem {
@@ -112,8 +116,7 @@
           hostModules = [
             ./xty.nix
             ./projects-xty.nix
-            ./configuration.nix
-            cfo
+            ./configuration-core.nix
             expedientesXty
           ];
         };
