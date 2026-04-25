@@ -41,6 +41,20 @@ in
   services.expedientes.backend.passwordHashFile =
     config.age.secrets.expedientes-password-hash.path;
 
+  security.acme = {
+    acceptTerms = true;
+    defaults.email = "hhefesto@rdataa.com";
+  };
+
+  services.nginx.virtualHosts."docxty.net" = {
+    enableACME = true;
+    forceSSL = true;
+    listen = lib.mkAfter [
+      { addr = "0.0.0.0"; port = 443; ssl = true; }
+      { addr = "[::]"; port = 443; ssl = true; }
+    ];
+  };
+
   systemd.services.expedientes-seed.after =
     lib.mkAfter [ "postgresql-setup.service" ];
   systemd.services.expedientes-seed.requires =
@@ -55,9 +69,16 @@ in
     locations."/".tryFiles = "$uri $uri/ /index.html";
   };
 
+  services.nginx.virtualHosts."xty-y-dan.net" = {
+    enableACME = true;
+    forceSSL = true;
+    root = inputs."wedding-page".packages.${system}.website;
+    locations."/".tryFiles = "$uri $uri/ /index.html";
+  };
+
   systemd.tmpfiles.rules = [
     "d /var/lib/expedientes-bootstrap 0700 root root -"
   ];
 
-  networking.firewall.allowedTCPPorts = [ 80 8084 ];
+  networking.firewall.allowedTCPPorts = [ 80 443 8084 ];
 }

@@ -48,9 +48,9 @@
 
         cfo = (import "${inputs."cfo-as-a-service"}/nixosModules/cfo-as-a-service.nix") null;
 
-        expedientesModule = { ports, databaseName, startingBackup ? null, htmlDir ? "/var/lib/expedientes/html" }:
+        expedientesModule = { ports, databaseName, startingBackup ? null, htmlDir ? "/var/lib/expedientes/html", serverName ? "_" }:
           (import "${inputs.expedientes}/nixosModules/expedientes.nix") {
-            inherit ports databaseName startingBackup htmlDir;
+            inherit ports databaseName startingBackup htmlDir serverName;
             packages = {
               backend        = inputs.expedientes.packages.${system}.expedientes-backend;
               frontendStatic = inputs.expedientes.packages.${system}.expedientes-frontend-static;
@@ -72,6 +72,7 @@
         expedientesXty = expedientesModule {
           ports        = { nginx = 80; backend = 3000; database = 5432; };
           databaseName = "expedientes";
+          serverName   = "docxty.net";
           htmlDir      = null;
           startingBackup = {
             dump = "/var/lib/expedientes-bootstrap/expedientes.dump";

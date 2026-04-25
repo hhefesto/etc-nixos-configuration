@@ -53,6 +53,8 @@
   ];
 
   environment.systemPackages = with pkgs; [
+    openssl
+    bind
     opencode
     claude-code
     tesseract
