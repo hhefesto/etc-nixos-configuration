@@ -835,11 +835,11 @@
         "nixpkgs": "nixpkgs_7"
       },
       "locked": {
-        "lastModified": 1777255747,
-        "narHash": "sha256-lyVDYKzauoA3+IPdexxFzPitTeYbRuCISJdiWAW+5ME=",
+        "lastModified": 1777303058,
+        "narHash": "sha256-1UwkEwQUV+xdFnqz9yYMhiNmKuPCRKW/k3+0uocIZFk=",
         "owner": "anomalyco",
         "repo": "opencode",
-        "rev": "244d1debe48ea07c42922600bab0ce79ba4b479e",
+        "rev": "738b3065dc2bf643daa40507061a928299f67d30",
         "type": "github"
       },
       "original": {
@@ -915,11 +915,11 @@
     "spacemacs": {
       "flake": false,
       "locked": {
-        "lastModified": 1777164065,
-        "narHash": "sha256-JermUNjVjw8fmkVsKiuvU6OwmvPWgjbJ8z9uIZwL4HY=",
+        "lastModified": 1777265781,
+        "narHash": "sha256-pqFullyRhrBvH0TT6If+wSuvqP6xprH6n/xmRd521LI=",
         "owner": "syl20bnr",
         "repo": "spacemacs",
-        "rev": "b8419a17ab10635ecf4e607c0c42eea41e80424e",
+        "rev": "e57594e7aa1d459d3428b9b116bb84b344aa6084",
         "type": "github"
       },
       "original": {
