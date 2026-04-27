@@ -1058,8 +1058,8 @@
         "reflex-platform": "reflex-platform_3"
       },
       "locked": {
-        "lastModified": 1777067000,
-        "narHash": "sha256-mQr33+Bwj88gxHdiWAo4clVMRPKLlfsKn8YyXhPEZnU=",
+        "lastModified": 1777256840,
+        "narHash": "sha256-E6qucKFknkWkVMFKs85jRPMMiOqihpRriIgMMWOX/uo=",
         "path": "/home/hhefesto/src/wedding-website",
         "type": "path"
       },

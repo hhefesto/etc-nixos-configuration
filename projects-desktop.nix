@@ -18,11 +18,13 @@ in
   services.expedientes.backend.passwordHashFile =
     config.age.secrets.expedientes-password-hash.path;
 
-  # Allow the expedientes backend (DynamicUser) to connect as the expedientes
-  # role over TCP without a password — dev desktops have no db secret file.
+  # Allow the expedientes and wedding backends (DynamicUser) to connect over
+  # TCP without a password — dev desktops have no db secret file.
   services.postgresql.authentication = lib.mkAfter ''
     host all expedientes 127.0.0.1/32 trust
     host all expedientes ::1/128      trust
+    host all wedding     127.0.0.1/32 trust
+    host all wedding     ::1/128      trust
   '';
 
   services.nginx.recommendedGzipSettings = lib.mkForce false;
@@ -55,14 +57,7 @@ in
     tls.forceSSL = false;
   };
 
-  services.nginx.virtualHosts."wedding.local" = {
-    listen = [
-      { addr = "0.0.0.0"; port = 8084; }
-      { addr = "[::]"; port = 8084; }
-    ];
-    root = inputs."wedding-page".packages.${system}.website;
-    locations."/".tryFiles = "$uri $uri/ /index.html";
-  };
-
-  networking.firewall.allowedTCPPorts = [ 8084 ];
+  # The wedding.local vhost (port 8084) and firewall opening are now provided
+  # by the weddingOlimpo module, which also adds the /api/ reverse proxy.
+  networking.hosts."127.0.0.1" = [ "wedding.local" ];
 }

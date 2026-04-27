@@ -53,6 +53,7 @@
   ];
 
   environment.systemPackages = with pkgs; [
+    python3
     openssl
     bind
     opencode

@@ -79,6 +79,21 @@
           };
         };
 
+        weddingModule = { ports, databaseName ? "wedding", serverName ? "_" }:
+          (import "${inputs.wedding-page}/nixosModules/wedding.nix") {
+            inherit ports databaseName serverName;
+            packages = {
+              backend    = inputs.wedding-page.packages.${system}.wedding-backend;
+              staticRoot = inputs.wedding-page.packages.${system}.website;
+            };
+          };
+
+        weddingOlimpo = weddingModule {
+          ports        = { nginx = 8084; backend = 3001; database = 5432; };
+          databaseName = "wedding";
+          serverName   = "wedding.local";
+        };
+
         mkHost = { hostModules, extraSpecialArgs ? {} }: nixpkgs.lib.nixosSystem {
           inherit system;
           modules = hostModules;
@@ -108,6 +123,7 @@
             inputs.agenix.nixosModules.default
             cfo
             expedientesOlimpo
+            weddingOlimpo
             (home-manager-module { xmobarrc = ./xmobarrc-olimpo; })
           ];
           extraSpecialArgs = { xmonadShortenLength = 50; };
