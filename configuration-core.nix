@@ -26,7 +26,9 @@
     description = "Daniel Herrera";
     extraGroups = [ "wheel" ];
     hashedPassword = "$6$/RvS0Se.iCx$A0eA/8PzgMj.Ms9ohNamfu53c9S.zdG30hEmUHLjmWP0CaXTPVA6QxGIZ6fy.abkjSOTJMAq7fFL6LUBGs4BU0";
-    openssh.authorizedKeys.keys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJcDIsto/6GS7XwTl+uVo4ABeRlRjDwAU0HHy8irqLaB hhefesto@olimpo" ];
+    openssh.authorizedKeys.keys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJcDIsto/6GS7XwTl+uVo4ABeRlRjDwAU0HHy8irqLaB hhefesto@olimpo"
+                                    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH2Ttj29zyClCr8pSobzAIJVcsEuL4GsPY7+aiK5eaA1"
+                                  ];
     shell = pkgs.zsh;
   };
 
@@ -48,28 +50,28 @@
   '';
 
   nix.settings.trusted-public-keys = [
-    "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
     "telomare.cachix.org-1:H0qRjVstxtb9oyEPvDDpmPSLyJ9oViAsTgwR02ra6Dk="
     "ryantrinkle.com-1:JJiAKaRv9mWgpVAz8dwewnZe0AzzEAzPkagE9SP5NWI="
-    "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
+    "claude-code.cachix.org-1:Yexf2anu7utx8vwrze0za1weds+4dui2kvewee4fsrk="
   ];
 
   nix.settings.trusted-substituters = [
+    "https://hercules-ci.cachix.org"
+    "https://cache.nixos.org"
     "https://nixcache.reflex-frp.org"
-    "https://cache.iog.io"
     "https://telomare.cachix.org"
     "https://claude-code.cachix.org"
   ];
 
   nix.settings.substituters = [
+    "https://hercules-ci.cachix.org"
     "https://telomare.cachix.org"
     "https://nixcache.reflex-frp.org"
-    "https://cache.iog.io"
     "https://claude-code.cachix.org"
   ];
 
   nix.settings.allowed-users = [ "@wheel" "hhefesto" ];
   nix.settings.trusted-users = [ "hhefesto" ];
 
-  system.stateVersion = "25.05";
+  system.stateVersion = "25.11";
 }
