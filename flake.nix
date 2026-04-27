@@ -17,9 +17,9 @@
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    expedientes.url = "git+file:///home/hhefesto/src/expedientes";
-    cfo-as-a-service.url = "path:/home/hhefesto/src/cfo-as-a-service";
-    wedding-page.url = "path:/home/hhefesto/src/wedding-website";
+    expedientes.url = "git+ssh://git@github.com/hhefesto/docxty";
+    cfo-as-a-service.url = "git+ssh://git@github.com/hhefesto/cfo-as-a-service";
+    wedding-page.url = "github:hhefesto/wedding-website";
     claude-code-nix.url = "github:sadjow/claude-code-nix";
     opencode.url = "github:anomalyco/opencode";
     spacemacs = {
