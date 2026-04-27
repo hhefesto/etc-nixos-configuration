@@ -109,6 +109,7 @@
             inputs.agenix.nixosModules.default
             cfo
             expedientesDelfos
+            weddingOlimpo
             (home-manager-module { xmobarrc = ./xmobarrc-delfos; })
           ];
           extraSpecialArgs = { xmonadShortenLength = 26; };
