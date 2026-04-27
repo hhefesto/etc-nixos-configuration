@@ -17,7 +17,7 @@
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    expedientes.url = "git+ssh://git@github.com/hhefesto/docxty";
+    docxty.url = "git+ssh://git@github.com/hhefesto/docxty";
     cfo-as-a-service.url = "git+ssh://git@github.com/hhefesto/cfo-as-a-service";
     wedding-page.url = "github:hhefesto/wedding-website";
     claude-code-nix.url = "github:sadjow/claude-code-nix";
@@ -48,51 +48,31 @@
 
         cfo = (import "${inputs."cfo-as-a-service"}/nixosModules/cfo-as-a-service.nix") null;
 
-        expedientesModule = { ports, databaseName, startingBackup ? null, htmlDir ? "/var/lib/expedientes/html", serverName ? "_" }:
-          (import "${inputs.expedientes}/nixosModules/expedientes.nix") {
-            inherit ports databaseName startingBackup htmlDir serverName;
+        expedientes = { serverName ? "_" }:
+          (import "${inputs.docxty}/nixosModules/expedientes.nix") {
+            inherit serverName;
+            ports        = { nginx = 80; backend = 3000; database = 5432; };
+            databaseName = "expedientes";
+            htmlDir      = null;
+            startingBackup = {
+              dump = "/var/lib/expedientes-bootstrap/expedientes.dump";
+            };
             packages = {
-              backend        = inputs.expedientes.packages.${system}.expedientes-backend;
-              frontendStatic = inputs.expedientes.packages.${system}.expedientes-frontend-static;
+              backend        = inputs.docxty.packages.${system}.expedientes-backend;
+              frontendStatic = inputs.docxty.packages.${system}.expedientes-frontend-static;
             };
           };
 
-        expedientesOlimpo = expedientesModule {
-          ports        = { nginx = 80; backend = 3000; database = 5432; };
-          databaseName = "expedientes";
-          htmlDir      = null;
-          startingBackup = {
-            dump = "/home/hhefesto/.local/share/expedientes/restore/var/lib/expedientes-backup/staging/expedientes.dump";
-          };
-        };
-        expedientesDelfos = expedientesModule {
-          ports        = { nginx = 80; backend = 3000; database = 5432; };
-          databaseName = "expedientes";
-        };
-        expedientesXty = expedientesModule {
-          ports        = { nginx = 80; backend = 3000; database = 5432; };
-          databaseName = "expedientes";
-          serverName   = "docxty.net";
-          htmlDir      = null;
-          startingBackup = {
-            dump = "/var/lib/expedientes-bootstrap/expedientes.dump";
-          };
-        };
-
-        weddingModule = { ports, databaseName ? "wedding", serverName ? "_" }:
+        wedding = { serverName ? "_" }:
           (import "${inputs.wedding-page}/nixosModules/wedding.nix") {
-            inherit ports databaseName serverName;
+            inherit serverName;
+            ports        = { nginx = 8084; backend = 3001; database = 5432; };
+            databaseName = "wedding";
             packages = {
               backend    = inputs.wedding-page.packages.${system}.wedding-backend;
               staticRoot = inputs.wedding-page.packages.${system}.website;
             };
           };
-
-        weddingOlimpo = weddingModule {
-          ports        = { nginx = 8084; backend = 3001; database = 5432; };
-          databaseName = "wedding";
-          serverName   = "wedding.local";
-        };
 
         mkHost = { hostModules, extraSpecialArgs ? {} }: nixpkgs.lib.nixosSystem {
           inherit system;
@@ -108,8 +88,8 @@
             ./configuration-gui.nix
             inputs.agenix.nixosModules.default
             cfo
-            expedientesDelfos
-            weddingOlimpo
+            expedientes
+            wedding
             (home-manager-module { xmobarrc = ./xmobarrc-delfos; })
           ];
           extraSpecialArgs = { xmonadShortenLength = 26; };
@@ -123,8 +103,8 @@
             ./configuration-gui.nix
             inputs.agenix.nixosModules.default
             cfo
-            expedientesOlimpo
-            weddingOlimpo
+            expedientes
+            wedding
             (home-manager-module { xmobarrc = ./xmobarrc-olimpo; })
           ];
           extraSpecialArgs = { xmonadShortenLength = 50; };
@@ -135,7 +115,8 @@
             ./xty.nix
             ./projects-xty.nix
             ./configuration-core.nix
-            expedientesXty
+            (wedding {serverName = "xty-y-dan.net";})
+            (expedientes {serverName = "docxty.net";})
           ];
         };
 

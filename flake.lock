@@ -51,7 +51,7 @@
         "darwin": "darwin_2",
         "home-manager": "home-manager_2",
         "nixpkgs": [
-          "expedientes",
+          "docxty",
           "nixpkgs"
         ],
         "systems": "systems_5"
@@ -137,7 +137,7 @@
     "darwin_2": {
       "inputs": {
         "nixpkgs": [
-          "expedientes",
+          "docxty",
           "agenix",
           "nixpkgs"
         ]
@@ -183,7 +183,7 @@
       "inputs": {
         "flake-compat": "flake-compat_3",
         "nixpkgs": [
-          "expedientes",
+          "docxty",
           "nixpkgs"
         ],
         "utils": "utils_2"
@@ -259,7 +259,7 @@
         "url": "https://install.determinate.systems/determinate-nixd/tag/v3.18.1/x86_64-linux"
       }
     },
-    "expedientes": {
+    "docxty": {
       "inputs": {
         "agenix": "agenix_2",
         "deploy-rs": "deploy-rs_2",
@@ -539,7 +539,7 @@
     "home-manager_2": {
       "inputs": {
         "nixpkgs": [
-          "expedientes",
+          "docxty",
           "agenix",
           "nixpkgs"
         ]
@@ -835,11 +835,11 @@
         "nixpkgs": "nixpkgs_7"
       },
       "locked": {
-        "lastModified": 1777303058,
-        "narHash": "sha256-1UwkEwQUV+xdFnqz9yYMhiNmKuPCRKW/k3+0uocIZFk=",
+        "lastModified": 1777317360,
+        "narHash": "sha256-3Mxc7HhcNwH53PUqSgrTd6ZgrYkqpvifaJqOnwPPIoM=",
         "owner": "anomalyco",
         "repo": "opencode",
-        "rev": "738b3065dc2bf643daa40507061a928299f67d30",
+        "rev": "c361c2953fb54040273324edd99f19ca94ad62ce",
         "type": "github"
       },
       "original": {
@@ -903,7 +903,7 @@
         "claude-code-nix": "claude-code-nix",
         "deploy-rs": "deploy-rs",
         "determinate": "determinate",
-        "expedientes": "expedientes",
+        "docxty": "docxty",
         "flake-parts": "flake-parts_4",
         "home-manager": "home-manager_3",
         "nixpkgs": "nixpkgs_6",
