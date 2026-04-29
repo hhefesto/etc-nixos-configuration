@@ -293,7 +293,11 @@
         };
       };
 
-      perSystem = { pkgs, ... }: {
+      perSystem = { pkgs, system, ... }: {
+        devShells.default = pkgs.mkShell {
+          packages = [ deploy-rs.packages.${system}.deploy-rs ];
+        };
+
         packages = let
           hosts = self.nixosConfigurations;
           entries = builtins.map (name: {
