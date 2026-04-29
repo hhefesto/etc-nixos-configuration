@@ -1,5 +1,8 @@
 { pkgs, ... }:
 {
+  environment.systemPackages = [ pkgs.emacs ];
+  environment.variables.EDITOR = "emacs";
+
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 

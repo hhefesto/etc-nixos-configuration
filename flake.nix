@@ -210,45 +210,28 @@
           , profile ? "desktop"
           , ports ? { nginx = 8084; backend = 3001; database = 5432; }
           }:
-          { lib, ... }:
+          { ... }:
           {
             imports = [
               ((import "${inputs.wedding-page}/nixosModules/wedding.nix") {
                 inherit ports serverName;
                 databaseName = "wedding";
+                localHostAlias = profile == "desktop";
+                localPostgresTrust = profile == "desktop";
+                recommendedGzipSettings = false;
+                tls = {
+                  enableACME = profile == "production";
+                  forceSSL = profile == "production";
+                  openFirewall = profile == "production";
+                };
+                acme = {
+                  acceptTerms = profile == "production";
+                  email = "hhefesto@rdataa.com";
+                };
                 packages = {
                   backend    = inputs.wedding-page.packages.${system}.wedding-backend;
                   staticRoot = inputs.wedding-page.packages.${system}.website;
                 };
-              })
-            ];
-
-            config = lib.mkMerge [
-              {
-                services.nginx.recommendedGzipSettings = lib.mkForce false;
-              }
-
-              (lib.mkIf (profile == "desktop") {
-                services.postgresql.authentication = lib.mkAfter ''
-                  host all wedding 127.0.0.1/32 trust
-                  host all wedding ::1/128      trust
-                '';
-
-                networking.hosts."127.0.0.1" = [ serverName ];
-              })
-
-              (lib.mkIf (profile == "production") {
-                security.acme = {
-                  acceptTerms = true;
-                  defaults.email = "hhefesto@rdataa.com";
-                };
-
-                services.nginx.virtualHosts.${serverName} = {
-                  enableACME = true;
-                  forceSSL = true;
-                };
-
-                networking.firewall.allowedTCPPorts = [ 443 ];
               })
             ];
           };

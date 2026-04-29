@@ -74,7 +74,6 @@
     any-nix-shell
     wget
     vim
-    emacs
     tmux
     curl
     gh
