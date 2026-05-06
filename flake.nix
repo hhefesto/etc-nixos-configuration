@@ -240,8 +240,9 @@
                   email = "hhefesto@rdataa.com";
                 };
                 packages = {
-                  backend    = inputs.wedding-page.packages.${system}.wedding-backend;
-                  staticRoot = inputs.wedding-page.packages.${system}.website;
+                  backend         = inputs.wedding-page.packages.${system}.wedding-backend;
+                  staticRoot      = inputs.wedding-page.packages.${system}.website;
+                  adminStaticRoot = inputs.wedding-page.packages.${system}.admin-website;
                 };
               })
             ];
