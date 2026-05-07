@@ -20,6 +20,7 @@
     docxty.url = "git+ssh://git@github.com/hhefesto/docxty";
     cfo-as-a-service.url = "git+ssh://git@github.com/hhefesto/cfo-as-a-service";
     wedding-page.url = "github:hhefesto/wedding-website";
+    vesiet.url = "git+ssh://git@github.com/hhefesto/vesiet";
     claude-code-nix.url = "github:sadjow/claude-code-nix";
     opencode.url = "github:anomalyco/opencode";
     spacemacs = {
@@ -278,6 +279,62 @@
             };
           };
 
+        vesiet =
+          { profile ? "desktop"
+          , serverName ? if profile == "production" then "vesiet.hhefesto.com" else "vesiet.local"
+          , ports ? if profile == "production"
+              then { nginx = 80;   backend = 3002; database = 5432; }
+              else { nginx = 8085; backend = 3002; database = 5432; }
+          }:
+          { config, lib, ... }:
+          {
+            imports = [
+              inputs.agenix.nixosModules.default
+              ((import "${inputs.vesiet}/nixosModules/vesiet.nix") {
+                inherit ports;
+                domain = serverName;
+                databaseName = "vesiet";
+                localHostAlias = profile == "desktop";
+                localPostgresTrust = profile == "desktop";
+                recommendedGzipSettings = false;
+                tls = {
+                  enableACME = profile == "production";
+                  forceSSL = profile == "production";
+                  openFirewall = profile == "production";
+                };
+                acme = {
+                  acceptTerms = profile == "production";
+                  email = "hhefesto@rdataa.com";
+                };
+                packages = {
+                  backend    = inputs.vesiet.packages.${system}.vesiet-backend-bundle;
+                  staticRoot = inputs.vesiet.packages.${system}.website;
+                };
+              })
+            ];
+
+            config = lib.mkIf (profile == "production") {
+              age.secrets.vesiet-db-password = {
+                file = inputs.vesiet + "/secrets/vesiet-db-password.age";
+                owner = "postgres";
+                group = "postgres";
+                mode = "0400";
+              };
+
+              age.secrets.vesiet-backend-env = {
+                file = inputs.vesiet + "/secrets/vesiet-backend-env.age";
+                owner = "root";
+                group = "root";
+                mode = "0400";
+              };
+
+              services.vesiet.database.passwordFile =
+                config.age.secrets.vesiet-db-password.path;
+              services.vesiet.backend.databaseUrlFile =
+                config.age.secrets.vesiet-backend-env.path;
+            };
+          };
+
         mkHost = { hostModules, extraSpecialArgs ? {} }: nixpkgs.lib.nixosSystem {
           inherit system;
           modules = hostModules;
@@ -305,6 +362,7 @@
             (cfo {})
             (expedientes {})
             (wedding { serverName = "wedding.local"; })
+            # (vesiet  { serverName = "vesiet.local"; })
             (home-manager-module { xmobarrc = ./xmobarrc-olimpo; })
           ];
           extraSpecialArgs = { xmonadShortenLength = 50; };
