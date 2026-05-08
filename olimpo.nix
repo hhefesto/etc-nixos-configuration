@@ -31,6 +31,12 @@
   # Sign every path olimpo serves so delfos accepts the signature.
   nix.settings.secret-key-files = [ "/etc/nix/cache-priv-key.pem" ];
 
+  # nix.sshServe runs `nix-daemon --stdio` as the `nix-ssh` user.
+  # allowed-users is restricted in configuration-core.nix, so re-grant
+  # nix-ssh explicitly here (list-merges with the core values).
+  nix.settings.allowed-users = [ "nix-ssh" ];
+  nix.settings.trusted-users = [ "nix-ssh" ];
+
   # Pre-seed delfos's host key so root's ssh client doesn't prompt.
   programs.ssh.knownHosts."delfos-nix-cache" = {
     hostNames = [ "delfos-nix-cache" "192.168.1.139" ];
