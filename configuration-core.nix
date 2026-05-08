@@ -37,6 +37,8 @@
 
   nix.settings.auto-optimise-store = true;
   nix.settings.allow-import-from-derivation = true;
+  nix.settings.fallback = true;
+  nix.settings.connect-timeout = 3;
 
   nix.gc = {
     automatic = true;

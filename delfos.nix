@@ -8,10 +8,10 @@
 
   # Pull from olimpo's store.
   nix.settings.substituters = [
-    "ssh-ng://nix-ssh@192.168.1.134"
+    "ssh-ng://nix-ssh@olimpo-nix-cache"
   ];
   nix.settings.trusted-substituters = [
-    "ssh-ng://nix-ssh@192.168.1.134"
+    "ssh-ng://nix-ssh@olimpo-nix-cache"
   ];
   nix.settings.trusted-public-keys = [
     # Contents of /etc/nix/cache-pub-key.pem on olimpo.
@@ -32,7 +32,20 @@
   nix.settings.secret-key-files = [ "/etc/nix/cache-priv-key.pem" ];
 
   # Pre-seed olimpo's host key so root's ssh client doesn't prompt.
-  programs.ssh.knownHosts."192.168.1.134" = {
+  programs.ssh.knownHosts."olimpo-nix-cache" = {
+    hostNames = [ "olimpo-nix-cache" "192.168.1.134" ];
     publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP5EUe2fiscGEdLFXkTfxPLRmHuRBwqCbHcFSabqVWN1";
   };
+
+  programs.ssh.extraConfig = ''
+    Host olimpo-nix-cache
+      HostName 192.168.1.134
+      User nix-ssh
+      IdentityFile /root/.ssh/id_ed25519
+      IdentitiesOnly yes
+      BatchMode yes
+      PasswordAuthentication no
+      KbdInteractiveAuthentication no
+      ConnectTimeout 3
+  '';
 }

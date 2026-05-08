@@ -8,10 +8,10 @@
 
   # Pull from delfos's store.
   nix.settings.substituters = [
-    "ssh-ng://nix-ssh@192.168.1.139"
+    "ssh-ng://nix-ssh@delfos-nix-cache"
   ];
   nix.settings.trusted-substituters = [
-    "ssh-ng://nix-ssh@192.168.1.139"
+    "ssh-ng://nix-ssh@delfos-nix-cache"
   ];
   nix.settings.trusted-public-keys = [
     # Contents of /etc/nix/cache-pub-key.pem on delfos.
@@ -32,7 +32,20 @@
   nix.settings.secret-key-files = [ "/etc/nix/cache-priv-key.pem" ];
 
   # Pre-seed delfos's host key so root's ssh client doesn't prompt.
-  programs.ssh.knownHosts."192.168.1.139" = {
+  programs.ssh.knownHosts."delfos-nix-cache" = {
+    hostNames = [ "delfos-nix-cache" "192.168.1.139" ];
     publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIINM3/adCok24i8fl600FBto4A/thxXaKpDu5B3ec3QT";
   };
+
+  programs.ssh.extraConfig = ''
+    Host delfos-nix-cache
+      HostName 192.168.1.139
+      User nix-ssh
+      IdentityFile /root/.ssh/id_ed25519
+      IdentitiesOnly yes
+      BatchMode yes
+      PasswordAuthentication no
+      KbdInteractiveAuthentication no
+      ConnectTimeout 3
+  '';
 }
