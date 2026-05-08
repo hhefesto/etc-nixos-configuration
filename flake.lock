@@ -1342,11 +1342,11 @@
         "reflex-platform": "reflex-platform_3"
       },
       "locked": {
-        "lastModified": 1778257506,
-        "narHash": "sha256-qPfS7t4mUHUAKNUMeQBCy7XXM141p2bKSgrWuPCYey8=",
+        "lastModified": 1778262869,
+        "narHash": "sha256-SLJEJumBXdyxh7eiBkqDnLODrz0BLQ8OoSto8X+Nlv8=",
         "owner": "hhefesto",
         "repo": "wedding-website",
-        "rev": "54ee5063e8f4a829b8caabc7952211cd1603705a",
+        "rev": "980118ad1cdd4d525340cdfa1193af471af45b8b",
         "type": "github"
       },
       "original": {
