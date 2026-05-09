@@ -1321,11 +1321,11 @@
         "nixpkgs": "nixpkgs_9"
       },
       "locked": {
-        "lastModified": 1778103336,
-        "narHash": "sha256-cpR0V3bQBx5YuSPespNx65e8L5x7NQ8A5yR4j4hZCrQ=",
+        "lastModified": 1778354334,
+        "narHash": "sha256-Kqf8oVnSX2ohvbMg8Hn1smjuGoWWr3iAZcnxUyJt4Vg=",
         "ref": "refs/heads/master",
-        "rev": "af678869c8557b53b35b2cdcc3307094c7f44be1",
-        "revCount": 2,
+        "rev": "3a79fb9d9497257673d31371cc542b1fbc99b856",
+        "revCount": 9,
         "type": "git",
         "url": "ssh://git@github.com/hhefesto/vesiet"
       },

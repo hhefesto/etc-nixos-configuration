@@ -382,6 +382,7 @@
               serverName = "docxty.net";
             })
             (cfo { profile = "production"; })
+            (vesiet { profile = "production"; })
             ({ config, lib, pkgs, ... }: {
               services.postgresql.package = pkgs.${"postgresql_${xtyPostgresMajor}"};
 
@@ -426,11 +427,11 @@
             lib.optionals (xtyPostgresPackageMajor != xtyPostgresMajor) [
               "xty PostgreSQL package major is ${xtyPostgresPackageMajor}, expected ${xtyPostgresMajor}"
             ]
-            ++ lib.optionals (!(hasAll [ "expedientes" "wedding" "cfo" ] xtyCfg.services.postgresql.ensureDatabases)) [
-              "xty PostgreSQL ensureDatabases must contain expedientes, wedding, and cfo"
+            ++ lib.optionals (!(hasAll [ "expedientes" "wedding" "cfo" "vesiet" ] xtyCfg.services.postgresql.ensureDatabases)) [
+              "xty PostgreSQL ensureDatabases must contain expedientes, wedding, cfo, and vesiet"
             ]
-            ++ lib.optionals (!(hasAll [ "expedientes" "wedding" "cfo" ] xtyPostgresUsers)) [
-              "xty PostgreSQL ensureUsers must contain expedientes, wedding, and cfo"
+            ++ lib.optionals (!(hasAll [ "expedientes" "wedding" "cfo" "vesiet" ] xtyPostgresUsers)) [
+              "xty PostgreSQL ensureUsers must contain expedientes, wedding, cfo, and vesiet"
             ]
             ++ lib.optionals (xtyCfg.systemd.services.postgresql.postStart != "") [
               "xty PostgreSQL password hooks must not run in postgresql.postStart"
@@ -443,6 +444,9 @@
             ]
             ++ lib.optionals (!(lib.hasInfix "ALTER USER cfo" xtyPostgresSetupPostStart)) [
               "xty PostgreSQL setup must set the cfo role password"
+            ]
+            ++ lib.optionals (!(lib.hasInfix "ALTER USER vesiet" xtyPostgresSetupPostStart)) [
+              "xty PostgreSQL setup must set the vesiet role password"
             ]
             ++ lib.optionals (!(hasUnit "postgresql-setup.service" xtyCfg.systemd.services.wedding-migrate.after)) [
               "wedding-migrate must start after postgresql-setup.service"
@@ -462,6 +466,18 @@
             ++ lib.optionals (!(hasUnit "postgresql-setup.service" xtyCfg.systemd.services.cfo-backend.requires)) [
               "cfo-backend must require postgresql-setup.service"
             ]
+            ++ lib.optionals (!(hasUnit "postgresql-setup.service" xtyCfg.systemd.services.vesiet-migrate.after)) [
+              "vesiet-migrate must start after postgresql-setup.service"
+            ]
+            ++ lib.optionals (!(hasUnit "postgresql-setup.service" xtyCfg.systemd.services.vesiet-migrate.requires)) [
+              "vesiet-migrate must require postgresql-setup.service"
+            ]
+            ++ lib.optionals (!(hasUnit "postgresql-setup.service" xtyCfg.systemd.services.vesiet-backend.after)) [
+              "vesiet-backend must start after postgresql-setup.service"
+            ]
+            ++ lib.optionals (!(hasUnit "vesiet-migrate.service" xtyCfg.systemd.services.vesiet-backend.requires)) [
+              "vesiet-backend must require vesiet-migrate.service"
+            ]
             ++ lib.optionals ((xtyCfg.systemd.services.expedientes-seed.unitConfig.ConditionPathExists or "") != "!/var/lib/expedientes/.seeded") [
               "expedientes-seed must stay guarded by /var/lib/expedientes/.seeded"
             ]
@@ -474,6 +490,9 @@
             ++ lib.optionals (!(hasXtyVhost "cfo-vision.com")) [
               "nginx must define cfo-vision.com vhost"
             ]
+            ++ lib.optionals (!(hasXtyVhost "vesiet.hhefesto.com")) [
+              "nginx must define vesiet.hhefesto.com vhost"
+            ]
             ++ lib.optionals (!(hasSsl443 "docxty.net")) [
               "docxty.net must listen on 443 with ssl"
             ]
@@ -483,6 +502,9 @@
             ++ lib.optionals (!(hasSsl443 "cfo-vision.com")) [
               "cfo-vision.com must listen on 443 with ssl"
             ]
+            ++ lib.optionals (!(hasSsl443 "vesiet.hhefesto.com")) [
+              "vesiet.hhefesto.com must listen on 443 with ssl"
+            ]
             ++ lib.optionals ((toString xtyCfg.services.wedding.backend.databaseUrlFile) != "/run/agenix/wedding-backend-env") [
               "wedding backend must use the production DATABASE_URL secret"
             ]
@@ -491,6 +513,9 @@
             ]
             ++ lib.optionals ((toString xtyCfg.services.cfo.backend.databaseUrlFile) != "/run/agenix/cfo-backend-env") [
               "cfo backend must use the production DATABASE_URL secret"
+            ]
+            ++ lib.optionals ((toString xtyCfg.services.vesiet.backend.databaseUrlFile) != "/run/agenix/vesiet-backend-env") [
+              "vesiet backend must use the production DATABASE_URL secret"
             ];
           preDeployXty = pkgs.runCommand "pre-deploy-xty" {} ''
             ${if checkFailures == [] then ''
