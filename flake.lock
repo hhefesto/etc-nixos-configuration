@@ -686,11 +686,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1777851538,
-        "narHash": "sha256-Gp8qwTEYNoy2yvmErVGlvLOQvrtEECCAKbonW7VJef8=",
+        "lastModified": 1778401693,
+        "narHash": "sha256-OVHdCqXXUF5UdGkH+FF2ZL06OLZjj2kvP2dIUmzVWoo=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "cc09c0f9b7eaa95c2d9827338a5eb03d32505ca5",
+        "rev": "389b83002efc26f1145e89a6a8e6edc5a6435948",
         "type": "github"
       },
       "original": {
@@ -1063,11 +1063,11 @@
         "nixpkgs": "nixpkgs_7"
       },
       "locked": {
-        "lastModified": 1778356955,
-        "narHash": "sha256-dupAgxOjiVZYSxlYA14Q20d31U6M1JHcRS5s217hBKc=",
+        "lastModified": 1778514510,
+        "narHash": "sha256-e0R6I3UHdDBrp6l4PHzULeGwkodsSSN4Ml84kMqolaU=",
         "owner": "anomalyco",
         "repo": "opencode",
-        "rev": "77da433e0aacaa991123723b8c5f79c6464eb98b",
+        "rev": "52f7ba7d4d6bdd924586bfddf41f19bcc4a07528",
         "type": "github"
       },
       "original": {
@@ -1342,11 +1342,11 @@
         "reflex-platform": "reflex-platform_3"
       },
       "locked": {
-        "lastModified": 1778271113,
-        "narHash": "sha256-6pEnPqF2yweoGasdTt/ByqBOfXsdG2XCki9F5PZjsNI=",
+        "lastModified": 1778519940,
+        "narHash": "sha256-2oZJliQfBMsxPtMozdFa7SMeTPapM6Nk+X9VVTOCKzw=",
         "owner": "hhefesto",
         "repo": "wedding-website",
-        "rev": "469f9fda4841429e33c711b8faa0aa0346173647",
+        "rev": "a3763abe6d65420438925802728b6e20e3e93983",
         "type": "github"
       },
       "original": {
