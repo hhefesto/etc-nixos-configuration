@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 {
   environment.systemPackages = [ pkgs.emacs ];
   environment.variables.EDITOR = "emacs";
@@ -9,7 +9,7 @@
   boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 
   networking.enableIPv6 = false;
-  time.timeZone = "America/Mexico_City";
+  time.timeZone = lib.mkDefault "America/Mexico_City";
 
   nixpkgs.config.allowUnfree = true;
 

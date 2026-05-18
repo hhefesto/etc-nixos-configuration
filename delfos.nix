@@ -1,8 +1,13 @@
-{ ... }:
+{ lib, ... }:
 {
   imports = [ ./hardware-configuration-delfos.nix ];
 
   networking.hostName = "delfos";
+
+  # Dynamic time zone for travel: automatic-timezoned + geoclue2.
+  services.geoclue2.enable = true;
+  services.automatic-timezoned.enable = true;
+  time.timeZone = lib.mkForce null;
 
   # --- LAN binary-cache: delfos <-> olimpo over ssh-ng ---------------------
 
