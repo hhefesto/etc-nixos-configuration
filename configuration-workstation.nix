@@ -1,5 +1,12 @@
 { pkgs, lib, inputs, ... }:
 {
+  nixpkgs.overlays = [
+    inputs.claude-code-nix.overlays.default
+    (final: prev: {
+      bun = inputs.opencode.inputs.nixpkgs.legacyPackages.${prev.stdenv.hostPlatform.system}.bun;
+    })
+    inputs.opencode.overlays.default
+  ];
 
   environment.systemPackages = with pkgs; [
     python3
