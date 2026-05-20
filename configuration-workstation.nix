@@ -1,56 +1,5 @@
 { pkgs, lib, inputs, ... }:
 {
-  nixpkgs.overlays = [
-    inputs.claude-code-nix.overlays.default
-    (final: prev: {
-      bun = inputs.opencode.inputs.nixpkgs.legacyPackages.${prev.stdenv.hostPlatform.system}.bun;
-    })
-    inputs.opencode.overlays.default
-    (final: prev: {
-      opencode = prev.opencode.overrideAttrs (old: {
-        patches = (old.patches or [ ]) ++ [
-          (builtins.toFile "opencode-generate-without-prettier.patch" ''
-            diff --git a/packages/opencode/src/cli/cmd/generate.ts b/packages/opencode/src/cli/cmd/generate.ts
-            --- a/packages/opencode/src/cli/cmd/generate.ts
-            +++ b/packages/opencode/src/cli/cmd/generate.ts
-            @@ -30,17 +30,7 @@ export const GenerateCommand = {
-                 }
-                 const raw = JSON.stringify(specs, null, 2)
-
-            -    // Format through prettier so output is byte-identical to committed file
-            -    // regardless of whether ./script/format.ts runs afterward.
-            -    const prettier = await import("prettier")
-            -    const babel = await import("prettier/plugins/babel")
-            -    const estree = await import("prettier/plugins/estree")
-            -    const format = prettier.format ?? prettier.default?.format
-            -    const json = await format(raw, {
-            -      parser: "json",
-            -      plugins: [babel.default ?? babel, estree.default ?? estree],
-            -      printWidth: 120,
-            -    })
-            +    const json = raw
-
-                 // Wait for stdout to finish writing before process.exit() is called
-                 await new Promise<void>((resolve, reject) => {
-          '')
-        ];
-
-        postConfigure = (old.postConfigure or "") + ''
-          patchShebangs node_modules
-          patchShebangs packages
-
-          if [ -e packages/app/node_modules/.bin/vite ]; then
-            vite_target=$(readlink -f packages/app/node_modules/.bin/vite || true)
-            if [ -n "$vite_target" ]; then
-              substituteInPlace "$vite_target" --replace /usr/bin/env ${prev.coreutils}/bin/env
-            else
-              substituteInPlace packages/app/node_modules/.bin/vite --replace /usr/bin/env ${prev.coreutils}/bin/env
-            fi
-          fi
-        '';
-      });
-    })
-  ];
 
   environment.systemPackages = with pkgs; [
     python3
