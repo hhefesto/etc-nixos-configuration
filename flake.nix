@@ -22,7 +22,8 @@
     wedding-page.url = "github:hhefesto/wedding-website";
     vesiet.url = "git+ssh://git@github.com/hhefesto/vesiet";
     claude-code-nix.url = "github:sadjow/claude-code-nix";
-    opencode.url = "github:anomalyco/opencode";
+    opencode.url = "github:anomalyco/opencode/c5db39f6268a36194a7fe5f833ae3197dfe250b6";
+    telomare.url = "git+ssh://git@github.com/hhefesto/stand-in-language?ref=source-locations";
     spacemacs = {
       url = "github:syl20bnr/spacemacs";
       flake = false;
@@ -45,7 +46,7 @@
           home-manager.useUserPackages = true;
           home-manager.users.hhefesto = import ./home.nix;
           home-manager.extraSpecialArgs = {
-            spacemacs = inputs.spacemacs;
+            inherit (inputs) spacemacs telomare;
             inherit xmobarrc;
           };
         };

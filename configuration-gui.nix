@@ -1,3 +1,4 @@
+
 { pkgs, lib, xmonadShortenLength ? 50, ... }:
 {
   networking.networkmanager.enable = true;
@@ -79,7 +80,6 @@
   };
 
   programs.dconf.enable = true;
-  programs.light.enable = true;
 
   hardware.bluetooth.enable = true;
   services.pipewire = {

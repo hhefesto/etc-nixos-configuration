@@ -1,4 +1,10 @@
-{ config, pkgs, lib, spacemacs, xmobarrc, ... }:
+{ config, pkgs, lib, spacemacs, telomare, xmobarrc, ... }:
+let
+  spacemacsConfig = pkgs.writeText "spacemacs" (builtins.replaceStrings
+    [ ''(load "@TELOMARE_MODE_SPACEMACS@")'' ]
+    [ ''(load "${telomare}/emacs-telomare-mode/telomare-mode-spacemacs.el")'' ]
+    (builtins.readFile ./spacemacs));
+in
 {
   home = {
     username = "hhefesto";
@@ -7,7 +13,7 @@
   };
   home.activation = {
     installSpacemacs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      install -Dm644 ${./spacemacs} "$HOME/.spacemacs"
+      install -Dm644 ${spacemacsConfig} "$HOME/.spacemacs"
 
       if [ ! -d "$HOME/.emacs.d" ]; then
         cp -r ${spacemacs} "$HOME/.emacs.d"

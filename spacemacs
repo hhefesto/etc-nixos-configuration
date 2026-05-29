@@ -33,7 +33,8 @@ This function should only modify configuration layer settings."
 
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(yaml
+   '(javascript
+     yaml
      nixos
      auto-completion
      better-defaults
@@ -607,7 +608,7 @@ before packages are loaded."
   ;;                   (cons '("\\.hs\\'" . haskell-mode)
   ;;                         (assq-delete-all "\\.hs\\'" auto-mode-alist)))))
 
-  (load "~/src/telomare/emacs-telomare-mode/telomare-mode-spacemacs.el")
+  (load "@TELOMARE_MODE_SPACEMACS@")
 
   (defun my/maybe-activate-agda-mode ()
     "Activate agda2-mode for Agda files using the project's direnv environment.
