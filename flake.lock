@@ -141,11 +141,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1780023606,
-        "narHash": "sha256-kLRVx7T+9ETF26prUsMA9Nm0LidSFN08oPLkXK5V2CA=",
+        "lastModified": 1780369239,
+        "narHash": "sha256-1hpcdHjLYsdBGzOYK/r1l+UvPrtkgt3wVhLF9D5OWmI=",
         "owner": "sadjow",
         "repo": "claude-code-nix",
-        "rev": "879750a6fc504c9eafbab781798cb85e1b39242f",
+        "rev": "3cc73775ecceb02a798519a5527f4eb400c8c8e4",
         "type": "github"
       },
       "original": {
@@ -1018,11 +1018,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1779877693,
-        "narHash": "sha256-NOF9NAREhxr50bbBfVcVOq+ArCMSoe8dP79Pk2uyARk=",
+        "lastModified": 1780336545,
+        "narHash": "sha256-vhVhuXzFrIOfcssC/9hDHx7MHzDKjF3keHuREOQqQiQ=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "4100e830e085863741bc69b156ec4ccd53ab5be0",
+        "rev": "4df1b885d76a54e1aa1a318f8d16fd6005b6401f",
         "type": "github"
       },
       "original": {
@@ -1078,12 +1078,12 @@
     },
     "nixpkgs_6": {
       "locked": {
-        "lastModified": 1779971959,
-        "narHash": "sha256-R5nauXyqyfRUFiZycFFZdkF7wl6eaUpPLst35+2nJQY=",
-        "rev": "ec942ba042dad5ef097e2ef3a3effc034241f011",
-        "revCount": 1004881,
+        "lastModified": 1780203844,
+        "narHash": "sha256-K5sT4jTpGs15ADhviMKNBH38REpPf5Q6mM1+N6cArVE=",
+        "rev": "b51242d7d43689db2f3be91bd05d5b24fbb469c4",
+        "revCount": 1005180,
         "type": "tarball",
-        "url": "https://api.flakehub.com/f/pinned/NixOS/nixpkgs/0.2605.1004881%2Brev-ec942ba042dad5ef097e2ef3a3effc034241f011/019e7280-271d-7cc0-b0b7-e37f681daa84/source.tar.gz"
+        "url": "https://api.flakehub.com/f/pinned/NixOS/nixpkgs/0.2605.1005180%2Brev-b51242d7d43689db2f3be91bd05d5b24fbb469c4/019e820b-3e9f-7ad0-acdd-dab08fdf665f/source.tar.gz"
       },
       "original": {
         "type": "tarball",
@@ -1225,11 +1225,11 @@
     "spacemacs": {
       "flake": false,
       "locked": {
-        "lastModified": 1779652481,
-        "narHash": "sha256-Yt7pZ/EgxaJhbain1lIV4xTtXztSCuJGFAdeONDJN2E=",
+        "lastModified": 1780421525,
+        "narHash": "sha256-ZiXdELtfjwbrauJmnTYw/lB69EPUxZX+vtX+XFBWFu4=",
         "owner": "syl20bnr",
         "repo": "spacemacs",
-        "rev": "a46fa81690fe3bae2198a470a8481ac091aae090",
+        "rev": "a1b98eb7d303226be60a0afe3025fc87d67be23b",
         "type": "github"
       },
       "original": {

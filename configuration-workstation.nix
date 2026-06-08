@@ -82,6 +82,24 @@
     ohMyZsh.plugins = [ "git" "sudo" "colorize" "extract" "history" "postgres" ];
     ohMyZsh.theme = "intheloop";
 
+    shellAliases = {
+      cat = "bat";
+      _cat = "cat";
+      gs = "git status";
+      ga = "git add -A";
+      gd = "git diff";
+      gc = "git commit -am";
+      gcs = "git commit -am \"squash\"";
+      gbs = "git --no-pager branch --sort -committerdate";
+      xclip = "xclip -selection c";
+      please = "sudo";
+      n = "nix -Lv";
+      nd = "nix -Lv develop -c zsh";
+      sn = "sudo nixos-rebuild -v switch --flake ~/src/etc-nixos-configuration";
+      gr = "grep -R --exclude='TAGS' --exclude-dir={.stack-work,dist-newstyle,result,result-2} -n";
+      where = "pwd";
+    };
+
     shellInit = ''
       if [[ -o interactive ]]; then
         ssh-add -l >/dev/null 2>&1
@@ -97,12 +115,15 @@
     interactiveShellInit = ''
       save_aliases=$(alias -L)
       eval $save_aliases; unset save_aliases
+      RPROMPT=${"'"}''${RPROMPT:+$RPROMPT  }%F{244}[%D{%H:%M:%S}]%f${"'"}
     '';
 
     promptInit = ''
       any-nix-shell zsh --info-right | source /dev/stdin
     '';
   };
+
+  users.users.root.shell = pkgs.zsh;
 
   users.extraUsers.hhefesto.extraGroups = lib.mkAfter [ "docker" ];
   virtualisation.docker.enable = true;

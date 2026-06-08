@@ -26,26 +26,7 @@ in
     '';
   };
 
-  programs.zsh = {
-    enable = true;
-    shellAliases = {
-      cat = "bat";
-      _cat = "cat";
-      gs = "git status";
-      ga = "git add -A";
-      gd = "git diff";
-      gc = "git commit -am";
-      gcs = "git commit -am \"squash\"";
-      gbs = "git --no-pager branch --sort -committerdate";
-      xclip = "xclip -selection c";
-      please = "sudo";
-      n = "nix -Lv";
-      nd = "nix -Lv develop -c zsh";
-      sn = "sudo nixos-rebuild -v switch --flake ~/src/etc-nixos-configuration";
-      gr = "grep -R --exclude='TAGS' --exclude-dir={.stack-work,dist-newstyle,result,result-2} -n";
-      where = "pwd";
-    };
-  };
+  programs.zsh.enable = true;
 
   # Add the doom binary to your PATH
   # home.sessionPath = [ "$HOME/.emacs.d/bin"
