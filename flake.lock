@@ -141,11 +141,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1782339958,
-        "narHash": "sha256-nGir9tLp3DpQwVNdVcBFxNGKCW9wI9fcFMFlkj0Jis4=",
+        "lastModified": 1782512584,
+        "narHash": "sha256-6pAOPEzTR5vGudD9K+zbD4u3mPetOg+HgMydzF0m8SM=",
         "owner": "sadjow",
         "repo": "claude-code-nix",
-        "rev": "41f9dcd9e2b546c2c0decae4adbe782e3c16520b",
+        "rev": "e0c8acbcb3690471a2d2d485b03d09e303780932",
         "type": "github"
       },
       "original": {
@@ -1078,11 +1078,11 @@
     },
     "nixpkgs_6": {
       "locked": {
-        "lastModified": 1781577229,
-        "narHash": "sha256-lrp67w8AulE9Ks53n27I45ADSzbOCn4H+CNW1Ck8B+8=",
+        "lastModified": 1782467914,
+        "narHash": "sha256-pGvFkM8N0xEkIIXDe5YYfbEAvHrk4IxBrjB/x8OomhE=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "567a49d1913ce81ac6e9582e3553dd90a955875f",
+        "rev": "e73de5be04e0eff4190a1432b946d469c794e7b4",
         "type": "github"
       },
       "original": {
@@ -1227,11 +1227,11 @@
     "spacemacs": {
       "flake": false,
       "locked": {
-        "lastModified": 1781976347,
-        "narHash": "sha256-KglrxymoUAKnfMzmezK1LTqEe/BOwcdrkRQy+xw83Ws=",
+        "lastModified": 1782449399,
+        "narHash": "sha256-4nF8LMfAwN66a5JAgC2inhFgzW3m/oHFATlm1F6f+tE=",
         "owner": "syl20bnr",
         "repo": "spacemacs",
-        "rev": "7ee024bd93d7737c8c4e40dd04934d15e3ff87b9",
+        "rev": "a34310ecbbb85fa9a125caee8fba227af1f94fcf",
         "type": "github"
       },
       "original": {
