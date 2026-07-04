@@ -2,7 +2,6 @@
   description = "hhefesto's system configurations";
 
   inputs = {
-    determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
     deploy-rs = {
@@ -20,7 +19,6 @@
     docxty.url = "git+ssh://git@github.com/hhefesto/docxty";
     cfo-as-a-service.url = "git+ssh://git@github.com/hhefesto/cfo-as-a-service";
     wedding-page.url = "github:hhefesto/wedding-website";
-    vesiet.url = "git+ssh://git@github.com/hhefesto/vesiet";
     claude-code-nix.url = "github:sadjow/claude-code-nix";
     opencode.url = "github:anomalyco/opencode/c5db39f6268a36194a7fe5f833ae3197dfe250b6";
     telomare.url = "git+ssh://git@github.com/hhefesto/stand-in-language?ref=source-locations";
@@ -268,7 +266,7 @@
                 file = inputs.wedding-page + "/secrets/wedding-admin-password-hash.age";
                 owner = "root";
                 group = "root";
-                mode = "0444";
+                mode = "0400";
               };
 
               services.wedding.database.passwordFile =
@@ -277,62 +275,13 @@
                 config.age.secrets.wedding-backend-env.path;
               services.wedding.backend.adminPasswordHashFile =
                 config.age.secrets.wedding-admin-password-hash.path;
-            };
-          };
 
-        vesiet =
-          { profile ? "desktop"
-          , serverName ? if profile == "production" then "vesiet.hhefesto.com" else "vesiet.local"
-          , ports ? if profile == "production"
-              then { nginx = 80;   backend = 3002; database = 5432; }
-              else { nginx = 8085; backend = 3002; database = 5432; }
-          }:
-          { config, lib, ... }:
-          {
-            imports = [
-              inputs.agenix.nixosModules.default
-              ((import "${inputs.vesiet}/nixosModules/vesiet.nix") {
-                inherit ports;
-                domain = serverName;
-                databaseName = "vesiet";
-                localHostAlias = profile == "desktop";
-                localPostgresTrust = profile == "desktop";
-                recommendedGzipSettings = false;
-                tls = {
-                  enableACME = profile == "production";
-                  forceSSL = profile == "production";
-                  openFirewall = profile == "production";
-                };
-                acme = {
-                  acceptTerms = profile == "production";
-                  email = "hhefesto@rdataa.com";
-                };
-                packages = {
-                  backend    = inputs.vesiet.packages.${system}.vesiet-backend-bundle;
-                  staticRoot = inputs.vesiet.packages.${system}.website;
-                };
-              })
-            ];
-
-            config = lib.mkIf (profile == "production") {
-              age.secrets.vesiet-db-password = {
-                file = inputs.vesiet + "/secrets/vesiet-db-password.age";
-                owner = "postgres";
-                group = "postgres";
-                mode = "0400";
-              };
-
-              age.secrets.vesiet-backend-env = {
-                file = inputs.vesiet + "/secrets/vesiet-backend-env.age";
-                owner = "root";
-                group = "root";
-                mode = "0400";
-              };
-
-              services.vesiet.database.passwordFile =
-                config.age.secrets.vesiet-db-password.path;
-              services.vesiet.backend.databaseUrlFile =
-                config.age.secrets.vesiet-backend-env.path;
+              # The backend runs as DynamicUser and cannot read a 0400
+              # root-owned secret directly; systemd hands it a private copy.
+              systemd.services.wedding-backend.serviceConfig.LoadCredential =
+                [ "admin-hash:${config.age.secrets.wedding-admin-password-hash.path}" ];
+              systemd.services.wedding-backend.environment.WEDDING_ADMIN_PASSWORD_HASH_FILE =
+                lib.mkForce "/run/credentials/wedding-backend.service/admin-hash";
             };
           };
 
@@ -363,7 +312,6 @@
             (cfo {})
             (expedientes {})
             (wedding { serverName = "wedding.local"; })
-            # (vesiet  { serverName = "vesiet.local"; })
             (home-manager-module { xmobarrc = ./xmobarrc-olimpo; })
           ];
           extraSpecialArgs = { xmonadShortenLength = 50; };
@@ -383,7 +331,6 @@
               serverName = "docxty.net";
             })
             (cfo { profile = "production"; })
-            (vesiet { profile = "production"; })
             ({ config, lib, pkgs, ... }: {
               services.postgresql.package = pkgs.${"postgresql_${xtyPostgresMajor}"};
 
@@ -428,11 +375,11 @@
             lib.optionals (xtyPostgresPackageMajor != xtyPostgresMajor) [
               "xty PostgreSQL package major is ${xtyPostgresPackageMajor}, expected ${xtyPostgresMajor}"
             ]
-            ++ lib.optionals (!(hasAll [ "expedientes" "wedding" "cfo" "vesiet" ] xtyCfg.services.postgresql.ensureDatabases)) [
-              "xty PostgreSQL ensureDatabases must contain expedientes, wedding, cfo, and vesiet"
+            ++ lib.optionals (!(hasAll [ "expedientes" "wedding" "cfo" ] xtyCfg.services.postgresql.ensureDatabases)) [
+              "xty PostgreSQL ensureDatabases must contain expedientes, wedding, and cfo"
             ]
-            ++ lib.optionals (!(hasAll [ "expedientes" "wedding" "cfo" "vesiet" ] xtyPostgresUsers)) [
-              "xty PostgreSQL ensureUsers must contain expedientes, wedding, cfo, and vesiet"
+            ++ lib.optionals (!(hasAll [ "expedientes" "wedding" "cfo" ] xtyPostgresUsers)) [
+              "xty PostgreSQL ensureUsers must contain expedientes, wedding, and cfo"
             ]
             ++ lib.optionals (xtyCfg.systemd.services.postgresql.postStart != "") [
               "xty PostgreSQL password hooks must not run in postgresql.postStart"
@@ -445,9 +392,6 @@
             ]
             ++ lib.optionals (!(lib.hasInfix "ALTER USER cfo" xtyPostgresSetupPostStart)) [
               "xty PostgreSQL setup must set the cfo role password"
-            ]
-            ++ lib.optionals (!(lib.hasInfix "ALTER USER vesiet" xtyPostgresSetupPostStart)) [
-              "xty PostgreSQL setup must set the vesiet role password"
             ]
             ++ lib.optionals (!(hasUnit "postgresql-setup.service" xtyCfg.systemd.services.wedding-migrate.after)) [
               "wedding-migrate must start after postgresql-setup.service"
@@ -467,18 +411,6 @@
             ++ lib.optionals (!(hasUnit "postgresql-setup.service" xtyCfg.systemd.services.cfo-backend.requires)) [
               "cfo-backend must require postgresql-setup.service"
             ]
-            ++ lib.optionals (!(hasUnit "postgresql-setup.service" xtyCfg.systemd.services.vesiet-migrate.after)) [
-              "vesiet-migrate must start after postgresql-setup.service"
-            ]
-            ++ lib.optionals (!(hasUnit "postgresql-setup.service" xtyCfg.systemd.services.vesiet-migrate.requires)) [
-              "vesiet-migrate must require postgresql-setup.service"
-            ]
-            ++ lib.optionals (!(hasUnit "postgresql-setup.service" xtyCfg.systemd.services.vesiet-backend.after)) [
-              "vesiet-backend must start after postgresql-setup.service"
-            ]
-            ++ lib.optionals (!(hasUnit "vesiet-migrate.service" xtyCfg.systemd.services.vesiet-backend.requires)) [
-              "vesiet-backend must require vesiet-migrate.service"
-            ]
             ++ lib.optionals ((xtyCfg.systemd.services.expedientes-seed.unitConfig.ConditionPathExists or "") != "!/var/lib/expedientes/.seeded") [
               "expedientes-seed must stay guarded by /var/lib/expedientes/.seeded"
             ]
@@ -491,9 +423,6 @@
             ++ lib.optionals (!(hasXtyVhost "cfo-vision.com")) [
               "nginx must define cfo-vision.com vhost"
             ]
-            ++ lib.optionals (!(hasXtyVhost "vesiet.hhefesto.com")) [
-              "nginx must define vesiet.hhefesto.com vhost"
-            ]
             ++ lib.optionals (!(hasSsl443 "docxty.net")) [
               "docxty.net must listen on 443 with ssl"
             ]
@@ -503,9 +432,6 @@
             ++ lib.optionals (!(hasSsl443 "cfo-vision.com")) [
               "cfo-vision.com must listen on 443 with ssl"
             ]
-            ++ lib.optionals (!(hasSsl443 "vesiet.hhefesto.com")) [
-              "vesiet.hhefesto.com must listen on 443 with ssl"
-            ]
             ++ lib.optionals ((toString xtyCfg.services.wedding.backend.databaseUrlFile) != "/run/agenix/wedding-backend-env") [
               "wedding backend must use the production DATABASE_URL secret"
             ]
@@ -514,9 +440,6 @@
             ]
             ++ lib.optionals ((toString xtyCfg.services.cfo.backend.databaseUrlFile) != "/run/agenix/cfo-backend-env") [
               "cfo backend must use the production DATABASE_URL secret"
-            ]
-            ++ lib.optionals ((toString xtyCfg.services.vesiet.backend.databaseUrlFile) != "/run/agenix/vesiet-backend-env") [
-              "vesiet backend must use the production DATABASE_URL secret"
             ];
           preDeployXty = pkgs.runCommand "pre-deploy-xty" {} ''
             ${if checkFailures == [] then ''

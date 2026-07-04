@@ -15,31 +15,47 @@ Primary languages: **Nix, Haskell, Agda**. Strongly prefers functional, type-dri
 
 | File | Purpose |
 |---|---|
-| `flake.nix` | Entry point. Uses `flake-parts`. Defines `mkHost` helper. Builds `nixosConfigurations.{olimpo,delfos}`. |
-| `configuration.nix` | Shared system config (~410 lines): packages, services, X11/xmonad, zsh, pipewire, users. |
-| `home.nix` | home-manager config for `hhefesto`. Integrated as a NixOS module (`useGlobalPkgs` + `useUserPackages`). |
-| `olimpo.nix` + `hardware-configuration-olimpo.nix` | olimpo host. Imports `expedientes-local.nix`. |
-| `delfos.nix` + `hardware-configuration-delfos.nix` | delfos host. Minimal. |
-| `xmonad.hs` | xmonad Haskell config. `@xmonadShortenLength@` is template-substituted per host via `builtins.replaceStrings` in `configuration.nix:257`. |
-| `xmobarrc-olimpo`, `xmobarrc-delfos` | Per-host xmobar configs. |
-| `spacemacs/`, `doom.d/` | Emacs configs; copied into `~/.emacs.d` via home-manager activation script. |
+| `flake.nix` | Entry point. Uses `flake-parts`. `mkHost` helper. Builds `nixosConfigurations.{olimpo,delfos,xty}`, `deploy.nodes.xty`, pre-deploy checks, `apps.deploy-xty`. |
+| `configuration-core.nix` | Every host: users (agenix-managed login hash in `secrets/user-password.age`), ssh, nix settings, agenix module import. |
+| `configuration-workstation.nix` | Workstations: dev tools, zsh (system-wide aliases; root shell is zsh), docker, claude-code/opencode overlays. |
+| `configuration-gui.nix` | Workstations: X11/xmonad, desktop apps, fonts, pipewire, LAN firewall. |
+| `configuration.nix` | 7-line stub = core + workstation (imported by olimpo/delfos only). |
+| `home.nix` | home-manager for `hhefesto` (NixOS module, `useGlobalPkgs` + `useUserPackages`). |
+| `olimpo.nix` / `delfos.nix` / `xty.nix` + `hardware-configuration-*.nix` | Per-host. olimpo↔delfos share LAN ssh-ng binary caches; delfos has dynamic timezone; xty is the headless production server (62.238.6.4, fail2ban, keys-only SSH). |
+| `secrets/` | agenix: `secrets.nix` recipients + `user-password.age` (rotate: `secrets/rotate-user-password.sh`). |
+| `xmonad.hs`, `xmobarrc-olimpo`, `xmobarrc-delfos` | xmonad config; `@xmonadShortenLength@` substituted per host. |
+| `spacemacs/`, `doom.d/` | Emacs configs. |
 
-**Navigation:** `flake.nix` → `mkHost` → `configuration.nix` (shared) + `{olimpo,delfos}.nix` (per-host).
+**Navigation:** `flake.nix` → `mkHost` → per-host module lists (workstations: `configuration.nix` + gui + projects desktop-profile; xty: core + projects production-profile).
+
+### Hosts & hosted projects
+
+- **olimpo**, **delfos** — workstations; test the app stacks with desktop profiles.
+- **xty** — production. Hosts (all sharing one postgres 16 on 5432):
+
+| Input | App | Prod domain | Backend port | DB |
+|---|---|---|---|---|
+| `docxty` | expedientes (medical records) | docxty.net | 3000 | `expedientes` |
+| `cfo-as-a-service` | CFO dashboard | cfo-vision.com | 3033 | `cfo` |
+| `wedding-page` | wedding RSVP | xty-y-dan.net | 3001 | `wedding` |
+
+Deploy: `nix run .#deploy-xty` (pure checks → live SSH checks → build → deploy-rs). **Update policy: manual only** — no `system.autoUpgrade`; every prod update goes through the check pipeline.
 
 ### Key flake inputs
 
-`nixpkgs` (FlakeHub), `determinate`, `flake-parts`, `home-manager` (release-25.11), `agenix`, `spacemacs` (non-flake git), `claude-code-nix`, `opencode`, `expedientes` (local at `/home/hhefesto/src/expedientes`).
+`nixpkgs` (nixos-unstable), `flake-parts`, `deploy-rs`, `home-manager` (release-25.11), `agenix`, `docxty`/`cfo-as-a-service`/`wedding-page` (project repos, git+ssh/github), `claude-code-nix`, `opencode`, `telomare`, `spacemacs` (non-flake).
 
-Binary caches: `telomare.cachix.org`, `nixcache.reflex-frp.org`, `cache.iog.io`, `claude-code.cachix.org`.
+Binary caches: `hercules-ci.cachix.org`, `telomare.cachix.org`, `nixcache.reflex-frp.org`, `claude-code.cachix.org`.
 
 `nixpkgs.config.allowUnfree = true`.
 
 ### Conventions
 
-- **Per-host parametrisation** is done via `extraSpecialArgs` (e.g., `xmonadShortenLength`), not conditionals inside shared files.
-- **Local flake inputs** for sibling in-progress projects (e.g., `expedientes` → `/home/hhefesto/src/expedientes`).
-- **Template substitution** over multiple config files when the host delta is small.
-- **Build after changes**: always try to build after making changes. Default command: `nix -Lv build .#olimpo`.
+- **Per-host parametrisation** via `extraSpecialArgs` (e.g., `xmonadShortenLength`), not conditionals inside shared files.
+- **Project modules own project code**; this repo only sets collide-able facts (ports, db names, serverName, profile) and host concerns.
+- **Secrets**: agenix only. App secrets live in each project repo (`${input}/secrets/*.age`); this repo's `secrets/` has the login hash. Never commit plaintext credentials or password hashes.
+- **Test project changes without pushing**: `nix build .#nixosConfigurations.olimpo.config.system.build.toplevel --override-input docxty path:$HOME/src/expedientes -L` (new files in the project must be `git add`ed — flake purity).
+- **Build after changes**: `nix build .#nixosConfigurations.olimpo.config.system.build.toplevel -L`.
 
 ---
 

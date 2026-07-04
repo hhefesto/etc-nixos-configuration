@@ -1,5 +1,11 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, config, inputs, ... }:
+let
+  passwordRotated = builtins.pathExists ./secrets/user-password.age;
+  burnedHash = "$6$/RvS0Se.iCx$A0eA/8PzgMj.Ms9ohNamfu53c9S.zdG30hEmUHLjmWP0CaXTPVA6QxGIZ6fy.abkjSOTJMAq7fFL6LUBGs4BU0";
+in
 {
+  imports = [ inputs.agenix.nixosModules.default ];
+
   environment.systemPackages = [ pkgs.emacs ];
   environment.variables.EDITOR = "emacs";
 
@@ -18,9 +24,25 @@
 
   programs.zsh.enable = true;
 
+  # Login password hash lives agenix-encrypted in ./secrets (shared by
+  # root + hhefesto on every host). Rotate with secrets/rotate-user-password.sh
+  #
+  # TODO(H1): the fallback branch below dies once secrets/user-password.age
+  # exists (run secrets/rotate-user-password.sh, then `git add` the file).
+  # The fallback hash is already burned — it lives in git history — so it
+  # only preserves bootstrap-ability until the rotation happens.
+  age.secrets = lib.mkIf passwordRotated {
+    user-password = {
+      file = ./secrets/user-password.age;
+      mode = "0400";
+    };
+  };
+
   users.mutableUsers = false;
-  users.users.root.initialHashedPassword = "$6$/RvS0Se.iCx$A0eA/8PzgMj.Ms9ohNamfu53c9S.zdG30hEmUHLjmWP0CaXTPVA6QxGIZ6fy.abkjSOTJMAq7fFL6LUBGs4BU0";
-  users.users.hhefesto.initialHashedPassword = "$6$/RvS0Se.iCx$A0eA/8PzgMj.Ms9ohNamfu53c9S.zdG30hEmUHLjmWP0CaXTPVA6QxGIZ6fy.abkjSOTJMAq7fFL6LUBGs4BU0";
+  users.users.root =
+    if passwordRotated
+    then { hashedPasswordFile = config.age.secrets.user-password.path; }
+    else { initialHashedPassword = burnedHash; };
 
   users.extraUsers.hhefesto = {
     createHome = true;
@@ -28,12 +50,13 @@
     home = "/home/hhefesto";
     description = "Daniel Herrera";
     extraGroups = [ "wheel" ];
-    hashedPassword = "$6$/RvS0Se.iCx$A0eA/8PzgMj.Ms9ohNamfu53c9S.zdG30hEmUHLjmWP0CaXTPVA6QxGIZ6fy.abkjSOTJMAq7fFL6LUBGs4BU0";
     openssh.authorizedKeys.keys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJcDIsto/6GS7XwTl+uVo4ABeRlRjDwAU0HHy8irqLaB hhefesto@olimpo"
                                     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH2Ttj29zyClCr8pSobzAIJVcsEuL4GsPY7+aiK5eaA1"
                                   ];
     shell = pkgs.zsh;
-  };
+  } // (if passwordRotated
+        then { hashedPasswordFile = config.age.secrets.user-password.path; }
+        else { initialHashedPassword = burnedHash; });
 
   nix.settings.auto-optimise-store = true;
   nix.settings.allow-import-from-derivation = true;

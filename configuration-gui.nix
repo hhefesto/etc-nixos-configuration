@@ -97,7 +97,7 @@
   services.xserver.xkb.variant = "altgr-intl";
   services.xserver.windowManager.xmonad = {
     enable = true;
-    enableConfiguredRecompile = true;
+    enableConfiguredRecompile = false;
     config = builtins.replaceStrings [ "@xmonadShortenLength@" ] [ "${toString xmonadShortenLength}" ] (pkgs.lib.readFile ./xmonad.hs);
     enableContribAndExtras = true;
     extraPackages = haskellPackages: [
@@ -134,7 +134,9 @@
 
   virtualisation.libvirtd.enable = true;
 
-  networking.firewall.allowedTCPPorts = [ 3000 5432 587 5938 53317 ];
+  # 587 submission, 5938 teamviewer, 53317 localsend.
+  # Dev backends (3000/…) and postgres (5432) stay localhost-only.
+  networking.firewall.allowedTCPPorts = [ 587 5938 53317 ];
   networking.firewall.allowedUDPPorts = [ 5938 53317 ];
 
   users.users.hhefesto.extraGroups = lib.mkAfter [ "video" "networkmanager" "libvirtd" "kvm" ];
