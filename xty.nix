@@ -1,6 +1,11 @@
-{ ... }:
+{ pkgs, ... }:
 {
   imports = [ ./hardware-configuration-xty.nix ];
+
+  # Host concern: the production data directory was initialised with
+  # PostgreSQL 16. Never bump without a migration plan (pre-deploy checks
+  # assert this major).
+  services.postgresql.package = pkgs.postgresql_16;
 
   networking.hostName = "xty";
   networking.nameservers = [ "1.1.1.1" "8.8.8.8" ];

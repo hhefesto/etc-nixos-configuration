@@ -49,241 +49,72 @@
           };
         };
 
-        cfo =
-          { profile ? "desktop"
-          , serverName ? if profile == "production" then "cfo-vision.com" else "cfo.local"
-          , ports ? if profile == "production"
-              then { frontend = 8083; backend = 3033; database = 5432; nginx = 80; }
-              else { frontend = 8083; backend = 3033; database = 5432; nginx = 8082; }
-          }:
-          { config, lib, pkgs, ... }:
-          let
-            cfoDbPassword = "cfo-local-password";
-            cfoDbPasswordFile = pkgs.writeText "cfo-db-password" cfoDbPassword;
-            cfoBackendEnvFile = pkgs.writeText "cfo-backend-env" ''
-              DATABASE_URL=postgres://cfo:${cfoDbPassword}@localhost:5432/cfo
-            '';
-          in {
-            imports = [
-              inputs.agenix.nixosModules.default
-              ((import "${inputs."cfo-as-a-service"}/nixosModules/cfo-as-a-service.nix") {
-                mode = if profile == "production" then "production" else "staging";
-                inherit ports serverName;
-                databaseName = "cfo";
-                packages = {
-                  backend = inputs."cfo-as-a-service".packages.${system}.cfo-backend;
-                  frontendStatic = inputs."cfo-as-a-service".packages.${system}.cfo-frontend-static;
-                };
-                secrets = lib.optionalAttrs (profile == "desktop") {
-                  dbPasswordFile = cfoDbPasswordFile;
-                  backendEnvFile = cfoBackendEnvFile;
-                };
-                tls = {
-                  enableACME = profile == "production";
-                  forceSSL = profile == "production";
-                  acmeEmail = if profile == "production" then "hhefesto@rdataa.com" else null;
-                };
-              })
-            ];
+        # Each project repo exports one canonical NixOS module
+        # (nixosModules.default) with a services.<name>.profile.* interface.
+        # Only collide-able facts (ports, database name, serverName, mode)
+        # live here; everything project-dependent is in the project repos.
+        projectModules = [
+          inputs.agenix.nixosModules.default
+          inputs.docxty.nixosModules.default
+          inputs."cfo-as-a-service".nixosModules.default
+          inputs.wedding-page.nixosModules.default
+        ];
 
-            config = lib.mkIf (profile == "production") {
-                age.secrets.cfo-db-password = {
-                  file = inputs."cfo-as-a-service" + "/secrets/cfo-db-password.age";
-                  owner = "postgres";
-                  group = "postgres";
-                  mode = "0400";
-                };
+        workstationServices = {
+          imports = projectModules;
 
-                age.secrets.cfo-backend-env = {
-                  file = inputs."cfo-as-a-service" + "/secrets/cfo-backend-env.age";
-                  owner = "root";
-                  group = "root";
-                  mode = "0400";
-                };
+          # Workstations decrypt the shared dev secrets (expedientes
+          # password hash) with the admin key instead of their host keys.
+          age.identityPaths = [ "/home/hhefesto/.ssh/hetzner_ed25519" ];
 
-                services.cfo.profile = {
-                  secrets = {
-                    dbPasswordFile = config.age.secrets.cfo-db-password.path;
-                    backendEnvFile = config.age.secrets.cfo-backend-env.path;
-                  };
-                };
-            };
+          services.expedientes.profile = {
+            enable = true;
+            mode = "development";
+            serverName = "docxty.local";
+            ports = { nginx = 80; backend = 3000; };
+            startingBackup.dump = "/var/lib/expedientes-bootstrap/expedientes.dump";
           };
 
-        expedientes =
-          { profile ? "desktop"
-          , serverName ? "_"
-          }:
-          { config, lib, ... }:
-          {
-            imports = [
-              inputs.agenix.nixosModules.default
-              ((import "${inputs.docxty}/nixosModules/expedientes.nix") {
-                inherit serverName;
-                ports        = { nginx = 80; backend = 3000; database = 5432; };
-                databaseName = "expedientes";
-                htmlDir      = null;
-                startingBackup = {
-                  dump = "/var/lib/expedientes-bootstrap/expedientes.dump";
-                };
-                packages = {
-                  backend        = inputs.docxty.packages.${system}.expedientes-backend;
-                  frontendStatic = inputs.docxty.packages.${system}.expedientes-frontend-static;
-                };
-              })
-            ];
-
-            config = lib.mkMerge [
-              {
-                services.nginx.recommendedGzipSettings = lib.mkForce false;
-              }
-
-              (lib.mkIf (profile == "desktop") {
-                age.identityPaths = [ "/home/hhefesto/.ssh/hetzner_ed25519" ];
-
-                age.secrets.expedientes-password-hash = {
-                  file  = inputs.docxty + "/secrets/expedientes-password-hash.age";
-                  owner = "root";
-                  group = "root";
-                  mode  = "0400";
-                };
-
-                services.expedientes.backend.passwordHashFile =
-                  config.age.secrets.expedientes-password-hash.path;
-
-                services.postgresql.authentication = lib.mkAfter ''
-                  host all expedientes 127.0.0.1/32 trust
-                  host all expedientes ::1/128      trust
-                '';
-              })
-
-              (lib.mkIf (profile == "production") {
-                age.secrets.expedientes-db-password = {
-                  file = inputs.docxty + "/secrets/expedientes-db-password.age";
-                  owner = "postgres";
-                  group = "postgres";
-                  mode = "0400";
-                };
-
-                age.secrets.expedientes-backend-env = {
-                  file = inputs.docxty + "/secrets/expedientes-backend-env.age";
-                  owner = "root";
-                  group = "root";
-                  mode = "0400";
-                };
-
-                age.secrets.expedientes-password-hash = {
-                  file = inputs.docxty + "/secrets/expedientes-password-hash.age";
-                  owner = "root";
-                  group = "root";
-                  mode = "0400";
-                };
-
-                services.expedientes.database.passwordFile =
-                  config.age.secrets.expedientes-db-password.path;
-                services.expedientes.backend.databaseUrlFile =
-                  config.age.secrets.expedientes-backend-env.path;
-                services.expedientes.backend.passwordHashFile =
-                  config.age.secrets.expedientes-password-hash.path;
-
-                security.acme = {
-                  acceptTerms = true;
-                  defaults.email = "hhefesto@rdataa.com";
-                };
-
-                services.nginx.virtualHosts.${serverName} = {
-                  enableACME = true;
-                  forceSSL = true;
-                  listen = lib.mkAfter [
-                    { addr = "0.0.0.0"; port = 443; ssl = true; }
-                    { addr = "[::]"; port = 443; ssl = true; }
-                  ];
-                };
-
-                systemd.services.expedientes-seed.after =
-                  lib.mkAfter [ "postgresql-setup.service" ];
-                systemd.services.expedientes-seed.requires =
-                  lib.mkAfter [ "postgresql-setup.service" ];
-
-                systemd.tmpfiles.rules = [
-                  "d /var/lib/expedientes-bootstrap 0700 root root -"
-                ];
-
-                networking.firewall.allowedTCPPorts = [ 443 ];
-              })
-            ];
+          services.cfo.profile = {
+            enable = true;
+            mode = "development";
+            serverName = "cfo.local";
+            ports = { nginx = 8082; backend = 3033; frontend = 8083; };
           };
 
-        wedding =
-          { serverName ? "_"
-          , profile ? "desktop"
-          , ports ? { nginx = 8084; backend = 3001; database = 5432; }
-          }:
-          { config, lib, ... }:
-          {
-            imports = [
-              inputs.agenix.nixosModules.default
-              ((import "${inputs.wedding-page}/nixosModules/wedding.nix") {
-                inherit ports serverName;
-                databaseName = "wedding";
-                localHostAlias = profile == "desktop";
-                localPostgresTrust = profile == "desktop";
-                recommendedGzipSettings = false;
-                cookieSecure = profile == "production";
-                tls = {
-                  enableACME = profile == "production";
-                  forceSSL = profile == "production";
-                  openFirewall = profile == "production";
-                };
-                acme = {
-                  acceptTerms = profile == "production";
-                  email = "hhefesto@rdataa.com";
-                };
-                packages = {
-                  backend         = inputs.wedding-page.packages.${system}.wedding-backend;
-                  staticRoot      = inputs.wedding-page.packages.${system}.website;
-                  adminStaticRoot = inputs.wedding-page.packages.${system}.admin-website;
-                };
-              })
-            ];
-
-            config = lib.mkIf (profile == "production") {
-              age.secrets.wedding-db-password = {
-                file = inputs.wedding-page + "/secrets/wedding-db-password.age";
-                owner = "postgres";
-                group = "postgres";
-                mode = "0400";
-              };
-
-              age.secrets.wedding-backend-env = {
-                file = inputs.wedding-page + "/secrets/wedding-backend-env.age";
-                owner = "root";
-                group = "root";
-                mode = "0400";
-              };
-
-              age.secrets.wedding-admin-password-hash = {
-                file = inputs.wedding-page + "/secrets/wedding-admin-password-hash.age";
-                owner = "root";
-                group = "root";
-                mode = "0400";
-              };
-
-              services.wedding.database.passwordFile =
-                config.age.secrets.wedding-db-password.path;
-              services.wedding.backend.databaseUrlFile =
-                config.age.secrets.wedding-backend-env.path;
-              services.wedding.backend.adminPasswordHashFile =
-                config.age.secrets.wedding-admin-password-hash.path;
-
-              # The backend runs as DynamicUser and cannot read a 0400
-              # root-owned secret directly; systemd hands it a private copy.
-              systemd.services.wedding-backend.serviceConfig.LoadCredential =
-                [ "admin-hash:${config.age.secrets.wedding-admin-password-hash.path}" ];
-              systemd.services.wedding-backend.environment.WEDDING_ADMIN_PASSWORD_HASH_FILE =
-                lib.mkForce "/run/credentials/wedding-backend.service/admin-hash";
-            };
+          services.wedding.profile = {
+            enable = true;
+            mode = "development";
+            serverName = "wedding.local";
+            ports = { nginx = 8084; backend = 3001; };
           };
+        };
+
+        xtyServices = {
+          imports = projectModules;
+
+          services.expedientes.profile = {
+            enable = true;
+            mode = "production";
+            serverName = "docxty.net";
+            ports = { nginx = 80; backend = 3000; };
+            startingBackup.dump = "/var/lib/expedientes-bootstrap/expedientes.dump";
+          };
+
+          services.cfo.profile = {
+            enable = true;
+            mode = "production";
+            serverName = "cfo-vision.com";
+            ports = { nginx = 80; backend = 3033; frontend = 8083; };
+          };
+
+          services.wedding.profile = {
+            enable = true;
+            mode = "production";
+            serverName = "xty-y-dan.net";
+            ports = { nginx = 80; backend = 3001; };
+          };
+        };
 
         mkHost = { hostModules, extraSpecialArgs ? {} }: nixpkgs.lib.nixosSystem {
           inherit system;
@@ -296,9 +127,7 @@
             ./delfos.nix
             ./configuration.nix
             ./configuration-gui.nix
-            (cfo {})
-            (expedientes {})
-            (wedding { serverName = "wedding.local"; })
+            workstationServices
             (home-manager-module { xmobarrc = ./xmobarrc-delfos; })
           ];
           extraSpecialArgs = { xmonadShortenLength = 26; };
@@ -309,9 +138,7 @@
             ./olimpo.nix
             ./configuration.nix
             ./configuration-gui.nix
-            (cfo {})
-            (expedientes {})
-            (wedding { serverName = "wedding.local"; })
+            workstationServices
             (home-manager-module { xmobarrc = ./xmobarrc-olimpo; })
           ];
           extraSpecialArgs = { xmonadShortenLength = 50; };
@@ -321,30 +148,7 @@
           hostModules = [
             ./xty.nix
             ./configuration-core.nix
-            (wedding {
-              profile = "production";
-              serverName = "xty-y-dan.net";
-              ports = { nginx = 80; backend = 3001; database = 5432; };
-            })
-            (expedientes {
-              profile = "production";
-              serverName = "docxty.net";
-            })
-            (cfo { profile = "production"; })
-            ({ config, lib, pkgs, ... }: {
-              services.postgresql.package = pkgs.${"postgresql_${xtyPostgresMajor}"};
-
-              # PostgreSQL 17 creates ensureUsers in postgresql-setup.service;
-              # legacy app modules still attach password changes to postgresql.service.
-              systemd.services.postgresql.postStart = lib.mkForce "";
-              systemd.services.postgresql-setup.postStart = lib.mkAfter ''
-                pw="$(${pkgs.coreutils}/bin/cat ${config.age.secrets.expedientes-db-password.path})"
-                ${config.services.postgresql.package}/bin/psql \
-                  -v ON_ERROR_STOP=1 -d postgres -v pw="$pw" <<'SQL'
-                ALTER USER expedientes WITH PASSWORD :'pw';
-                SQL
-              '';
-            })
+            xtyServices
           ];
         };
 
@@ -381,7 +185,7 @@
             ++ lib.optionals (!(hasAll [ "expedientes" "wedding" "cfo" ] xtyPostgresUsers)) [
               "xty PostgreSQL ensureUsers must contain expedientes, wedding, and cfo"
             ]
-            ++ lib.optionals (xtyCfg.systemd.services.postgresql.postStart != "") [
+            ++ lib.optionals (lib.hasInfix "ALTER USER" (xtyCfg.systemd.services.postgresql.postStart or "")) [
               "xty PostgreSQL password hooks must not run in postgresql.postStart"
             ]
             ++ lib.optionals (!(lib.hasInfix "ALTER USER expedientes" xtyPostgresSetupPostStart)) [
@@ -435,8 +239,8 @@
             ++ lib.optionals ((toString xtyCfg.services.wedding.backend.databaseUrlFile) != "/run/agenix/wedding-backend-env") [
               "wedding backend must use the production DATABASE_URL secret"
             ]
-            ++ lib.optionals ((toString xtyCfg.services.wedding.backend.adminPasswordHashFile) != "/run/agenix/wedding-admin-password-hash") [
-              "wedding backend must use the production admin hash secret"
+            ++ lib.optionals ((toString xtyCfg.services.wedding.backend.adminPasswordHashFile) != "/run/credentials/wedding-backend.service/admin-hash") [
+              "wedding backend must read the admin hash via systemd LoadCredential"
             ]
             ++ lib.optionals ((toString xtyCfg.services.cfo.backend.databaseUrlFile) != "/run/agenix/cfo-backend-env") [
               "cfo backend must use the production DATABASE_URL secret"

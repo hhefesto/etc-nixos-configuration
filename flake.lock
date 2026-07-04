@@ -101,11 +101,11 @@
         "reflex-platform": "reflex-platform"
       },
       "locked": {
-        "lastModified": 1777512236,
-        "narHash": "sha256-MD2QMdv/u0eVyF+dPjLaZH4i1C0RsDR4K+927Td0w50=",
+        "lastModified": 1783194155,
+        "narHash": "sha256-uDq8Oflo/pr78OvSHvqqCWuG34oN5jXc3XUfTgQb0Ko=",
         "ref": "refs/heads/master",
-        "rev": "36dea7ae478d028a6c4c553e475751f02ebd38b4",
-        "revCount": 34,
+        "rev": "1a4592888d01a92f0367a2f0bc52743c30e36ffb",
+        "revCount": 35,
         "type": "git",
         "url": "ssh://git@github.com/hhefesto/cfo-as-a-service"
       },
@@ -120,11 +120,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1783038109,
-        "narHash": "sha256-MeIBCX8z3kl+qsmPoq4WutD0gHLLTqxvX0yYswWvTU0=",
+        "lastModified": 1783124463,
+        "narHash": "sha256-rIawyN3+D9uqGmoYpTLZ2D6PYEp8xPykto8Uu+ER830=",
         "owner": "sadjow",
         "repo": "claude-code-nix",
-        "rev": "09b577c6d7b1cea741693eb7056139a27eed2465",
+        "rev": "9b05ec91a00ee8edea17b9279d55a5c1f084d754",
         "type": "github"
       },
       "original": {
@@ -256,11 +256,11 @@
         "reflex-platform": "reflex-platform_2"
       },
       "locked": {
-        "lastModified": 1777131767,
-        "narHash": "sha256-3FTdzV+tlzcws18t7GiMC0fcn8xsdPlRkAgSeqV4uyA=",
+        "lastModified": 1783193848,
+        "narHash": "sha256-KMf3a4BP7w36XSMrm7crA87eZZhqufH8bTzPH0ZXWk0=",
         "ref": "refs/heads/master",
-        "rev": "f41daaf7349345d5253ff23ae4f817235682b618",
-        "revCount": 26,
+        "rev": "b049584c1e94c796b55e3d6fb94a24dcf287d55e",
+        "revCount": 27,
         "type": "git",
         "url": "ssh://git@github.com/hhefesto/docxty"
       },
@@ -683,11 +683,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1782918843,
-        "narHash": "sha256-ETYnV9U7Sr+A45dohzZdfCZKOss4qrTkO+wgNZNvEc0=",
+        "lastModified": 1782948114,
+        "narHash": "sha256-AXmz9ho4Lud5CsbrZsuSVwpQZ4o5FgZ1chxBn5cJ8+0=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "e8273b29fe1390ec8d4603f2477357555291432e",
+        "rev": "9e92285f211dad236540fd617d7e30e0b99bc0e1",
         "type": "github"
       },
       "original": {
@@ -715,11 +715,11 @@
     },
     "nixpkgs_4": {
       "locked": {
-        "lastModified": 1782723713,
-        "narHash": "sha256-oPXCU/SSUokcGaJREHibG1CBX3+s/W7orDWQOZDsEeQ=",
+        "lastModified": 1782959384,
+        "narHash": "sha256-xnJJk+ct+D2+wdRxj1wk36w5zV9RVESwRqcklPdt3fM=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "b5aa0fbd538984f6e3d201be0005b4463d8b09f8",
+        "rev": "65179426c83bb3f6bc14898b42ea1c6f01d374b0",
         "type": "github"
       },
       "original": {
@@ -1062,11 +1062,11 @@
         "reflex-platform": "reflex-platform_3"
       },
       "locked": {
-        "lastModified": 1778519940,
-        "narHash": "sha256-2oZJliQfBMsxPtMozdFa7SMeTPapM6Nk+X9VVTOCKzw=",
+        "lastModified": 1783194760,
+        "narHash": "sha256-JpYSc7w/dwM8UrZPzs+6GQu+xeDX/bVO19z3br7Dmk0=",
         "owner": "hhefesto",
         "repo": "wedding-website",
-        "rev": "a3763abe6d65420438925802728b6e20e3e93983",
+        "rev": "04331bcbd5b310f3f1abb3b9c46d9acd969324d8",
         "type": "github"
       },
       "original": {
