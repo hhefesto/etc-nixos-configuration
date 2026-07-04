@@ -97,99 +97,48 @@ domains. Only option paths and code location change.
 
 ## State of play
 
-### DONE (Phase 0 — this branch, builds green for olimpo AND xty)
+### DONE (as of 2026-07-04, on delfos)
 
-- Vesiet: input, factory, xty wiring, all 6 pre-deploy-check references removed; lock pruned.
-- fail2ban on xty (`xty.nix`), firewall trim (`configuration-gui.nix`).
-- H2 interim: 0400 + `LoadCredential admin-hash:` + env override to
-  `/run/credentials/wedding-backend.service/admin-hash` (consumer flake, wedding production block).
-- `determinate` input removed; Claude.md stale sections rewritten (kept FP-taste,
-  conventions, open xmonad Print-key debugging section); README useful.
-- H1 wiring: `configuration-core.nix` imports agenix globally; root+hhefesto use
-  `hashedPasswordFile = config.age.secrets.user-password.path` **gated on
-  `builtins.pathExists ./secrets/user-password.age`** with the old (burned) hash
-  as fallback so builds stay green until rotation. `secrets/secrets.nix` has
-  recipients: admin key (`~/.ssh/hetzner_ed25519.pub` = hhefesto@rdataa.com),
-  olimpo/delfos/xty host keys.
+- Phase 0 (see git history): vesiet removal, fail2ban, firewall trim, H2
+  interim fix, H1 wiring (rotation still pending).
+- **Phase 2 — wedding** (`04331bc` on master, pushed): services.wedding.profile
+  module, nginx.nix vhost split (HSTS/headers/limit_req on /api/admin/login),
+  in-module agenix, permanent LoadCredential, hardening. Legacy factory kept.
+- **Phase 3 — expedientes** (`b049584`, pushed): same treatment; database.nix
+  password hook fixed to postgresql-setup.service; TLS/ACME in-module
+  (mkDefault so legacy overrides win); limit_req on /api/login; restic backup
+  enabled by default in production mode; seed ordered after postgresql-setup.
+- **Phase 4 — cfo** (`1a45928`, pushed): profile.nix wrapper (self-defaults,
+  in-module agenix, dev writeText password moved in); staging enum collapsed.
+- **Phase 5 — consumer** (`1b6cf2d` on env-review-hardening): factories/manual
+  agenix/inline postgres hack deleted; postgresql_16 pin → xty.nix; per-host
+  single-import + profile blocks; pre-deploy checks updated (LoadCredential
+  path; postStart just needs no ALTER USER). All hosts build; flake check and
+  pre-deploy-xty pass.
+- **Backup verified (deploy gate #1 SATISFIED)**: the restic mechanism had
+  been dead since Apr 25 (module was only in expedientes' old self-deploy).
+  Manual restic snapshot `53235259` taken 2026-07-04 from xty (fresh pg_dump +
+  html); full repo mirrored to delfos at ~/.local/share/expedientes/restic-mirror;
+  restic check clean; dump verified with pg_restore --list. Post-deploy the
+  daily 03:00 timer returns permanently.
 
-### Immediate next steps (in order)
+### Remaining
 
-1. **User runs `bash secrets/rotate-user-password.sh`** (interactive; prompts
-   for NEW password — old one is burned in git history). Then
-   `git add secrets/user-password.age`, delete the `burnedHash` fallback branch
-   in `configuration-core.nix`, rebuild, and verify `sudo` accepts the new
-   password in an open session before logging out.
-2. **Phase 2 — wedding-website** (`~/src/wedding-website`): rewrite
-   `nixosModules/wedding.nix` (positional factory) → `services.wedding.profile`
-   options module; split vhost out of `frontend.nix` into `nginx.nix`;
-   self-default packages (`wedding-backend`, `website`, `admin-website`);
-   move agenix decls in from consumer; LoadCredential permanent here;
-   hardening + HSTS + limit_req. Consumer keeps its old factory until Phase 5.
-3. **Phase 3 — expedientes** (`~/src/expedientes`, input name `docxty`): same,
-   PLUS move TLS/ACME into the module (consumer currently does it manually) and
-   fix `database.nix` password hook from `postgresql.postStart` →
-   `postgresql-setup.service.postStart` (kills consumer's inline mkForce hack).
-   Keep seed (`startingBackup`) + restic backup modules, wire through profile.
-   Medical data — extra care, no on-disk path changes.
-4. **Phase 4 — cfo** (`~/src/cfo-as-a-service`): smallest diff. 2-mode enum,
-   self-default packages, in-module agenix, move the desktop
-   `cfo-local-password` writeText from consumer into the module's dev mode.
-5. **Phase 5 — consumer rewrite** to the end-state above; update
-   `preDeployXty` option-path references; push all project repos,
-   `nix flake update docxty cfo-as-a-service wedding-page`; build all hosts +
-   `nix flake check`.
-6. **Expedientes backup (BLOCKS deploy)**: check `services.expedientes.backup`
-   actually enabled/running on xty (`ssh root@62.238.6.4 systemctl status …`);
-   if not: manual `pg_dump` of expedientes + rsync of /var/lib/expedientes/html
-   off-host, verify with `pg_restore --list`.
-7. **Phase 6 — deploy**: `nix run .#deploy-xty` — ONLY after #6 AND explicit
-   user confirmation. Verify: HTTPS+HSTS on 3 domains, rate limit trips (429),
-   0400 secrets, nmap shows only 22/80/443.
+1. **User runs `bash secrets/rotate-user-password.sh`** (interactive; old hash
+   burned in git history) → git add secrets/user-password.age, remove the
+   burnedHash fallback in configuration-core.nix, rebuild, verify sudo.
+2. **Phase 6 — deploy**: `nix run .#deploy-xty` — needs explicit user
+   confirmation (gate #2). Verify after: HTTPS+HSTS on 3 domains, 429 on
+   login brute force, 0400 secrets, nmap 22/80/443 only, expedientes-backup
+   timer active, drop stale vesiet DB + /run/agenix/vesiet-* if desired.
 
-### Gotchas discovered (will bite you if forgotten)
+### Gotchas that still apply
 
-1. **Flake purity**: new files in any project repo must be `git add`ed before
-   `nix build` sees them.
-2. **Dev loop**: test project changes against olimpo with
-   `nix build .#nixosConfigurations.olimpo.config.system.build.toplevel --override-input docxty path:$HOME/src/expedientes -L`
-   (inputs: `docxty`, `cfo-as-a-service`, `wedding-page`).
-3. **Inline postgres module in consumer flake (xty host)**: blanks
-   `postgresql.postStart` with mkForce and re-adds the expedientes `ALTER USER`
-   in `postgresql-setup.postStart` — exists ONLY because expedientes'
-   `database.nix` hooks the wrong unit. Fix in Phase 3, then delete it. The
-   `postgresql_16` pin inside it must survive (move to `xty.nix`).
-4. **agenix identityPaths**: the expedientes desktop branch sets
-   `age.identityPaths = [ "/home/hhefesto/.ssh/hetzner_ed25519" ]` on
-   workstations — overrides host-key identities. `user-password.age` is
-   encrypted to admin + all three host keys, so it decrypts either way. Keep
-   both mechanisms in mind when moving agenix decls into project modules.
-5. **LoadCredential path**: systemd credentials land at
-   `/run/credentials/<unit>.service/<name>`; `Environment=` does NOT expand
-   `%d`, hence the hardcoded path in the consumer's wedding block.
-6. **Pre-deploy checks** (`flake.nix`, perSystem): assert postgres major=16,
-   ensure DBs/users, unit ordering, vhosts+443, `/run/agenix/*` paths. They
-   pin today's names — update alongside Phase 5, never delete.
-7. **wedding `frontend.nix` IS the nginx module** (same for old vesiet);
-   cfo/expedientes have separate `nginx.nix`. Normalize to separate `nginx.nix`.
-8. **configuration-gui.nix** carries an unrelated pre-existing change
-   (`enableConfiguredRecompile = false`) from the user's xmonad work — keep it.
-
-### Task list snapshot (recreate on delfos)
-
-1. ~~Phase 0 consumer quick wins~~ DONE
-2. User runs rotate-user-password.sh → then remove fallback (pending)
-3. Phase 2 wedding normalization (pending)
-4. Phase 3 expedientes normalization (pending)
-5. Phase 4 cfo alignment (pending)
-6. Phase 5 consumer flake rewrite (pending)
-7. Expedientes backup verification — BLOCKS deploy (pending)
-8. Phase 6 deploy xty — needs backup done + EXPLICIT user confirmation (pending)
-
-### Reference: audit evidence pointers
-
-- H1: `configuration-core.nix` (fallback hash still visible in the let-binding, by design until rotation)
-- H2 interim: consumer `flake.nix` wedding production block (search `LoadCredential`)
-- fail2ban: `xty.nix`; firewall: `configuration-gui.nix`
-- Project module option surfaces + asymmetry table: re-derive quickly by reading
-  `~/src/<repo>/nixosModules/*.nix`; the key asymmetries are listed in the
-  gotchas above.
+- Flake purity: git add new files in project repos before nix build.
+- Dev loop: --override-input docxty/cfo-as-a-service/wedding-page path:$HOME/src/<repo>.
+- agenix identityPaths on workstations lives in the consumer's
+  workstationServices block (admin key decrypts shared dev secrets).
+- configuration-gui.nix carries the unrelated enableConfiguredRecompile=false
+  (xmonad work) — keep.
+- Project repos may move ahead on origin (happened twice); fetch/rebase before
+  committing in them.
