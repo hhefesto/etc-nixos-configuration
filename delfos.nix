@@ -71,13 +71,13 @@
 
   # Pre-seed olimpo's host key so root's ssh client doesn't prompt.
   programs.ssh.knownHosts."olimpo-nix-cache" = {
-    hostNames = [ "olimpo-nix-cache" "192.168.1.134" ];
+    hostNames = [ "olimpo-nix-cache" "192.168.3.5" ];
     publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP5EUe2fiscGEdLFXkTfxPLRmHuRBwqCbHcFSabqVWN1";
   };
 
   programs.ssh.extraConfig = ''
     Host olimpo-nix-cache
-      HostName 192.168.1.134
+      HostName 192.168.3.5
       User nix-ssh
       IdentityFile /root/.ssh/id_ed25519
       IdentitiesOnly yes

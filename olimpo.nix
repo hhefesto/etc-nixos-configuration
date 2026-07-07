@@ -1,8 +1,18 @@
-{ ... }:
+{ pkgs, ... }:
 {
   imports = [ ./hardware-configuration-olimpo.nix ];
 
   networking.hostName = "olimpo";
+
+  # OpenCL for the RX 580 (Polaris/gfx803). ROCm dropped this GPU, so the
+  # compute path is Mesa's rusticl; RUSTICL_ENABLE exposes the radeonsi
+  # driver as an OpenCL device. Consumed by the Futhark GPU training
+  # backend in ~/src/modArTransformer (see ELLIOTT-LLM.md there).
+  hardware.graphics = {
+    enable = true;
+    extraPackages = [ pkgs.mesa.opencl ];
+  };
+  environment.variables.RUSTICL_ENABLE = "radeonsi";
 
   # --- LAN binary-cache: olimpo <-> delfos over ssh-ng ---------------------
 
@@ -39,13 +49,13 @@
 
   # Pre-seed delfos's host key so root's ssh client doesn't prompt.
   programs.ssh.knownHosts."delfos-nix-cache" = {
-    hostNames = [ "delfos-nix-cache" "192.168.1.139" ];
+    hostNames = [ "delfos-nix-cache" "192.168.3.6" ];
     publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIINM3/adCok24i8fl600FBto4A/thxXaKpDu5B3ec3QT";
   };
 
   programs.ssh.extraConfig = ''
     Host delfos-nix-cache
-      HostName 192.168.1.139
+      HostName 192.168.3.6
       User nix-ssh
       IdentityFile /root/.ssh/id_ed25519
       IdentitiesOnly yes
