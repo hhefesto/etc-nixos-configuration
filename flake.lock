@@ -101,11 +101,11 @@
         "reflex-platform": "reflex-platform"
       },
       "locked": {
-        "lastModified": 1783194155,
-        "narHash": "sha256-uDq8Oflo/pr78OvSHvqqCWuG34oN5jXc3XUfTgQb0Ko=",
+        "lastModified": 1783486632,
+        "narHash": "sha256-neXylxjHxC7AYzvtKHmTRZa4h8NVPLvKOX0PCyhwRVo=",
         "ref": "refs/heads/master",
-        "rev": "1a4592888d01a92f0367a2f0bc52743c30e36ffb",
-        "revCount": 35,
+        "rev": "344102866b0cedc4faf8ed494bb7f270f79570ec",
+        "revCount": 36,
         "type": "git",
         "url": "ssh://git@github.com/hhefesto/cfo-as-a-service"
       },
@@ -256,11 +256,11 @@
         "reflex-platform": "reflex-platform_2"
       },
       "locked": {
-        "lastModified": 1783193848,
-        "narHash": "sha256-KMf3a4BP7w36XSMrm7crA87eZZhqufH8bTzPH0ZXWk0=",
+        "lastModified": 1783486621,
+        "narHash": "sha256-9Onb2O5SSp9OS6JgQYkE2C2lTGXeXW8+u9ru68iryIM=",
         "ref": "refs/heads/master",
-        "rev": "b049584c1e94c796b55e3d6fb94a24dcf287d55e",
-        "revCount": 27,
+        "rev": "6a8ead8503c6df18e429ba5587e00437e1f854a5",
+        "revCount": 28,
         "type": "git",
         "url": "ssh://git@github.com/hhefesto/docxty"
       },
@@ -1062,11 +1062,11 @@
         "reflex-platform": "reflex-platform_3"
       },
       "locked": {
-        "lastModified": 1783194760,
-        "narHash": "sha256-JpYSc7w/dwM8UrZPzs+6GQu+xeDX/bVO19z3br7Dmk0=",
+        "lastModified": 1783486626,
+        "narHash": "sha256-HJzwkaQhC3Pid+/PfIusvF+8voJD9mx/QpwZbeBxxYg=",
         "owner": "hhefesto",
         "repo": "wedding-website",
-        "rev": "04331bcbd5b310f3f1abb3b9c46d9acd969324d8",
+        "rev": "abb6501742f32abab0e9a55f188bf761403506d4",
         "type": "github"
       },
       "original": {

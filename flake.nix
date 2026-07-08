@@ -157,6 +157,14 @@
           profiles.system = {
             sshUser = "root";
             path = deploy-rs.lib.${system}.activate.nixos self.nixosConfigurations.xty;
+            # 2026-07-07: a benign `user activation for root failed`
+            # (dbus-broker user-unit reload on a headless host) made
+            # magic-rollback treat a successful activation as failed; the
+            # rollback re-activation then hung with all services stopped
+            # (production outage). Pre-deploy checks gate correctness
+            # instead; roll back manually via system profile generations.
+            magicRollback = false;
+            autoRollback = false;
           };
         };
       };
