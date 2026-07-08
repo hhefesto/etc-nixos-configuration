@@ -256,11 +256,11 @@
         "reflex-platform": "reflex-platform_2"
       },
       "locked": {
-        "lastModified": 1783494528,
-        "narHash": "sha256-9WosaRjuULc/KB/rDdNEjyZ5HeftY7xDXAXShA0defE=",
+        "lastModified": 1783495821,
+        "narHash": "sha256-RzOlHBhV/Rb1OxDiF0G8wCYJ8zzzXmbmEayt4OjeRW4=",
         "ref": "refs/heads/master",
-        "rev": "f2078b98cc19d13b5c1b5a01ded94959b024ecbd",
-        "revCount": 31,
+        "rev": "a3c1457fd5469a2ea83d9034d68591274758e891",
+        "revCount": 32,
         "type": "git",
         "url": "ssh://git@github.com/hhefesto/docxty"
       },
