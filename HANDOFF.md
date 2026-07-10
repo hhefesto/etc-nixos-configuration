@@ -48,6 +48,25 @@ repos under `~/src` (`wedding-website`, `expedientes`).
 > OAuth creds go into directo-backend-env.age, the ROTATED Gmail app
 > password into xpsoasis-smtp-password.age, then redeploy. Added
 > `apps.check-docxty-backups` (also runs first in `deploy-xty`).
+>
+> Deploy war stories from that first deploy (both resolved, keep for
+> next time):
+> 1. **Stale logind ↔ dbus connection**: dbus-broker had been restarted
+>    (2026-07-07 incident) without restarting systemd-logind, so every
+>    logind dbus call timed out ("Unable to list users with logind",
+>    "Failed to start session scope: Transport endpoint is not
+>    connected") and activation died with exit 11. Fix:
+>    `systemctl restart systemd-logind` on xty, then redeploy.
+> 2. **deploy-rs rolls back the profile even with
+>    magicRollback/autoRollback = false**, and phantom in-memory units
+>    from the running generation (the removed cfo-*) counted as
+>    "Failed to start … not found" → switch exit 4 → profile rollback.
+>    The system itself HAD switched successfully. Recovery:
+>    `nix-env -p /nix/var/nix/profiles/system --set <new toplevel>`,
+>    `systemctl daemon-reload && systemctl reset-failed`, then
+>    `<toplevel>/bin/switch-to-configuration switch` (exited 0).
+> The cfo/vesiet leftovers (databases, /run/agenix entries) can still
+> be dropped manually whenever convenient.
 
 ## Mission (user's words, condensed)
 
