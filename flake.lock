@@ -275,11 +275,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1783660436,
-        "narHash": "sha256-gzIiSsZivC/ipbnyj+XKb8/ufbIvS0c2030H8PjjogA=",
+        "lastModified": 1783699238,
+        "narHash": "sha256-1hY9Ft6OFh5+0FIt2jQOkY9j2aLXpvY7IgauUTXxEwU=",
         "ref": "refs/heads/master",
-        "rev": "9e298c574475a5e9e25698dc995e4883a1f82682",
-        "revCount": 6,
+        "rev": "f44b624a4ed28e12397b4c8db83d7f6d42354eaf",
+        "revCount": 7,
         "type": "git",
         "url": "ssh://git@github.com/hhefesto/directo"
       },
@@ -1262,11 +1262,11 @@
         "web-push": "web-push"
       },
       "locked": {
-        "lastModified": 1783659971,
-        "narHash": "sha256-6ESoA9qydrGo5lkJuXm6TCS6zdvDSKxzkEOh/pgPyYo=",
+        "lastModified": 1783699241,
+        "narHash": "sha256-7LtnVg6Dus3csQ9Tg7JRo4TGHOPMeYLgzbfUkLU/xds=",
         "ref": "xpsoasis",
-        "rev": "1eef0637c64615f95de91515ce914cc364fa19b8",
-        "revCount": 977,
+        "rev": "3ebfe7599f80f8f030e9e282f48d57acd6feaa09",
+        "revCount": 978,
         "type": "git",
         "url": "ssh://git@github.com/rdataa/xpsOasis"
       },

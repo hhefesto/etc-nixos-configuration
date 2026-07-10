@@ -120,14 +120,14 @@
           services.directo.profile = {
             enable = true;
             mode = "production";
-            serverName = "store.directo-qro.com";
+            serverName = "directo.hhefesto.com";
             ports = { nginx = 80; backend = 3002; };
           };
 
           services.xpsoasis.profile = {
             enable = true;
             mode = "production";
-            serverName = "xpsoasis.org";
+            serverName = "xpsoasis.hhefesto.com";
             ports = { nginx = 80; backend = 3003; };
           };
         };
@@ -263,11 +263,11 @@
             ++ lib.optionals (!(hasXtyVhost "xty-y-dan.net")) [
               "nginx must define xty-y-dan.net vhost"
             ]
-            ++ lib.optionals (!(hasXtyVhost "store.directo-qro.com")) [
-              "nginx must define store.directo-qro.com vhost"
+            ++ lib.optionals (!(hasXtyVhost "directo.hhefesto.com")) [
+              "nginx must define directo.hhefesto.com vhost"
             ]
-            ++ lib.optionals (!(hasXtyVhost "xpsoasis.org")) [
-              "nginx must define xpsoasis.org vhost"
+            ++ lib.optionals (!(hasXtyVhost "xpsoasis.hhefesto.com")) [
+              "nginx must define xpsoasis.hhefesto.com vhost"
             ]
             ++ lib.optionals (!(hasSsl443 "docxty.net")) [
               "docxty.net must listen on 443 with ssl"
@@ -275,11 +275,11 @@
             ++ lib.optionals (!(hasSsl443 "xty-y-dan.net")) [
               "xty-y-dan.net must listen on 443 with ssl"
             ]
-            ++ lib.optionals (!(hasSsl443 "store.directo-qro.com")) [
-              "store.directo-qro.com must listen on 443 with ssl"
+            ++ lib.optionals (!(hasSsl443 "directo.hhefesto.com")) [
+              "directo.hhefesto.com must listen on 443 with ssl"
             ]
-            ++ lib.optionals (!(hasSsl443 "xpsoasis.org")) [
-              "xpsoasis.org must listen on 443 with ssl"
+            ++ lib.optionals (!(hasSsl443 "xpsoasis.hhefesto.com")) [
+              "xpsoasis.hhefesto.com must listen on 443 with ssl"
             ]
             ++ lib.optionals ((toString xtyCfg.services.wedding.backend.databaseUrlFile) != "/run/agenix/wedding-backend-env") [
               "wedding backend must use the production DATABASE_URL secret"
@@ -305,6 +305,75 @@
               exit 1
             ''}
           '';
+          # Health check for the expedientes (docxty) restic backups on xty.
+          # Fails unless the timer is live, the last run succeeded, the latest
+          # snapshot is fresh (< 26 h) and contains both the DB dump and the
+          # HTML dir, and the repository passes a metadata integrity check.
+          checkDocxtyBackups = pkgs.writeShellApplication {
+            name = "check-docxty-backups";
+            runtimeInputs = [ pkgs.coreutils pkgs.gnugrep pkgs.jq pkgs.openssh ];
+            text = ''
+              set -euo pipefail
+
+              host="''${DOCXTY_BACKUP_HOST:-root@62.238.6.4}"
+              max_age_seconds=$(( 26 * 3600 ))
+              ssh_opts=(-o BatchMode=yes -o ConnectTimeout=10)
+
+              remote() {
+                # shellcheck disable=SC2029
+                ssh "''${ssh_opts[@]}" "$host" "$@"
+              }
+
+              fail() {
+                printf 'check-docxty-backups: FAIL: %s\n' "$*" >&2
+                exit 1
+              }
+
+              echo "==> 1/4 expedientes-backup.timer"
+              remote "systemctl is-active --quiet expedientes-backup.timer" \
+                || fail "expedientes-backup.timer is not active on $host"
+              remote "systemctl show expedientes-backup.timer -p LastTriggerUSec -p NextElapseUSecRealtime --no-pager"
+
+              echo "==> 2/4 last expedientes-backup.service run"
+              result="$(remote "systemctl show -p Result --value expedientes-backup.service" | tr -d '[:space:]')"
+              [ "$result" = "success" ] \
+                || fail "last expedientes-backup.service run: Result=$result (expected success)"
+              echo "Result=success"
+
+              echo "==> 3/4 latest restic snapshot (freshness + contents)"
+              snapshot_json="$(remote "expedientes-restic snapshots --latest 1 --json")"
+              snapshot_count="$(jq 'length' <<< "$snapshot_json")"
+              [ "$snapshot_count" -ge 1 ] || fail "restic repository has no snapshots"
+
+              snapshot_time="$(jq -r '.[-1].time' <<< "$snapshot_json")"
+              snapshot_epoch="$(date -d "$snapshot_time" +%s)"
+              now_epoch="$(date +%s)"
+              age_seconds=$(( now_epoch - snapshot_epoch ))
+              [ "$age_seconds" -le "$max_age_seconds" ] \
+                || fail "latest snapshot is $(( age_seconds / 3600 )) h old (limit: 26 h)"
+
+              jq -e '.[-1].paths | any(endswith("expedientes.dump"))' <<< "$snapshot_json" >/dev/null \
+                || fail "latest snapshot does not contain expedientes.dump"
+              # Patient HTML lives in the DB (patients.body_html) since the
+              # docxty migration; the legacy html dir is only in older
+              # snapshots (e.g. 53235259, 2026-07-04), so its absence here
+              # is expected — warn, don't fail.
+              jq -e '.[-1].paths | any(. == "/var/lib/expedientes/html")' <<< "$snapshot_json" >/dev/null \
+                || echo "note: snapshot has no /var/lib/expedientes/html (expected: patient HTML lives in the DB)"
+              jq -r '.[-1] | "id=\(.short_id) time=\(.time) paths=\(.paths | join(","))"' <<< "$snapshot_json"
+              echo "snapshot age: $(( age_seconds / 3600 )) h"
+
+              if [ "''${DOCXTY_BACKUP_CHECK_FAST:-0}" = "1" ]; then
+                echo "==> 4/4 restic check skipped (DOCXTY_BACKUP_CHECK_FAST=1)"
+              else
+                echo "==> 4/4 restic repository integrity (metadata)"
+                remote "expedientes-restic check" \
+                  || fail "restic check reported errors"
+              fi
+
+              echo "check-docxty-backups: all checks passed"
+            '';
+          };
           preDeployXtyLive = pkgs.writeShellApplication {
             name = "pre-deploy-xty-live";
             runtimeInputs = [ pkgs.coreutils pkgs.gnugrep pkgs.openssh ];
@@ -363,6 +432,9 @@
             text = ''
               set -euo pipefail
 
+              echo "==> Checking docxty (expedientes) backups"
+              ${checkDocxtyBackups}/bin/check-docxty-backups
+
               echo "==> Running pure xty predeploy check"
               nix build .#checks.x86_64-linux.pre-deploy-xty -L
 
@@ -378,6 +450,11 @@
           };
         in {
         checks.pre-deploy-xty = preDeployXty;
+
+        apps.check-docxty-backups = {
+          type = "app";
+          program = "${checkDocxtyBackups}/bin/check-docxty-backups";
+        };
 
         apps.pre-deploy-xty-live = {
           type = "app";

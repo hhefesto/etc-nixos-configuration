@@ -33,14 +33,21 @@ repos under `~/src` (`wedding-website`, `expedientes`).
 > 3. xpsoasis data migration from Hetzner (65.109.162.220):
 >    `pg_dump -U analyzer -Fc aanalyzer_yesod` → `pg_restore --clean
 >    --if-exists --no-owner --role=analyzer -d aanalyzer_yesod` on xty;
->    rsync the upload dir to /var/lib/xpsoasis/upload; then repoint
->    xpsoasis.org DNS to 62.238.6.4.
-> 4. DNS for store.directo-qro.com → 62.238.6.4 (the apex
->    directo-qro.com keeps serving the existing site).
-> 5. Register the Mercado Pago webhook at
->    https://store.directo-qro.com/api/webhooks/mercadopago (payment
+>    rsync the upload dir to /var/lib/xpsoasis/upload.
+> 4. Register the Mercado Pago webhook at
+>    https://directo.hhefesto.com/api/webhooks/mercadopago (payment
 >    events); the backend also polls MP as a fallback, and dev mode works
 >    with MP disabled entirely (no token in env).
+>
+> **Update 2026-07-10 (first xty deploy with directo + xpsoasis):**
+> prod domains changed to **directo.hhefesto.com** and
+> **xpsoasis.hhefesto.com** (A records → 62.238.6.4 created by the user;
+> xpsoasis.org stays on Hetzner until its data migration). All six agenix
+> secrets created (random DB passwords, bcrypt admin hash); third-party
+> creds are placeholders — Mercado Pago token/webhook secret and Google
+> OAuth creds go into directo-backend-env.age, the ROTATED Gmail app
+> password into xpsoasis-smtp-password.age, then redeploy. Added
+> `apps.check-docxty-backups` (also runs first in `deploy-xty`).
 
 ## Mission (user's words, condensed)
 
