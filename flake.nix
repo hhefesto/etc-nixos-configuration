@@ -18,7 +18,7 @@
     };
     docxty.url = "git+ssh://git@github.com/hhefesto/docxty";
     wedding-page.url = "github:hhefesto/wedding-website";
-    directo.url = "git+ssh://git@github.com/hhefesto/storeApp?ref=store-rebuild";
+    directo.url = "git+ssh://git@github.com/hhefesto/directo";
     xpsoasis.url = "git+ssh://git@github.com/rdataa/xpsOasis?ref=xpsoasis";
     claude-code-nix.url = "github:sadjow/claude-code-nix";
     opencode.url = "github:anomalyco/opencode/c5db39f6268a36194a7fe5f833ae3197dfe250b6";

@@ -46,7 +46,7 @@ Deploy: `nix run .#deploy-xty` (pure checks → live SSH checks → build → de
 
 ### Key flake inputs
 
-`nixpkgs` (nixos-unstable), `flake-parts`, `deploy-rs`, `home-manager` (release-25.11), `agenix`, `docxty`/`wedding-page`/`directo`/`xpsoasis` (project repos, git+ssh/github; directo currently lives at `hhefesto/storeApp?ref=store-rebuild`, xpsoasis at `rdataa/xpsOasis?ref=xpsoasis`), `claude-code-nix`, `opencode`, `telomare`, `spacemacs` (non-flake).
+`nixpkgs` (nixos-unstable), `flake-parts`, `deploy-rs`, `home-manager` (release-25.11), `agenix`, `docxty`/`wedding-page`/`directo`/`xpsoasis` (project repos, git+ssh/github; xpsoasis lives at `rdataa/xpsOasis?ref=xpsoasis`), `claude-code-nix`, `opencode`, `telomare`, `spacemacs` (non-flake).
 
 Binary caches: `hercules-ci.cachix.org`, `telomare.cachix.org`, `nixcache.reflex-frp.org`, `claude-code.cachix.org`.
 

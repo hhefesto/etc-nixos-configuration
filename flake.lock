@@ -277,16 +277,15 @@
       "locked": {
         "lastModified": 1783660436,
         "narHash": "sha256-gzIiSsZivC/ipbnyj+XKb8/ufbIvS0c2030H8PjjogA=",
-        "ref": "store-rebuild",
+        "ref": "refs/heads/master",
         "rev": "9e298c574475a5e9e25698dc995e4883a1f82682",
         "revCount": 6,
         "type": "git",
-        "url": "ssh://git@github.com/hhefesto/storeApp"
+        "url": "ssh://git@github.com/hhefesto/directo"
       },
       "original": {
-        "ref": "store-rebuild",
         "type": "git",
-        "url": "ssh://git@github.com/hhefesto/storeApp"
+        "url": "ssh://git@github.com/hhefesto/directo"
       }
     },
     "docxty": {
