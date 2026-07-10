@@ -14,6 +14,12 @@
   };
   environment.variables.RUSTICL_ENABLE = "radeonsi";
 
+  # Relax amdgpu's job watchdog from ~10 s to 60 s so training kernels can
+  # run in larger launches (see TRAINING-GUIDE.md Lesson 10).
+  # Tradeoff: a genuinely hung GPU job stalls the desktop up to 60 s
+  # before soft recovery instead of 10 s.
+  boot.kernelParams = [ "amdgpu.lockup_timeout=60000" ];
+
   # --- LAN binary-cache: olimpo <-> delfos over ssh-ng ---------------------
 
   # Pull from delfos's store.
