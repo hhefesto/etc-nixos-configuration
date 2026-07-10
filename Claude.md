@@ -36,14 +36,17 @@ Primary languages: **Nix, Haskell, Agda**. Strongly prefers functional, type-dri
 | Input | App | Prod domain | Backend port | DB |
 |---|---|---|---|---|
 | `docxty` | expedientes (medical records) | docxty.net | 3000 | `expedientes` |
-| `cfo-as-a-service` | CFO dashboard | cfo-vision.com | 3033 | `cfo` |
 | `wedding-page` | wedding RSVP | xty-y-dan.net | 3001 | `wedding` |
+| `directo` | store (refacciones, Querétaro) | store.directo-qro.com | 3002 | `directo` |
+| `xpsoasis` | AAnalyzer (Yesod) | xpsoasis.org | 3003 | `aanalyzer_yesod` (user `analyzer`) |
+
+Workstation dev nginx ports: expedientes 80, wedding 8084, directo 8085, xpsoasis 8086.
 
 Deploy: `nix run .#deploy-xty` (pure checks → live SSH checks → build → deploy-rs). **Update policy: manual only** — no `system.autoUpgrade`; every prod update goes through the check pipeline.
 
 ### Key flake inputs
 
-`nixpkgs` (nixos-unstable), `flake-parts`, `deploy-rs`, `home-manager` (release-25.11), `agenix`, `docxty`/`cfo-as-a-service`/`wedding-page` (project repos, git+ssh/github), `claude-code-nix`, `opencode`, `telomare`, `spacemacs` (non-flake).
+`nixpkgs` (nixos-unstable), `flake-parts`, `deploy-rs`, `home-manager` (release-25.11), `agenix`, `docxty`/`wedding-page`/`directo`/`xpsoasis` (project repos, git+ssh/github; directo currently lives at `hhefesto/storeApp?ref=store-rebuild`, xpsoasis at `rdataa/xpsOasis?ref=xpsoasis`), `claude-code-nix`, `opencode`, `telomare`, `spacemacs` (non-flake).
 
 Binary caches: `hercules-ci.cachix.org`, `telomare.cachix.org`, `nixcache.reflex-frp.org`, `claude-code.cachix.org`.
 

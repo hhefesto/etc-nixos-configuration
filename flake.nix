@@ -17,8 +17,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     docxty.url = "git+ssh://git@github.com/hhefesto/docxty";
-    cfo-as-a-service.url = "git+ssh://git@github.com/hhefesto/cfo-as-a-service";
     wedding-page.url = "github:hhefesto/wedding-website";
+    directo.url = "git+ssh://git@github.com/hhefesto/storeApp?ref=store-rebuild";
+    xpsoasis.url = "git+ssh://git@github.com/rdataa/xpsOasis?ref=xpsoasis";
     claude-code-nix.url = "github:sadjow/claude-code-nix";
     opencode.url = "github:anomalyco/opencode/c5db39f6268a36194a7fe5f833ae3197dfe250b6";
     telomare.url = "git+ssh://git@github.com/hhefesto/stand-in-language?ref=source-locations";
@@ -56,8 +57,9 @@
         projectModules = [
           inputs.agenix.nixosModules.default
           inputs.docxty.nixosModules.default
-          inputs."cfo-as-a-service".nixosModules.default
           inputs.wedding-page.nixosModules.default
+          inputs.directo.nixosModules.default
+          inputs.xpsoasis.nixosModules.default
         ];
 
         workstationServices = {
@@ -75,18 +77,25 @@
             startingBackup.dump = "/var/lib/expedientes-bootstrap/expedientes.dump";
           };
 
-          services.cfo.profile = {
-            enable = true;
-            mode = "development";
-            serverName = "cfo.local";
-            ports = { nginx = 8082; backend = 3033; frontend = 8083; };
-          };
-
           services.wedding.profile = {
             enable = true;
             mode = "development";
             serverName = "wedding.local";
             ports = { nginx = 8084; backend = 3001; };
+          };
+
+          services.directo.profile = {
+            enable = true;
+            mode = "development";
+            serverName = "directo.local";
+            ports = { nginx = 8085; backend = 3002; };
+          };
+
+          services.xpsoasis.profile = {
+            enable = true;
+            mode = "development";
+            serverName = "xpsoasis.local";
+            ports = { nginx = 8086; backend = 3003; };
           };
         };
 
@@ -101,18 +110,25 @@
             startingBackup.dump = "/var/lib/expedientes-bootstrap/expedientes.dump";
           };
 
-          services.cfo.profile = {
-            enable = true;
-            mode = "production";
-            serverName = "cfo-vision.com";
-            ports = { nginx = 80; backend = 3033; frontend = 8083; };
-          };
-
           services.wedding.profile = {
             enable = true;
             mode = "production";
             serverName = "xty-y-dan.net";
             ports = { nginx = 80; backend = 3001; };
+          };
+
+          services.directo.profile = {
+            enable = true;
+            mode = "production";
+            serverName = "store.directo-qro.com";
+            ports = { nginx = 80; backend = 3002; };
+          };
+
+          services.xpsoasis.profile = {
+            enable = true;
+            mode = "production";
+            serverName = "xpsoasis.org";
+            ports = { nginx = 80; backend = 3003; };
           };
         };
 
@@ -187,11 +203,11 @@
             lib.optionals (xtyPostgresPackageMajor != xtyPostgresMajor) [
               "xty PostgreSQL package major is ${xtyPostgresPackageMajor}, expected ${xtyPostgresMajor}"
             ]
-            ++ lib.optionals (!(hasAll [ "expedientes" "wedding" "cfo" ] xtyCfg.services.postgresql.ensureDatabases)) [
-              "xty PostgreSQL ensureDatabases must contain expedientes, wedding, and cfo"
+            ++ lib.optionals (!(hasAll [ "expedientes" "wedding" "directo" "aanalyzer_yesod" ] xtyCfg.services.postgresql.ensureDatabases)) [
+              "xty PostgreSQL ensureDatabases must contain expedientes, wedding, directo, and aanalyzer_yesod"
             ]
-            ++ lib.optionals (!(hasAll [ "expedientes" "wedding" "cfo" ] xtyPostgresUsers)) [
-              "xty PostgreSQL ensureUsers must contain expedientes, wedding, and cfo"
+            ++ lib.optionals (!(hasAll [ "expedientes" "wedding" "directo" "analyzer" ] xtyPostgresUsers)) [
+              "xty PostgreSQL ensureUsers must contain expedientes, wedding, directo, and analyzer"
             ]
             ++ lib.optionals (lib.hasInfix "ALTER USER" (xtyCfg.systemd.services.postgresql.postStart or "")) [
               "xty PostgreSQL password hooks must not run in postgresql.postStart"
@@ -202,8 +218,11 @@
             ++ lib.optionals (!(lib.hasInfix "ALTER USER wedding" xtyPostgresSetupPostStart)) [
               "xty PostgreSQL setup must set the wedding role password"
             ]
-            ++ lib.optionals (!(lib.hasInfix "ALTER USER cfo" xtyPostgresSetupPostStart)) [
-              "xty PostgreSQL setup must set the cfo role password"
+            ++ lib.optionals (!(lib.hasInfix "ALTER USER directo" xtyPostgresSetupPostStart)) [
+              "xty PostgreSQL setup must set the directo role password"
+            ]
+            ++ lib.optionals (!(lib.hasInfix "ALTER USER analyzer" xtyPostgresSetupPostStart)) [
+              "xty PostgreSQL setup must set the analyzer role password"
             ]
             ++ lib.optionals (!(hasUnit "postgresql-setup.service" xtyCfg.systemd.services.wedding-migrate.after)) [
               "wedding-migrate must start after postgresql-setup.service"
@@ -217,11 +236,23 @@
             ++ lib.optionals (!(hasUnit "wedding-migrate.service" xtyCfg.systemd.services.wedding-backend.requires)) [
               "wedding-backend must require wedding-migrate.service"
             ]
-            ++ lib.optionals (!(hasUnit "postgresql-setup.service" xtyCfg.systemd.services.cfo-backend.after)) [
-              "cfo-backend must start after postgresql-setup.service"
+            ++ lib.optionals (!(hasUnit "postgresql-setup.service" xtyCfg.systemd.services.directo-migrate.after)) [
+              "directo-migrate must start after postgresql-setup.service"
             ]
-            ++ lib.optionals (!(hasUnit "postgresql-setup.service" xtyCfg.systemd.services.cfo-backend.requires)) [
-              "cfo-backend must require postgresql-setup.service"
+            ++ lib.optionals (!(hasUnit "postgresql-setup.service" xtyCfg.systemd.services.directo-migrate.requires)) [
+              "directo-migrate must require postgresql-setup.service"
+            ]
+            ++ lib.optionals (!(hasUnit "postgresql-setup.service" xtyCfg.systemd.services.directo-backend.after)) [
+              "directo-backend must start after postgresql-setup.service"
+            ]
+            ++ lib.optionals (!(hasUnit "directo-migrate.service" xtyCfg.systemd.services.directo-backend.requires)) [
+              "directo-backend must require directo-migrate.service"
+            ]
+            ++ lib.optionals (!(hasUnit "postgresql-setup.service" xtyCfg.systemd.services.xpsoasis-backend.after)) [
+              "xpsoasis-backend must start after postgresql-setup.service"
+            ]
+            ++ lib.optionals (!(hasUnit "postgresql-setup.service" xtyCfg.systemd.services.xpsoasis-backend.requires)) [
+              "xpsoasis-backend must require postgresql-setup.service"
             ]
             ++ lib.optionals ((xtyCfg.systemd.services.expedientes-seed.unitConfig.ConditionPathExists or "") != "!/var/lib/expedientes/.seeded") [
               "expedientes-seed must stay guarded by /var/lib/expedientes/.seeded"
@@ -232,8 +263,11 @@
             ++ lib.optionals (!(hasXtyVhost "xty-y-dan.net")) [
               "nginx must define xty-y-dan.net vhost"
             ]
-            ++ lib.optionals (!(hasXtyVhost "cfo-vision.com")) [
-              "nginx must define cfo-vision.com vhost"
+            ++ lib.optionals (!(hasXtyVhost "store.directo-qro.com")) [
+              "nginx must define store.directo-qro.com vhost"
+            ]
+            ++ lib.optionals (!(hasXtyVhost "xpsoasis.org")) [
+              "nginx must define xpsoasis.org vhost"
             ]
             ++ lib.optionals (!(hasSsl443 "docxty.net")) [
               "docxty.net must listen on 443 with ssl"
@@ -241,8 +275,11 @@
             ++ lib.optionals (!(hasSsl443 "xty-y-dan.net")) [
               "xty-y-dan.net must listen on 443 with ssl"
             ]
-            ++ lib.optionals (!(hasSsl443 "cfo-vision.com")) [
-              "cfo-vision.com must listen on 443 with ssl"
+            ++ lib.optionals (!(hasSsl443 "store.directo-qro.com")) [
+              "store.directo-qro.com must listen on 443 with ssl"
+            ]
+            ++ lib.optionals (!(hasSsl443 "xpsoasis.org")) [
+              "xpsoasis.org must listen on 443 with ssl"
             ]
             ++ lib.optionals ((toString xtyCfg.services.wedding.backend.databaseUrlFile) != "/run/agenix/wedding-backend-env") [
               "wedding backend must use the production DATABASE_URL secret"
@@ -250,8 +287,14 @@
             ++ lib.optionals ((toString xtyCfg.services.wedding.backend.adminPasswordHashFile) != "/run/credentials/wedding-backend.service/admin-hash") [
               "wedding backend must read the admin hash via systemd LoadCredential"
             ]
-            ++ lib.optionals ((toString xtyCfg.services.cfo.backend.databaseUrlFile) != "/run/agenix/cfo-backend-env") [
-              "cfo backend must use the production DATABASE_URL secret"
+            ++ lib.optionals ((toString (lib.head (xtyCfg.systemd.services.directo-backend.serviceConfig.EnvironmentFile or [ "" ]))) != "/run/agenix/directo-backend-env") [
+              "directo backend must use the production env secret (DATABASE_URL + Mercado Pago)"
+            ]
+            ++ lib.optionals ((xtyCfg.systemd.services.directo-backend.environment.DIRECTO_ADMIN_PASSWORD_HASH_FILE or "") != "/run/credentials/directo-backend.service/admin-hash") [
+              "directo backend must read the admin hash via systemd LoadCredential"
+            ]
+            ++ lib.optionals ((toString (lib.head (xtyCfg.systemd.services.xpsoasis-backend.serviceConfig.EnvironmentFile or [ "" ]))) != "/run/agenix/xpsoasis-backend-env") [
+              "xpsoasis backend must use the production AANALYZER_PGPASS secret"
             ];
           preDeployXty = pkgs.runCommand "pre-deploy-xty" {} ''
             ${if checkFailures == [] then ''
@@ -294,7 +337,10 @@
               remote "test -e /var/lib/expedientes/.seeded" \
                 || fail "missing /var/lib/expedientes/.seeded; expedientes seed could drop and restore the DB"
 
-              for service in postgresql nginx expedientes-backend wedding-migrate wedding-backend cfo-backend; do
+              # NOTE first deploy of directo/xpsoasis: these services do not
+              # exist on xty yet, so this live check will fail; deploy that
+              # one time with `deploy .#xty` directly, then this gate applies.
+              for service in postgresql nginx expedientes-backend wedding-migrate wedding-backend directo-migrate directo-backend xpsoasis-backend; do
                 remote "systemctl is-active --quiet $service" \
                   || fail "$service is not active on $host"
               done
@@ -304,12 +350,6 @@
                 || fail "could not count expedientes public tables"
               [ "$expedientes_tables" -gt 0 ] \
                 || fail "expedientes database has no public tables"
-
-              cfo_tables="$(remote "runuser -u postgres -- psql -d cfo -tAc \"select count(*) from information_schema.tables where table_schema='public';\"" | tr -d '[:space:]')"
-              [[ "$cfo_tables" =~ ^[0-9]+$ ]] \
-                || fail "could not count cfo public tables"
-              [ "$cfo_tables" -gt 0 ] \
-                || fail "cfo database has no public tables"
 
               echo "pre-deploy-xty-live checks passed"
             '';

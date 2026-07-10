@@ -2,7 +2,45 @@
 
 Written 2026-07-04 on olimpo, for continuing on delfos. Everything a fresh
 session needs is in this file. The work spans this repo **and** the project
-repos under `~/src` (`wedding-website`, `expedientes`, `cfo-as-a-service`).
+repos under `~/src` (`wedding-website`, `expedientes`).
+
+> **Update 2026-07-09:** `cfo-as-a-service` was removed from this config
+> entirely (input, module import, profile blocks, pre-deploy/live checks).
+> Its `cfo` database/user still exist on xty; drop manually if desired
+> after the next deploy. Historical references to cfo below are kept for
+> context (its module shape remains the canonical interface).
+>
+> **Update 2026-07-09 (2):** two projects were added following the same
+> convention: **directo** (store for directo-qro.com; input
+> `hhefesto/storeApp?ref=store-rebuild`, dev directo.local:8085 /
+> backend 3002, prod store.directo-qro.com) and **xpsoasis** (AAnalyzer;
+> input `rdataa/xpsOasis?ref=xpsoasis`, dev xpsoasis.local:8086 /
+> backend 3003, prod xpsoasis.org, DB `aanalyzer_yesod` user `analyzer`).
+> Pre-deploy pure + live checks extended for both.
+>
+> **Before the first xty deploy with these projects:**
+> 1. Create agenix secrets in each project repo (recipients admin+xty,
+>    see `secrets/secrets.nix` in each): directo — `directo-db-password`,
+>    `directo-backend-env` (DATABASE_URL=postgres://directo:PW@localhost:5432/directo,
+>    MERCADOPAGO_ACCESS_TOKEN, MERCADOPAGO_WEBHOOK_SECRET),
+>    `directo-admin-password-hash` (bcrypt); xpsoasis —
+>    `xpsoasis-smtp-password` (ROTATE the Gmail app password; the old one
+>    is plaintext in xpsoasis git history), `xpsoasis-db-password`,
+>    `xpsoasis-backend-env` (AANALYZER_PGPASS=…).
+> 2. The live check now requires directo-migrate/directo-backend/
+>    xpsoasis-backend active on xty — they don't exist before the first
+>    deploy, so run that one deploy with `deploy .#xty` directly.
+> 3. xpsoasis data migration from Hetzner (65.109.162.220):
+>    `pg_dump -U analyzer -Fc aanalyzer_yesod` → `pg_restore --clean
+>    --if-exists --no-owner --role=analyzer -d aanalyzer_yesod` on xty;
+>    rsync the upload dir to /var/lib/xpsoasis/upload; then repoint
+>    xpsoasis.org DNS to 62.238.6.4.
+> 4. DNS for store.directo-qro.com → 62.238.6.4 (the apex
+>    directo-qro.com keeps serving the existing site).
+> 5. Register the Mercado Pago webhook at
+>    https://store.directo-qro.com/api/webhooks/mercadopago (payment
+>    events); the backend also polls MP as a fallback, and dev mode works
+>    with MP disabled entirely (no token in env).
 
 ## Mission (user's words, condensed)
 
@@ -135,7 +173,7 @@ domains. Only option paths and code location change.
 ### Gotchas that still apply
 
 - Flake purity: git add new files in project repos before nix build.
-- Dev loop: --override-input docxty/cfo-as-a-service/wedding-page path:$HOME/src/<repo>.
+- Dev loop: --override-input docxty/wedding-page path:$HOME/src/<repo>.
 - agenix identityPaths on workstations lives in the consumer's
   workstationServices block (admin key decrypts shared dev secrets).
 - configuration-gui.nix carries the unrelated enableConfiguredRecompile=false
