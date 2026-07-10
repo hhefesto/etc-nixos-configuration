@@ -275,11 +275,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1783658742,
-        "narHash": "sha256-6EXszK1s76TmgxzBZjFYL0+PEFblY/sh3tHxWW4E4NM=",
+        "lastModified": 1783660436,
+        "narHash": "sha256-gzIiSsZivC/ipbnyj+XKb8/ufbIvS0c2030H8PjjogA=",
         "ref": "store-rebuild",
-        "rev": "20883f0e3e3043eb3f580620c53c86ab178c455b",
-        "revCount": 5,
+        "rev": "9e298c574475a5e9e25698dc995e4883a1f82682",
+        "revCount": 6,
         "type": "git",
         "url": "ssh://git@github.com/hhefesto/storeApp"
       },
@@ -1263,11 +1263,11 @@
         "web-push": "web-push"
       },
       "locked": {
-        "lastModified": 1783658854,
-        "narHash": "sha256-zJ5R7PGOWNievPLqS8dhqhZl/pKbUuNrMBQwSudKUi4=",
+        "lastModified": 1783659971,
+        "narHash": "sha256-6ESoA9qydrGo5lkJuXm6TCS6zdvDSKxzkEOh/pgPyYo=",
         "ref": "xpsoasis",
-        "rev": "849277901b56d08cd1cde38d53c91db926f54c2b",
-        "revCount": 976,
+        "rev": "1eef0637c64615f95de91515ce914cc364fa19b8",
+        "revCount": 977,
         "type": "git",
         "url": "ssh://git@github.com/rdataa/xpsOasis"
       },
