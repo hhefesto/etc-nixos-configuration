@@ -275,11 +275,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1783703030,
-        "narHash": "sha256-6Mg1wQe1ggErgkL8KxFs/Blm144WnciP8v7WUaPMDR4=",
+        "lastModified": 1783705315,
+        "narHash": "sha256-3uvDQEkGMKl4/ThHPXfNjy+kVZ7F6cksViKI/lLSrRY=",
         "ref": "refs/heads/master",
-        "rev": "943fecc77fe7bee875a893b442d14c89e1e1a02f",
-        "revCount": 8,
+        "rev": "2c5fca333e8f0929ba9171c6a419d40cfcd09a05",
+        "revCount": 9,
         "type": "git",
         "url": "ssh://git@github.com/hhefesto/directo"
       },
