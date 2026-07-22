@@ -19,7 +19,10 @@
     docxty.url = "git+ssh://git@github.com/hhefesto/docxty";
     wedding-page.url = "github:hhefesto/wedding-website";
     directo.url = "git+ssh://git@github.com/hhefesto/directo";
-    xpsoasis.url = "git+ssh://git@github.com/rdataa/xpsOasis?ref=xpsoasis";
+    # Olimpo-local parity work. Restore the Git branch input after the
+    # single-backend refactor is committed and pushed; never deploy xty while
+    # this absolute path pin is present.
+    xpsoasis.url = "path:/home/hhefesto/src/xpsoasis";
     claude-code-nix.url = "github:sadjow/claude-code-nix";
     opencode.url = "github:anomalyco/opencode/c5db39f6268a36194a7fe5f833ae3197dfe250b6";
     telomare.url = "git+ssh://git@github.com/hhefesto/stand-in-language?ref=source-locations";

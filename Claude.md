@@ -38,15 +38,15 @@ Primary languages: **Nix, Haskell, Agda**. Strongly prefers functional, type-dri
 | `docxty` | expedientes (medical records) | docxty.net | 3000 | `expedientes` |
 | `wedding-page` | wedding RSVP | xty-y-dan.net | 3001 | `wedding` |
 | `directo` | store (refacciones, Querétaro) | directo.hhefesto.com | 3002 | `directo` |
-| `xpsoasis` | AAnalyzer (Yesod) | xpsoasis.hhefesto.com | 3003 | `aanalyzer_yesod` (user `analyzer`) |
+| `xpsoasis` | AAnalyzer (Servant + Reflex; production Yesod is reference-only in master) | xpsoasis.hhefesto.com | 3003 | `aanalyzer_yesod` (user `analyzer`) |
 
-Workstation dev nginx ports: expedientes 80, wedding 8084, directo 8085, xpsoasis 8086.
+Workstation dev nginx ports: expedientes 80, wedding 8084, directo 8085, xpsoasis 8086. xpsOasis has one Servant backend on 3003 for `/api`, `/b`, `/ws`, and the SPA.
 
 Deploy: `nix run .#deploy-xty` (docxty backup health check → pure checks → live SSH checks → build → deploy-rs). Backup health check standalone: `nix run .#check-docxty-backups` (`DOCXTY_BACKUP_CHECK_FAST=1` skips the restic integrity pass). **Update policy: manual only** — no `system.autoUpgrade`; every prod update goes through the check pipeline.
 
 ### Key flake inputs
 
-`nixpkgs` (nixos-unstable), `flake-parts`, `deploy-rs`, `home-manager` (release-25.11), `agenix`, `docxty`/`wedding-page`/`directo`/`xpsoasis` (project repos, git+ssh/github; xpsoasis lives at `rdataa/xpsOasis?ref=xpsoasis`), `claude-code-nix`, `opencode`, `telomare`, `spacemacs` (non-flake).
+`nixpkgs` (nixos-unstable), `flake-parts`, `deploy-rs`, `home-manager` (release-25.11), `agenix`, `docxty`/`wedding-page`/`directo` (project repos), and an Olimpo-local `path:/home/hhefesto/src/xpsoasis` input. Restore xpsOasis to its Git branch after the single-backend changes are committed; never deploy xty while path-pinned. Other inputs: `claude-code-nix`, `opencode`, `telomare`, `spacemacs` (non-flake).
 
 Binary caches: `hercules-ci.cachix.org`, `telomare.cachix.org`, `nixcache.reflex-frp.org`, `claude-code.cachix.org`.
 

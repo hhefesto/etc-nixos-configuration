@@ -14,8 +14,11 @@ repos under `~/src` (`wedding-website`, `expedientes`).
 > convention: **directo** (store for directo-qro.com; input
 > `hhefesto/storeApp?ref=store-rebuild`, dev directo.local:8085 /
 > backend 3002, prod store.directo-qro.com) and **xpsoasis** (AAnalyzer;
-> input `rdataa/xpsOasis?ref=xpsoasis`, dev xpsoasis.local:8086 /
-> backend 3003, prod xpsoasis.org, DB `aanalyzer_yesod` user `analyzer`).
+> Olimpo-local input `path:/home/hhefesto/src/xpsoasis`, dev
+> xpsoasis.local:8086 / one Servant backend on 3003, prod xpsoasis.org, DB
+> `aanalyzer_yesod` user `analyzer`). Servant owns `/api`, `/b`, `/ws`, and
+> the SPA; production Yesod behavior is reference-only in `rdataa/master`.
+> Restore the Git input before any xty deployment.
 > Pre-deploy pure + live checks extended for both.
 >
 > **Before the first xty deploy with these projects:**
