@@ -1189,14 +1189,18 @@
         "web-push": "web-push"
       },
       "locked": {
-        "lastModified": 1784760192,
-        "narHash": "sha256-fvIXqu2NTdTKAFnVdTjhIGjjWTyaJEPeFOM15cjZn7Y=",
-        "path": "/home/hhefesto/src/xpsoasis",
-        "type": "path"
+        "lastModified": 1784768004,
+        "narHash": "sha256-fWgmUh9Ze4GJ2+rEOoGkaJfT6dYA+9YuzAysrksk1cc=",
+        "ref": "xpsoasis-single-servant",
+        "rev": "6321cb2be09e60e144179e996fa5d46db4d356e2",
+        "revCount": 1105,
+        "type": "git",
+        "url": "ssh://git@github.com/rdataa/xpsOasis"
       },
       "original": {
-        "path": "/home/hhefesto/src/xpsoasis",
-        "type": "path"
+        "ref": "xpsoasis-single-servant",
+        "type": "git",
+        "url": "ssh://git@github.com/rdataa/xpsOasis"
       }
     }
   },
