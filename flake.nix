@@ -21,20 +21,10 @@
     directo.url = "git+ssh://git@github.com/hhefesto/directo";
     # Single-Servant parity branch; both Olimpo and xty evaluate the same
     # application source, but deployment remains an explicit separate step.
-    # Local git+file pin (per xpsOasis HANDOFF §7) so olimpo builds the working
-    # tree — including the Spectra navigation + manual — before it is pushed.
-    # git+file honours .gitignore and includes uncommitted tracked changes +
-    # staged new files. Revert to
-    # `git+ssh://git@github.com/rdataa/xpsOasis?ref=xpsoasis-single-servant`
-    # once the branch is pushed; do NOT deploy xty while locally pinned.
-    # `?ref=<branch>` pins to the branch's committed tree: nix then ignores the
-    # working copy, so the lock stays clean and reproducible (a bare git+file
-    # pin resolves the DIRTY worktree, which nix caches by HEAD rev — later
-    # edits silently never reach the build). Commit, then re-lock.
-    xpsoasis.url = "git+file:///home/hhefesto/src/xpsoasis?ref=xpsoasis-single-servant";
-    # Spectra (web AAnalyzer): C++ engine + reflex frontend. Local pin for now;
-    # local-only deployment (olimpo). Prod home: aaspectra.xpsoasis.org.
-    aanalyzer-classic.url = "git+file:///home/hhefesto/src/aanalyzer-classic?ref=headless-backend";
+    xpsoasis.url = "git+ssh://git@github.com/rdataa/xpsOasis?ref=xpsoasis-single-servant";
+    # Spectra (web AAnalyzer): C++ engine + reflex frontend.
+    # Prod home: aaspectra.xpsoasis.org.
+    aanalyzer-classic.url = "git+ssh://git@github.com/rdataa/aanalyzer-classic?ref=headless-backend";
     claude-code-nix.url = "github:sadjow/claude-code-nix";
     opencode.url = "github:anomalyco/opencode/c5db39f6268a36194a7fe5f833ae3197dfe250b6";
     telomare.url = "git+ssh://git@github.com/hhefesto/stand-in-language?ref=source-locations";

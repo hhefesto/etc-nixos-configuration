@@ -14,12 +14,12 @@
         "rev": "0cbc1614777a3df033085315cb8f64ceb6afa9ef",
         "revCount": 1440,
         "type": "git",
-        "url": "file:///home/hhefesto/src/aanalyzer-classic"
+        "url": "ssh://git@github.com/rdataa/aanalyzer-classic"
       },
       "original": {
         "ref": "headless-backend",
         "type": "git",
-        "url": "file:///home/hhefesto/src/aanalyzer-classic"
+        "url": "ssh://git@github.com/rdataa/aanalyzer-classic"
       }
     },
     "agenix": {
@@ -1321,12 +1321,12 @@
         "rev": "ababb75987e0c7952ea33782c42254c8b9cfb09f",
         "revCount": 1192,
         "type": "git",
-        "url": "file:///home/hhefesto/src/xpsoasis"
+        "url": "ssh://git@github.com/rdataa/xpsOasis"
       },
       "original": {
         "ref": "xpsoasis-single-servant",
         "type": "git",
-        "url": "file:///home/hhefesto/src/xpsoasis"
+        "url": "ssh://git@github.com/rdataa/xpsOasis"
       }
     }
   },
