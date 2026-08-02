@@ -18,7 +18,12 @@
   # run in larger launches (see TRAINING-GUIDE.md Lesson 10).
   # Tradeoff: a genuinely hung GPU job stalls the desktop up to 60 s
   # before soft recovery instead of 10 s.
-  boot.kernelParams = [ "amdgpu.lockup_timeout=60000" ];
+  # NOTE (2026-07-10): a single value sets only the NON-COMPUTE rings
+  # (GFX, SDMA, Video); rusticl submits OpenCL work to the COMPUTE ring,
+  # which kept its default and soft-reset formalTransformer's small-preset
+  # gradient kernel after ~11 s.  The four-value form [GFX,Compute,SDMA,
+  # Video] covers the compute ring explicitly.  Takes effect on reboot.
+  boot.kernelParams = [ "amdgpu.lockup_timeout=60000,60000,60000,60000" ];
 
   # --- LAN binary-cache: olimpo <-> delfos over ssh-ng ---------------------
 
@@ -31,7 +36,7 @@
   ];
   nix.settings.trusted-public-keys = [
     # Contents of /etc/nix/cache-pub-key.pem on delfos.
-    "delfos:hcd36Z1XMujbH2BoY1Xv7b+p5GbcMOCy/Of6qCxWmjYPewhiGuRwlRvs7TX6v3igPnQ1Vi85LTYeDaile7tobA=="
+    "delfos:D3sIYhrkcJUb7O01+r94oD50NVYvOS02Hg2opXu7aGw="
   ];
 
   # Serve olimpo's store to delfos. Authorize delfos's root key.
