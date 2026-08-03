@@ -52,6 +52,32 @@ repos under `~/src` (`wedding-website`, `expedientes`).
 > password into xpsoasis-smtp-password.age, then redeploy. Added
 > `apps.check-docxty-backups` (also runs first in `deploy-xty`).
 >
+> **Update 2026-08-02 (single-Servant xpsoasis + Spectra on xty):**
+> xty now deploys the Servant/Reflex xpsoasis (branch
+> `xpsoasis-single-servant`) with Spectra beside it:
+> `services.aaspectra.profile` production block added (serverName
+> `aaspectra.xpsoasis.hhefesto.com`, nginx 80 for the ACME HTTP-01
+> challenge, engine loopback 3004, oasisUrl
+> `https://xpsoasis.hhefesto.com`); xpsoasis profile gained
+> `cookieDomain = "xpsoasis.hhefesto.com"` (parent-domain cookie for the
+> Spectra auth subrequest) and `spectraUrl` (deployment-injected
+> cross-link). Pure checks extended: aaspectra vhost + ssl443, and
+> `AANALYZER_WORKER=1` on xpsoasis-backend (the module sets it — the
+> deferred-job worker/article delivery needs exactly one unit).
+> New agenix secret in the xpsoasis repo: `xpsoasis-session-keys.age`
+> (stable AANALYZER_JWT_KEY + persisted VAPID pair; recipients
+> admin+xty; wired by the module as a second EnvironmentFile — never
+> rotate casually).
+> USER ACTION: create the A record `aaspectra.xpsoasis.hhefesto.com` →
+> 62.238.6.4; until it exists that vhost's ACME order fails (the other
+> vhosts' certs are independent and unaffected).
+> xty's aanalyzer_yesod is seeded from the xpsoasis repo's committed
+> 2022 fixture dump + repo `upload/`; the real xpsoasis.org migration
+> from Hetzner (step 3 above) stays pending for the true cutover.
+> Production schema migration is explicit: the backend refuses pending
+> DDL; apply once via a temporary `AANALYZER_DEV_MIGRATE=1` drop-in
+> after a pg_dump backup, then remove the drop-in.
+>
 > Deploy war stories from that first deploy (both resolved, keep for
 > next time):
 > 1. **Stale logind ↔ dbus connection**: dbus-broker had been restarted

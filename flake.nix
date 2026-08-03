@@ -144,7 +144,22 @@
             enable = true;
             mode = "production";
             serverName = "xpsoasis.hhefesto.com";
+            # Parent-domain session cookie so the Spectra sibling vhost can
+            # authorize through /b/auth/me with the same cookie.
+            cookieDomain = "xpsoasis.hhefesto.com";
+            spectraUrl = "https://aaspectra.xpsoasis.hhefesto.com";
             ports = { nginx = 80; backend = 3003; };
+          };
+
+          # Spectra (web AAnalyzer) — production sibling of xpsoasis. nginx
+          # port must be 80 so the ACME HTTP-01 challenge is reachable; the
+          # engine stays on loopback 3004.
+          services.aaspectra.profile = {
+            enable = true;
+            mode = "production";
+            serverName = "aaspectra.xpsoasis.hhefesto.com";
+            ports = { nginx = 80; backend = 3004; };
+            oasisUrl = "https://xpsoasis.hhefesto.com";
           };
         };
 
@@ -285,6 +300,9 @@
             ++ lib.optionals (!(hasXtyVhost "xpsoasis.hhefesto.com")) [
               "nginx must define xpsoasis.hhefesto.com vhost"
             ]
+            ++ lib.optionals (!(hasXtyVhost "aaspectra.xpsoasis.hhefesto.com")) [
+              "nginx must define aaspectra.xpsoasis.hhefesto.com vhost"
+            ]
             ++ lib.optionals (!(hasSsl443 "docxty.net")) [
               "docxty.net must listen on 443 with ssl"
             ]
@@ -296,6 +314,12 @@
             ]
             ++ lib.optionals (!(hasSsl443 "xpsoasis.hhefesto.com")) [
               "xpsoasis.hhefesto.com must listen on 443 with ssl"
+            ]
+            ++ lib.optionals (!(hasSsl443 "aaspectra.xpsoasis.hhefesto.com")) [
+              "aaspectra.xpsoasis.hhefesto.com must listen on 443 with ssl"
+            ]
+            ++ lib.optionals ((xtyCfg.systemd.services.xpsoasis-backend.environment.AANALYZER_WORKER or "") != "1") [
+              "xpsoasis backend must own the deferred-job worker (AANALYZER_WORKER=1)"
             ]
             ++ lib.optionals ((toString xtyCfg.services.wedding.backend.databaseUrlFile) != "/run/agenix/wedding-backend-env") [
               "wedding backend must use the production DATABASE_URL secret"
