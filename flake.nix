@@ -161,6 +161,16 @@
             ports = { nginx = 80; backend = 3004; };
             oasisUrl = "https://xpsoasis.hhefesto.com";
           };
+
+          # The aaspectra certificate order can only succeed once its A
+          # record exists; keep the order unit out of activation so a
+          # missing record cannot fail the switch (deploy war story 2).
+          # The daily acme timer keeps retrying, so the real certificate
+          # replaces the self-signed placeholder on its own once DNS
+          # resolves — or start it manually:
+          #   systemctl start acme-aaspectra.xpsoasis.hhefesto.com.service
+          systemd.services."acme-aaspectra.xpsoasis.hhefesto.com".wantedBy =
+            nixpkgs.lib.mkForce [ ];
         };
 
         mkHost = { hostModules, extraSpecialArgs ? {} }: nixpkgs.lib.nixosSystem {
