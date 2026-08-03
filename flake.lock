@@ -1315,11 +1315,11 @@
         "web-push": "web-push"
       },
       "locked": {
-        "lastModified": 1785736799,
-        "narHash": "sha256-kGJ9vb9DugKE15WQJEcllKtJbgvb5lubmm/U8QDyVXE=",
+        "lastModified": 1785774573,
+        "narHash": "sha256-UFdGFp9H9s1/dJx5aJjz7kJ3oKAXLloUz1tooZhDLRU=",
         "ref": "xpsoasis-single-servant",
-        "rev": "58e95e3680e063c3d05ef4b59bb8c10574469f60",
-        "revCount": 1203,
+        "rev": "ae1ab6056d34d7d0a901893f21f7efb8d8900d0a",
+        "revCount": 1205,
         "type": "git",
         "url": "ssh://git@github.com/rdataa/xpsOasis"
       },
