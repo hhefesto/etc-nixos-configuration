@@ -8,11 +8,11 @@
         "purescript-overlay": "purescript-overlay"
       },
       "locked": {
-        "lastModified": 1785639998,
-        "narHash": "sha256-eO2WK7kmFR9ZMhniI4wBt80KvrVpu5uOHqU7t/U1OTw=",
+        "lastModified": 1785736816,
+        "narHash": "sha256-RspUAwi6QeNg+5vQ/Bx/j4M6P5XqVwRP7LdSb8tFzZg=",
         "ref": "headless-backend",
-        "rev": "0cbc1614777a3df033085315cb8f64ceb6afa9ef",
-        "revCount": 1440,
+        "rev": "2a765dfc9cd415484575b3e8c070ac02a54eebfd",
+        "revCount": 1441,
         "type": "git",
         "url": "ssh://git@github.com/rdataa/aanalyzer-classic"
       },
@@ -1315,11 +1315,11 @@
         "web-push": "web-push"
       },
       "locked": {
-        "lastModified": 1785640016,
-        "narHash": "sha256-QAgc1JK2XlSLAtCBYps/tgXQ5jd/SV/t+4Tf1ewWDZo=",
+        "lastModified": 1785736799,
+        "narHash": "sha256-kGJ9vb9DugKE15WQJEcllKtJbgvb5lubmm/U8QDyVXE=",
         "ref": "xpsoasis-single-servant",
-        "rev": "ababb75987e0c7952ea33782c42254c8b9cfb09f",
-        "revCount": 1192,
+        "rev": "58e95e3680e063c3d05ef4b59bb8c10574469f60",
+        "revCount": 1203,
         "type": "git",
         "url": "ssh://git@github.com/rdataa/xpsOasis"
       },
