@@ -17,13 +17,13 @@ myStartupHook = do
   spawnOnce "nautilus"
   spawnOnce "brave"
   spawnOnce "feh --bg-scale ~/Pictures/wallpaper.png &"
-  spawnOnce "gnome-terminal"
+  spawnOnce "myterm"
   spawnOnce "emacs"
   spawnOnce "signal-desktop"
   spawnOnce "env XDG_CURRENT_DESKTOP=GNOME gnome-control-center"
 
 myModMask            = mod4Mask                        -- Sets modkey to super/windows key
-myTerminal           = "gnome-terminal"
+myTerminal           = "myterm"   -- gnome-terminal wrapped in tmux; see configuration-gui.nix
 myTextEditor         = "emacs"                         -- Sets default text editor
 myBorderWidth        = 2                               -- Sets border width for windows
 myNormalBorderColor  = "#4a4a4a"

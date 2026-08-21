@@ -1,4 +1,40 @@
 { pkgs, lib, inputs, ... }:
+let
+  llm-transcript = import ./llm-transcript.nix { inherit pkgs; };
+
+  # Every `claude` launch also opens a debug log beside the transcripts, so
+  # whatever claude-code is willing to emit lands in a file. `pkgs.claude-code`
+  # is deliberately NOT in systemPackages: two packages shipping `bin/claude`
+  # collide in the profile, and going through this wrapper is the point.
+  # Nothing failure-prone runs before the exec, so a bug here cannot make
+  # claude unlaunchable.
+  claude-wrapped = pkgs.writeShellScriptBin "claude" ''
+    out="$HOME/src/llm-transcript"
+    mkdir -p "$out" 2>/dev/null || true
+    chmod 700 "$out" 2>/dev/null || true
+    stamp=$(${pkgs.coreutils}/bin/date +%Y-%m-%d_%H%M)
+    proj=$(${pkgs.coreutils}/bin/basename "$PWD")
+
+    # Fixing the session id up front lets the debug log sit beside the
+    # transcript this session will produce. Skipped when resuming, because
+    # --session-id is mutually exclusive with those flags.
+    resuming=
+    for a in "$@"; do
+      case "$a" in
+        -c|--continue|-r|--resume|--fork-session|--from-pr|--teleport) resuming=1 ;;
+      esac
+    done
+
+    if [ -z "$resuming" ]; then
+      sid=$(${pkgs.util-linux}/bin/uuidgen)
+      exec ${pkgs.claude-code}/bin/claude \
+        --session-id "$sid" \
+        --debug-file "$out/$stamp-$proj-''${sid%%-*}.debug.log" "$@"
+    fi
+    exec ${pkgs.claude-code}/bin/claude \
+      --debug-file "$out/$stamp-$proj.debug.log" "$@"
+  '';
+in
 {
   nixpkgs.overlays = [
     inputs.claude-code-nix.overlays.default
@@ -13,7 +49,8 @@
     openssl
     bind
     opencode
-    claude-code
+    claude-wrapped
+    llm-transcript
     tesseract
     poppler-utils
     sd
@@ -30,7 +67,6 @@
     any-nix-shell
     wget
     vim
-    tmux
     curl
     gh
     gist

@@ -187,7 +187,7 @@
             workstationServices
             (home-manager-module { xmobarrc = ./xmobarrc-delfos; })
           ];
-          extraSpecialArgs = { xmonadShortenLength = 26; };
+          extraSpecialArgs = { xmonadShortenLength = 26; tmuxAccent = "#7fff00"; };
         };
 
         nixosConfigurations.olimpo = mkHost {
@@ -198,7 +198,7 @@
             workstationServices
             (home-manager-module { xmobarrc = ./xmobarrc-olimpo; })
           ];
-          extraSpecialArgs = { xmonadShortenLength = 50; };
+          extraSpecialArgs = { xmonadShortenLength = 50; tmuxAccent = "#7fff00"; };
         };
 
         nixosConfigurations.xty = mkHost {
@@ -207,6 +207,8 @@
             ./configuration-core.nix
             xtyServices
           ];
+          # Red tmux status bar: this is production.
+          extraSpecialArgs = { tmuxAccent = "#ff5f5f"; };
         };
 
         deploy.nodes.xty = {
@@ -533,6 +535,7 @@
           }) (builtins.attrNames hosts);
         in {
           default = pkgs.linkFarm "all-hosts" entries;
+          llm-transcript = import ./llm-transcript.nix { inherit pkgs; };
           delfos = hosts.delfos.config.system.build.toplevel;
           olimpo = hosts.olimpo.config.system.build.toplevel;
           xty = hosts.xty.config.system.build.toplevel;

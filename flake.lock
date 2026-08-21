@@ -8,11 +8,11 @@
         "purescript-overlay": "purescript-overlay"
       },
       "locked": {
-        "lastModified": 1785736816,
-        "narHash": "sha256-RspUAwi6QeNg+5vQ/Bx/j4M6P5XqVwRP7LdSb8tFzZg=",
+        "lastModified": 1787022014,
+        "narHash": "sha256-sJrHmTPI3bX3QEgmKhP0qjaeQYg/8+xMu5PCJcxnVmE=",
         "ref": "headless-backend",
-        "rev": "2a765dfc9cd415484575b3e8c070ac02a54eebfd",
-        "revCount": 1441,
+        "rev": "1e12789104df801be97621370ec69aa7649444bb",
+        "revCount": 1525,
         "type": "git",
         "url": "ssh://git@github.com/rdataa/aanalyzer-classic"
       },
@@ -113,15 +113,15 @@
     },
     "claude-code-nix": {
       "inputs": {
-        "flake-utils": "flake-utils",
-        "nixpkgs": "nixpkgs_2"
+        "nixpkgs": "nixpkgs_2",
+        "systems": "systems_2"
       },
       "locked": {
-        "lastModified": 1785285785,
-        "narHash": "sha256-r1cMlvXjRVKe+uQ/GKwy4TpionpmbNgksFP2758D/MM=",
+        "lastModified": 1786748620,
+        "narHash": "sha256-K+sJmUXFksrB7pLvrcv8jIDGKxN52QtV1sIKXhT8MZo=",
         "owner": "sadjow",
         "repo": "claude-code-nix",
-        "rev": "da78262708d858861afbe1f68ea65fedda4054c4",
+        "rev": "fd727a3f341b079ba5387b770c5caef86bdae3e6",
         "type": "github"
       },
       "original": {
@@ -230,11 +230,11 @@
         "utils": "utils"
       },
       "locked": {
-        "lastModified": 1785518313,
-        "narHash": "sha256-anlq3YQDCsNrkNlu3HTg4dEIpRugwnyAVUxoPcBmA/U=",
+        "lastModified": 1786361680,
+        "narHash": "sha256-IxaZkb9rCGEZ+yGndxKXONeIEcKMzoFUsvLTB5G/caw=",
         "owner": "serokell",
         "repo": "deploy-rs",
-        "rev": "b974715a27b49fadbf3bf6d85e26bcb3109daa6d",
+        "rev": "16901271e5b30b591e56f7a84f25f186fb20f3e1",
         "type": "github"
       },
       "original": {
@@ -513,24 +513,6 @@
       "original": {
         "owner": "hercules-ci",
         "repo": "flake-parts",
-        "type": "github"
-      }
-    },
-    "flake-utils": {
-      "inputs": {
-        "systems": "systems_2"
-      },
-      "locked": {
-        "lastModified": 1731533236,
-        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
         "type": "github"
       }
     },
@@ -873,11 +855,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1784783405,
-        "narHash": "sha256-4IHyyLgLBdKefkljdKod4IMn023pQiDXAWJA187cmdY=",
+        "lastModified": 1786593342,
+        "narHash": "sha256-smTKQXMLLStzc8zJevMCckbk3My7SvbbLmPYZUJJKW4=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "7525d999cd850b9a488817abc89c75dc733acf17",
+        "rev": "6b5e5b7a6631f065bf6908986990b37d845f847f",
         "type": "github"
       },
       "original": {
@@ -937,11 +919,11 @@
     },
     "nixpkgs_6": {
       "locked": {
-        "lastModified": 1785571196,
-        "narHash": "sha256-KoTsyMQqnXQZq8deCEnu4QkyldkwH/bpMMhUcfMdGIw=",
+        "lastModified": 1786862985,
+        "narHash": "sha256-FBJRXmbGXiSUDvYEbfLYRkckayyZ6SK1UEqhCrIZ2Cs=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "148bab9c1c3c53136ecb44a6ea356a0ed5b39b06",
+        "rev": "e5bdc4a41d4c072fe1e3787eaa0320a384741d44",
         "type": "github"
       },
       "original": {
@@ -1092,11 +1074,11 @@
     "spacemacs": {
       "flake": false,
       "locked": {
-        "lastModified": 1785335121,
-        "narHash": "sha256-Y6Rf2hNsiWO9mYN6Zbxm0tuz0m+Utbq60KWWIhY2Qc8=",
+        "lastModified": 1786480230,
+        "narHash": "sha256-sitqBVLk3ttlY5K6jbsDJHKyYCd5EpDmCREPq1hT9T0=",
         "owner": "syl20bnr",
         "repo": "spacemacs",
-        "rev": "bc3ea24cb6028ad93cd4fbe1b8d28c185ef7dc0e",
+        "rev": "a10be2cb18e3e5f9bdd7eccec8a5dbb1b9b00c07",
         "type": "github"
       },
       "original": {
@@ -1315,11 +1297,11 @@
         "web-push": "web-push"
       },
       "locked": {
-        "lastModified": 1785775356,
-        "narHash": "sha256-4iu6oDTbDeObuVzK89eHZt480ma0/mMV9wLybL2mac4=",
+        "lastModified": 1787122223,
+        "narHash": "sha256-PXgvkraV/Bai0QuGSY68wAY6IxiJOkVGPROXD2vGXns=",
         "ref": "xpsoasis-single-servant",
-        "rev": "638971d33f09cee8c778325a28e96bcd1c68ad28",
-        "revCount": 1206,
+        "rev": "2313ba1ae7ef475c5c8913e955123814e461a863",
+        "revCount": 1364,
         "type": "git",
         "url": "ssh://git@github.com/rdataa/xpsOasis"
       },

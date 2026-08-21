@@ -12,6 +12,31 @@ in
     stateVersion = "22.11";
   };
   home.activation = {
+    # ~/.claude/settings.json is a real file that Claude Code rewrites itself,
+    # so it must not become a /nix/store symlink. Merge in just the two hook
+    # entries and leave everything else untouched -- the same seed-a-mutable-
+    # file idiom as installSpacemacs below. Idempotent across rebuilds.
+    #
+    # The hooks call llm-transcript by name rather than by store path: hooks
+    # inherit the user's PATH, and ~/.claude is not a GC root, so a pinned
+    # store path could be collected out from under it.
+    claudeTranscriptHooks = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      settings="$HOME/.claude/settings.json"
+      mkdir -p "$HOME/.claude"
+      [ -s "$settings" ] || echo '{}' > "$settings"
+
+      hook='{"hooks":[{"type":"command","command":"jq -r \".transcript_path // empty\" | xargs -r llm-transcript render","timeout":120}]}'
+      tmp=$(mktemp)
+      if ${pkgs.jq}/bin/jq --argjson h "$hook" \
+           '.hooks = ((.hooks // {}) | .Stop = [$h] | .SessionEnd = [$h])' \
+           "$settings" > "$tmp"; then
+        mv "$tmp" "$settings"
+      else
+        echo "claudeTranscriptHooks: could not merge hooks into $settings" >&2
+        rm -f "$tmp"
+      fi
+    '';
+
     installSpacemacs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       install -Dm644 ${spacemacsConfig} "$HOME/.spacemacs"
 

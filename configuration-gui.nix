@@ -1,9 +1,40 @@
 
-{ pkgs, lib, xmonadShortenLength ? 50, ... }:
+{ pkgs, lib, config, xmonadShortenLength ? 50, ... }:
+let
+  # The terminal xmonad opens (M-S-<Return>, and the startupHook one).
+  #
+  # Reattach a session no client is on -- typically one whose terminal window
+  # was closed -- otherwise start a fresh one. The session count therefore
+  # settles at the number of terminals actually kept open, and nothing is lost
+  # to an accidentally closed window.
+  tmuxAttachOrNew = pkgs.writeShellScript "tmux-attach-or-new" ''
+    tmux=${config.programs.tmux.package}/bin/tmux
+
+    orphans=$("$tmux" list-sessions -f '#{==:#{session_attached},0}' \
+                                    -F '#{session_name}' 2>/dev/null || true)
+    orphan=''${orphans%%$'\n'*}
+
+    if [ -n "$orphan" ]; then
+      "$tmux" attach-session -t "$orphan" && exit 0
+    else
+      "$tmux" new-session && exit 0
+    fi
+
+    # gnome-terminal closes the window the moment its command exits, so a tmux
+    # failure would otherwise be an invisible flash. Keep a usable shell.
+    echo "myterm: tmux failed to start, falling back to a plain shell." >&2
+    exec ${pkgs.zsh}/bin/zsh -l
+  '';
+
+  myterm = pkgs.writeShellScriptBin "myterm" ''
+    exec ${pkgs.gnome-terminal}/bin/gnome-terminal -- ${tmuxAttachOrNew}
+  '';
+in
 {
   networking.networkmanager.enable = true;
 
   environment.systemPackages = with pkgs; [
+    myterm
     localsend
     insomnia
     brightnessctl
@@ -80,6 +111,14 @@
   };
 
   programs.dconf.enable = true;
+
+  # Local X11 hosts: copy-mode yanks also land in the X CLIPBOARD selection,
+  # the same route the xmonad OCR binding takes. (copy-mode, not
+  # copy-mode-vi -- programs.tmux.keyMode is emacs.) Remote hosts are
+  # covered by set-clipboard/OSC 52 in configuration-core.nix.
+  programs.tmux.extraConfig = ''
+    bind -T copy-mode M-w send -X copy-pipe-and-cancel "${pkgs.xclip}/bin/xclip -selection clipboard"
+  '';
 
   hardware.bluetooth.enable = true;
   services.pipewire = {
