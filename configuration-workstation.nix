@@ -49,6 +49,7 @@ in
     openssl
     bind
     opencode
+    inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
     claude-wrapped
     llm-transcript
     tesseract

@@ -126,12 +126,6 @@ in
   nix.settings.fallback = true;
   nix.settings.connect-timeout = 3;
 
-  nix.gc = {
-    automatic = true;
-    dates = "weekly";
-    options = "--delete-older-than 7d";
-  };
-
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
   nix.extraOptions = ''
     keep-outputs = true
@@ -144,6 +138,7 @@ in
     "telomare.cachix.org-1:H0qRjVstxtb9oyEPvDDpmPSLyJ9oViAsTgwR02ra6Dk="
     "ryantrinkle.com-1:JJiAKaRv9mWgpVAz8dwewnZe0AzzEAzPkagE9SP5NWI="
     "claude-code.cachix.org-1:Yexf2anu7utx8vwrze0za1weds+4dui2kvewee4fsrk="
+    "codex-cli.cachix.org-1:1Br3H1hHoRYG22n//cGKJOk3cQXgYobUel6O8DgSing="
   ];
 
   nix.settings.trusted-substituters = [
@@ -152,6 +147,7 @@ in
     "https://nixcache.reflex-frp.org"
     "https://telomare.cachix.org"
     "https://claude-code.cachix.org"
+    "https://codex-cli.cachix.org"
   ];
 
   nix.settings.substituters = [
@@ -159,6 +155,7 @@ in
     "https://telomare.cachix.org"
     "https://nixcache.reflex-frp.org"
     "https://claude-code.cachix.org"
+    "https://codex-cli.cachix.org"
   ];
 
   nix.settings.allowed-users = [ "@wheel" "hhefesto" ];
