@@ -176,16 +176,11 @@
             oasisUrl = "https://xpsoasis.hhefesto.dev";
           };
 
-          # New hhefesto.dev vhosts (2026-09-19): keep their ACME order units
-          # out of activation so a failed order cannot fail the switch (deploy
-          # war story 2). Start them by hand after the switch, e.g.
-          #   systemctl start acme-refl.hhefesto.dev.service
-          # and drop these lines once every certificate exists; the daily
-          # acme timer renews them from then on.
-          systemd.services."acme-directo.hhefesto.dev".wantedBy = nixpkgs.lib.mkForce [ ];
-          systemd.services."acme-xpsoasis.hhefesto.dev".wantedBy = nixpkgs.lib.mkForce [ ];
-          systemd.services."acme-aaspectra.xpsoasis.hhefesto.dev".wantedBy = nixpkgs.lib.mkForce [ ];
-          systemd.services."acme-refl.hhefesto.dev".wantedBy = nixpkgs.lib.mkForce [ ];
+          # All four hhefesto.dev certificates were issued on 2026-09-19 during
+          # the first switch (records existed and resolved beforehand). If a
+          # vhost is ever added before its DNS record, guard its order unit
+          # with `systemd.services."acme-<name>".wantedBy = mkForce [ ]` so a
+          # failed order cannot fail the switch (deploy war story 2).
         };
 
         mkHost = { hostModules, extraSpecialArgs ? {} }: nixpkgs.lib.nixosSystem {
