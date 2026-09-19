@@ -15,9 +15,9 @@ running-system gate against unrelated restarts/reloads. Block production until
 one establishes that shared nginx, PostgreSQL, networking, docxty and all other
 projects remain untouched. Keep backup checks and disabled automatic rollback.
 
-**Medium:** refl's timed draft flush needs immediate-navigation browser coverage;
-new tests exercise same-task input/navigation, exact Unicode restoration and
-per-language drafts. See refl handoff for final results.
+**Medium, fixed:** same-task input/navigation reproduced a lost edit from stale
+reactive text. The departure flush now reads the live textarea; exact Unicode
+and per-language drafts pass the new regression checks (details below).
 
 **Low, addressed:** stale branch, publication, hint and deployment documentation.
 
@@ -26,18 +26,18 @@ and local module acceptance do not substitute for VM resource-exhaustion tests.
 
 ## Local rollout and approval
 
-Pin only the reviewed refl snapshot; do not update unrelated dependencies.
-Add `ns = "nixos-rebuild switch --sudo --flake ~/src/etc-nixos-configuration"`
+Only the reviewed refl snapshot is pinned; unrelated dependencies are unchanged.
+Added `ns = "nixos-rebuild switch --sudo --flake ~/src/etc-nixos-configuration"`
 to workstation zsh aliases. Existing `sn` remains available. The user's final
 path spelling had an extra slash; use the actual existing checkout above.
 
-Build with `nixos-rebuild build --flake ~/src/etc-nixos-configuration`.
+Built with `nixos-rebuild build --flake ~/src/etc-nixos-configuration`.
 The user then runs `nixos-rebuild switch --sudo --flake
 ~/src/etc-nixos-configuration`; start a new zsh afterwards for `ns`.
 After switch, verify http://127.0.0.1:3007 through the module and let the user
 assess the lesson. Explicit production approval is still required.
 
-Exact reviewed source, consumer change, build result and test results pending.
+Exact source, build and test results are recorded below.
 No production switch, publication, remote push or local activation performed.
 
 ## Production and rollback
@@ -83,3 +83,32 @@ reported 61 variants before activation. These probes do not validate the new
 candidate. After the user's switch, run the updated browser suite in existing
 service mode against :3007 and verify its ExecStart references the new closure.
 Olimpo lesson assessment and explicit xty approval are pending.
+
+## Olimpo build result and pre-existing drift
+
+Consumer configuration commit: `188cc609869d70a929c6c4bad882eb86f49a858d`;
+later commits only finalize these records. The module build succeeded:
+`/nix/store/yqsv22fni68nggn5q0iakm088d86yavd-nixos-system-olimpo-26.11.20260831.34ab990`.
+Its `etc/zshrc` contains the exact `ns` alias. Refl service ExecStart is
+`/nix/store/f8lx96yyy0hjswwgsk1h8v25447dw793-refl-site/bin/refl-site`.
+Log: `/tmp/refl-olimpo-build.log`.
+
+**Read before switching:** Olimpo currently runs
+`/nix/store/5pghfdayjcpb2vvjbsbxhl5hmn7cb109-nixos-system-olimpo-26.11.20260916.b1b8759`.
+This checkout has older pins; its full switch would change unrelated units
+including local nginx, PostgreSQL and NetworkManager, and change the next-boot
+kernel from 6.18.52 to 6.18.48. Only the refl lock entry was edited in this task;
+the unrelated drift was already present. The user was informed before switch.
+Unit comparison: `/tmp/refl-olimpo-unit-diff.txt`. No local switch was performed.
+
+After the user switches, verify the actual service and run:
+
+```sh
+cd ~/src/refl
+REFL_BROWSER_EXISTING_URL=http://127.0.0.1:3007 FONTCONFIG_FILE=/etc/fonts/fonts.conf \
+  /nix/store/r5n6ysvs7iwdsvja01f875a40sf2d7qs-refl-backend-0.1.0.0/bin/refl-browser-test \
+  result-browser-tools/bin/chromium unused games/refl
+```
+
+This uses a fresh browser identity and does not start/stop the module. Confirm
+that refl's ExecStart matches the candidate above before accepting the result.

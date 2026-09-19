@@ -131,7 +131,7 @@ this pass): `xpsoasis/static/js/checkVersion.js` (legacy Yesod asset whose
 ## Final state (2026-09-19)
 
 - xty generation 71 serves https://directo.hhefesto.dev,
-  https://xpsoasis.hhefesto.dev (Spectra link → aaspectra), 
+  https://xpsoasis.hhefesto.dev (Spectra link → aaspectra),
   https://aaspectra.xpsoasis.hhefesto.dev (DNS-only record, origin cert) and
   https://refl.hhefesto.dev, plus the unchanged docxty.net and xty-y-dan.net.
   Certificates: Let's Encrypt, renewed by the acme timers.
