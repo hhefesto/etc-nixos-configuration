@@ -487,7 +487,7 @@
               # NOTE first deploy of directo/xpsoasis: these services do not
               # exist on xty yet, so this live check will fail; deploy that
               # one time with `deploy .#xty` directly, then this gate applies.
-              for service in postgresql nginx expedientes-backend wedding-migrate wedding-backend directo-migrate directo-backend xpsoasis-backend; do
+              for service in postgresql nginx expedientes-backend wedding-migrate wedding-backend directo-migrate directo-backend xpsoasis-backend refl; do
                 remote "systemctl is-active --quiet $service" \
                   || fail "$service is not active on $host"
               done
