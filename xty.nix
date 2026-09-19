@@ -8,6 +8,18 @@
   services.postgresql.package = pkgs.postgresql_16;
 
   networking.hostName = "xty";
+
+  # hhefesto.com's DNS is broken (2026-09-18). nginx resolves proxy_pass
+  # upstreams at start-up, and the aaspectra vhost proxies to
+  # xpsoasis.hhefesto.com, so without this pin nginx refuses to start and
+  # every vhost (docxty.net included) goes down on the next restart.
+  # Harmless once DNS returns: these names point here anyway.
+  networking.hosts."62.238.6.4" = [
+    "xpsoasis.hhefesto.com"
+    "aaspectra.xpsoasis.hhefesto.com"
+    "directo.hhefesto.com"
+    "refl.hhefesto.com"
+  ];
   networking.nameservers = [ "1.1.1.1" "8.8.8.8" ];
   networking.useDHCP = false;
 
