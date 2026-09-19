@@ -38,9 +38,9 @@ Primary languages: **Nix, Haskell, Agda**. Strongly prefers functional, type-dri
 |---|---|---|---|---|
 | `docxty` | expedientes (medical records) | docxty.net | 3000 | `expedientes` |
 | `wedding-page` | wedding RSVP | xty-y-dan.net | 3001 | `wedding` |
-| `directo` | store (refacciones, Querétaro) | directo.hhefesto.com | 3002 | `directo` |
-| `xpsoasis` | AAnalyzer (Servant + Reflex; production Yesod is reference-only in master) | xpsoasis.hhefesto.com | 3003 | `aanalyzer_yesod` (user `analyzer`) |
-| `refl` | The Refl Game (Agda/Lean/Bend proof game, no DB) | http://62.238.6.4:3007 until hhefesto.com DNS returns, then refl.hhefesto.com | 3007 (public address, plain http) | none |
+| `directo` | store (refacciones, Querétaro) | directo.hhefesto.dev | 3002 | `directo` |
+| `xpsoasis` | AAnalyzer (Servant + Reflex; production Yesod is reference-only in master) | xpsoasis.hhefesto.dev | 3003 | `aanalyzer_yesod` (user `analyzer`) |
+| `refl` | The Refl Game (Agda/Lean/Bend proof game, no DB) | refl.hhefesto.dev | 3007 | none |
 
 Workstation dev nginx ports: expedientes 80, wedding 8084, directo 8085, xpsoasis 8086; refl on olimpo is loopback 3007 (no nginx). xpsOasis has one Servant backend on 3003 for `/api`, `/b`, `/ws`, and the SPA.
 

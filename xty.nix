@@ -9,16 +9,17 @@
 
   networking.hostName = "xty";
 
-  # hhefesto.com's DNS is broken (2026-09-18). nginx resolves proxy_pass
-  # upstreams at start-up, and the aaspectra vhost proxies to
-  # xpsoasis.hhefesto.com, so without this pin nginx refuses to start and
-  # every vhost (docxty.net included) goes down on the next restart.
-  # Harmless once DNS returns: these names point here anyway.
+  # nginx resolves proxy_pass upstreams at start-up, and the aaspectra vhost
+  # proxies to xpsoasis.hhefesto.dev: on 2026-09-18 a dead domain made nginx
+  # refuse to start and took every vhost (docxty.net included) down. Pin our
+  # own names to the origin so nginx never depends on public DNS for them,
+  # and so the aaspectra → xpsoasis auth subrequest skips the Cloudflare
+  # proxy (the names publicly resolve to Cloudflare edge addresses).
   networking.hosts."62.238.6.4" = [
-    "xpsoasis.hhefesto.com"
-    "aaspectra.xpsoasis.hhefesto.com"
-    "directo.hhefesto.com"
-    "refl.hhefesto.com"
+    "xpsoasis.hhefesto.dev"
+    "aaspectra.xpsoasis.hhefesto.dev"
+    "directo.hhefesto.dev"
+    "refl.hhefesto.dev"
   ];
   networking.nameservers = [ "1.1.1.1" "8.8.8.8" ];
   networking.useDHCP = false;

@@ -1,279 +1,74 @@
-# Refl on olimpo and xty — 2026-09-18 (evening)
+# Handoff: hhefesto.com → hhefesto.dev — started 2026-09-19
 
-Branch `refl-xty` (from master `83d7a5b`) adds the `refl` input
-(`github:hhefesto/refl`, public, no `follows`), imports
-`inputs.refl.nixosModules.default` for both hosts, and enables
-`services.refl.profile`: olimpo on loopback 3007 (ingress off), xty on the
-public address `62.238.6.4:3007` with `backend.openFirewall = true` and
-ingress off because hhefesto.com DNS is still being repaired. The pure
-pre-deploy checks assert refl's memory/swap/task limits, empty capability
-set, the open port and the absence of a `refl.hhefesto.com` vhost. When DNS
-is back: set `hostname = "refl.hhefesto.com"`, `ingress.enable = true`,
-drop `openFirewall`, keep the ACME order unit out of activation until the A
-record resolves (as for aaspectra), and add the vhost/ssl443 pure checks.
-
-The earlier WIP (a `path:` `cardano-stake-pool` input for xty, lock bumps of
-aanalyzer-classic/deploy-rs/determinate/claude-code-nix, the store-snapshot
-`refl` input) is in `git stash` ("WIP before refl-xty"), not on this branch:
-xty must not get a mainnet Cardano node or a `path:` input by accident.
-The `sn` alias fix (`nixos-rebuild --sudo`, evaluation as the user) and the
-olimpo block were taken from it.
-
-Deploy only with `nix run .#deploy-xty` (docxty backup health → pure checks
-→ live checks → build → deploy-rs). This branch also carries the two
-undeployed master commits (nixpkgs bump 2026-08-21, Determinate Nix
-migration 2026-09-01), so the first xty deploy from it restarts the other
-apps on their new closures; refl itself has no database and no nginx.
-Rollback for refl alone: disable its profile and redeploy, keeping
-`/var/lib/refl`. See `~/src/refl/HANDOFF-ROLLOUT.md` for the game side and
-the rollout log.
-
-**Deployed 2026-09-18 21:30 CST** (xty generation 69, `fbbb7a1`). The first
-switch took docxty.net down for ~12 minutes: nginx refuses to start when a
-`proxy_pass` upstream does not resolve, and the aaspectra vhost proxies to
-`xpsoasis.hhefesto.com`, which has no DNS right now. `xty.nix` now pins the
-hhefesto.com names to 62.238.6.4 (`networking.hosts`); keep that until DNS
-is back, and remember that any nginx restart on xty is an outage without it.
-The activation of generation 68 also showed the known "user activation for
-root failed" / exit 4 while the switch had applied; generation 69 activated
-cleanly. refl is in the live pre-deploy check now.
-
----
-
-# Session handoff: environment review, xty hardening, module normalization
-
-Written 2026-07-04 on olimpo, for continuing on delfos. Everything a fresh
-session needs is in this file. The work spans this repo **and** the project
-repos under `~/src` (`wedding-website`, `expedientes`).
-
-> **Update 2026-07-09:** `cfo-as-a-service` was removed from this config
-> entirely (input, module import, profile blocks, pre-deploy/live checks).
-> Its `cfo` database/user still exist on xty; drop manually if desired
-> after the next deploy. Historical references to cfo below are kept for
-> context (its module shape remains the canonical interface).
->
-> **Update 2026-07-09 (2):** two projects were added following the same
-> convention: **directo** (store for directo-qro.com; input
-> `hhefesto/storeApp?ref=store-rebuild`, dev directo.local:8085 /
-> backend 3002, prod store.directo-qro.com) and **xpsoasis** (AAnalyzer;
-> Olimpo-local input `path:/home/hhefesto/src/xpsoasis`, dev
-> xpsoasis.local:8086 / one Servant backend on 3003, prod xpsoasis.org, DB
-> `aanalyzer_yesod` user `analyzer`). Servant owns `/api`, `/b`, `/ws`, and
-> the SPA; production Yesod behavior is reference-only in `rdataa/master`.
-> Restore the Git input before any xty deployment.
-> Pre-deploy pure + live checks extended for both.
->
-> **Before the first xty deploy with these projects:**
-> 1. Create agenix secrets in each project repo (recipients admin+xty,
->    see `secrets/secrets.nix` in each): directo — `directo-db-password`,
->    `directo-backend-env` (DATABASE_URL=postgres://directo:PW@localhost:5432/directo,
->    MERCADOPAGO_ACCESS_TOKEN, MERCADOPAGO_WEBHOOK_SECRET),
->    `directo-admin-password-hash` (bcrypt); xpsoasis —
->    `xpsoasis-smtp-password` (ROTATE the Gmail app password; the old one
->    is plaintext in xpsoasis git history), `xpsoasis-db-password`,
->    `xpsoasis-backend-env` (AANALYZER_PGPASS=…).
-> 2. The live check now requires directo-migrate/directo-backend/
->    xpsoasis-backend active on xty — they don't exist before the first
->    deploy, so run that one deploy with `deploy .#xty` directly.
-> 3. xpsoasis data migration from Hetzner (65.109.162.220):
->    `pg_dump -U analyzer -Fc aanalyzer_yesod` → `pg_restore --clean
->    --if-exists --no-owner --role=analyzer -d aanalyzer_yesod` on xty;
->    rsync the upload dir to /var/lib/xpsoasis/upload.
-> 4. Register the Mercado Pago webhook at
->    https://directo.hhefesto.com/api/webhooks/mercadopago (payment
->    events); the backend also polls MP as a fallback, and dev mode works
->    with MP disabled entirely (no token in env).
->
-> **Update 2026-07-10 (first xty deploy with directo + xpsoasis):**
-> prod domains changed to **directo.hhefesto.com** and
-> **xpsoasis.hhefesto.com** (A records → 62.238.6.4 created by the user;
-> xpsoasis.org stays on Hetzner until its data migration). All six agenix
-> secrets created (random DB passwords, bcrypt admin hash); third-party
-> creds are placeholders — Mercado Pago token/webhook secret and Google
-> OAuth creds go into directo-backend-env.age, the ROTATED Gmail app
-> password into xpsoasis-smtp-password.age, then redeploy. Added
-> `apps.check-docxty-backups` (also runs first in `deploy-xty`).
->
-> **Update 2026-08-02 (single-Servant xpsoasis + Spectra on xty):**
-> xty now deploys the Servant/Reflex xpsoasis (branch
-> `xpsoasis-single-servant`) with Spectra beside it:
-> `services.aaspectra.profile` production block added (serverName
-> `aaspectra.xpsoasis.hhefesto.com`, nginx 80 for the ACME HTTP-01
-> challenge, engine loopback 3004, oasisUrl
-> `https://xpsoasis.hhefesto.com`); xpsoasis profile gained
-> `cookieDomain = "xpsoasis.hhefesto.com"` (parent-domain cookie for the
-> Spectra auth subrequest) and `spectraUrl` (deployment-injected
-> cross-link). Pure checks extended: aaspectra vhost + ssl443, and
-> `AANALYZER_WORKER=1` on xpsoasis-backend (the module sets it — the
-> deferred-job worker/article delivery needs exactly one unit).
-> New agenix secret in the xpsoasis repo: `xpsoasis-session-keys.age`
-> (stable AANALYZER_JWT_KEY + persisted VAPID pair; recipients
-> admin+xty; wired by the module as a second EnvironmentFile — never
-> rotate casually).
-> USER ACTION: create the A record `aaspectra.xpsoasis.hhefesto.com` →
-> 62.238.6.4; until it exists that vhost's ACME order fails (the other
-> vhosts' certs are independent and unaffected).
-> xty's aanalyzer_yesod is seeded from the xpsoasis repo's committed
-> 2022 fixture dump + repo `upload/`; the real xpsoasis.org migration
-> from Hetzner (step 3 above) stays pending for the true cutover.
-> Production schema migration is explicit: the backend refuses pending
-> DDL; apply once via a temporary `AANALYZER_DEV_MIGRATE=1` drop-in
-> after a pg_dump backup, then remove the drop-in.
->
-> Deploy war stories from that first deploy (both resolved, keep for
-> next time):
-> 1. **Stale logind ↔ dbus connection**: dbus-broker had been restarted
->    (2026-07-07 incident) without restarting systemd-logind, so every
->    logind dbus call timed out ("Unable to list users with logind",
->    "Failed to start session scope: Transport endpoint is not
->    connected") and activation died with exit 11. Fix:
->    `systemctl restart systemd-logind` on xty, then redeploy.
-> 2. **deploy-rs rolls back the profile even with
->    magicRollback/autoRollback = false**, and phantom in-memory units
->    from the running generation (the removed cfo-*) counted as
->    "Failed to start … not found" → switch exit 4 → profile rollback.
->    The system itself HAD switched successfully. Recovery:
->    `nix-env -p /nix/var/nix/profiles/system --set <new toplevel>`,
->    `systemctl daemon-reload && systemctl reset-failed`, then
->    `<toplevel>/bin/switch-to-configuration switch` (exited 0).
-> The cfo/vesiet leftovers (databases, /run/agenix entries) can still
-> be dropped manually whenever convenient.
+Fresh handoff for the domain move. Older history (the July hardening, the
+Refl rollout of 2026-09-18 and its nginx outage) is in
+`HANDOFF-2026-09-18-refl-rollout-and-earlier.md`; the Refl game's own log is
+`~/src/refl/HANDOFF-ROLLOUT.md`.
 
 ## Mission (user's words, condensed)
 
-1. **Security review** of the whole environment — "is the xty server safe from hackers?"
-2. **Make this repo much leaner**: each project repo exports **one** NixOS
-   module consumed here with a **single import**; only collide-able facts stay
-   explicit in this repo (ports, database name — each app has its own DB on the
-   shared postgres — serverName, profile). Move ALL project-dependent code into
-   the project repos.
-3. **Vesiet is removed entirely** (user decision mid-session). Its DB still
-   exists on xty; drop manually if desired after next deploy.
-4. **HARD GATES**: (a) expedientes data must be verifiably backed up BEFORE any
-   xty deployment; (b) deployment itself needs explicit user confirmation.
+hhefesto.com is dead (no nameservers). The user bought **hhefesto.dev**.
+Move every hhefesto.com thing to hhefesto.dev; Refl lives at
+**refl.hhefesto.dev**. The Cloudflare API token is `~/cloudflare-api-token`
+(**secret**: never print, log, or commit it; it should be mode 600, it was
+644). **Do not push to any git remote.** Any xty change goes through
+`nix run .#deploy-xty` and needs the user's explicit go.
 
-Hosts: **xty** = production (62.238.6.4, headless, deploy-rs as root),
-**olimpo**/**delfos** = workstations that test the same app stacks with
-desktop profiles.
+## Facts established
 
-## Security audit findings (2026-07-03)
+- Cloudflare account holds the zones docxty.net, xty-y-dan.net, cfo-vision.com
+  and hhefesto.dev (zone id `b641959f…`, created 2026-09-19, active,
+  nameservers alexandra/reese.ns.cloudflare.com). Convention on the live
+  zones: one `A` → 62.238.6.4, **proxied**, SSL mode **full**,
+  `always_use_https` off (ACME HTTP-01 passes through the proxy on port 80).
+  `.dev` is on the browser HSTS preload list: everything must be https.
+- The four names were created 2026-09-19 with the same shape (proxied A →
+  62.238.6.4): `refl`, `directo`, `xpsoasis`, `aaspectra.xpsoasis`
+  under hhefesto.dev. Public resolution returns Cloudflare edge IPs.
+- Where hhefesto.com lived (consumer repo, branch `refl-xty`):
+  `flake.nix` xty profile blocks (directo `serverName`, xpsoasis
+  `serverName`/`cookieDomain`/`spectraUrl`, aaspectra `serverName`/`oasisUrl`,
+  the `acme-aaspectra…` mkForce that keeps that ACME order out of activation),
+  the pure pre-deploy vhost/ssl443 checks, the refl block (plain http on
+  62.238.6.4:3007 because there was no DNS), `xty.nix`'s `networking.hosts`
+  pin of the .com names (added 2026-09-18 because nginx refuses to start
+  when a `proxy_pass` upstream does not resolve), `Claude.md`'s host table.
+  A survey of the project repos for hard-coded domains is in progress; code
+  changes there cannot reach xty without a push, so this pass is config-only
+  and anything found in code is listed under "Remaining".
 
-Verified-good posture: SSH keys-only + prohibit-password root; postgres not
-exposed (localhost, firewall only 22/80/443); ACME/forceSSL on all prod vhosts;
-agenix for prod secrets; DynamicUser backends; trust-auth gated to desktop
-profiles only.
+## Plan
 
-| # | Sev | Finding | Status |
-|---|---|---|---|
-| H1 | HIGH | Real SHA-512 crypt hash committed in `configuration-core.nix`, reused for root+hhefesto on all hosts; passwordless wheel sudo on xty | **Wired, rotation pending** (see "Immediate next steps") |
-| H2 | HIGH | `wedding-admin-password-hash` deployed 0444 (world-readable) | **FIXED** (0400 + systemd LoadCredential; interim fix lives in consumer flake, permanent home is the wedding repo in Phase 2) |
-| M1 | MED | No rate limiting on login endpoints (expedientes = medical records!), no fail2ban | fail2ban on xty **DONE**; nginx `limit_req` pending, goes into each project's vhost during normalization |
-| M2 | MED | No auto security updates | **Decided: manual-only policy**, documented in Claude.md — deploys go through the check pipeline |
-| M3 | MED | wedding/expedientes backends lack systemd hardening (cfo has a full block) | Pending — copy cfo's hardening block during normalization |
-| L1 | LOW | No HSTS/security headers on any vhost | Pending — add during normalization |
-| L2 | LOW | Workstations opened 3000/5432 to LAN | **FIXED** (`configuration-gui.nix` firewall trim) |
+1. Consumer config (branch `refl-xty`, then merge to master later):
+   all `serverName`s, `cookieDomain`, `oasisUrl`, `spectraUrl` → `.dev`;
+   refl: `hostname = "refl.hhefesto.dev"`, `ingress.enable = true`, no
+   `openFirewall` (port 3007 closes; origin becomes https); keep the
+   ACME-out-of-activation mkForce for **every new vhost** until each cert
+   exists (aaspectra, directo, xpsoasis, refl) so a failed order cannot fail
+   the switch; pure checks renamed to `.dev`, drop the "refl ingress must
+   stay off" check, add `refl.hhefesto.dev` vhost + ssl443;
+   `xty.nix` pin → the `.dev` names (nginx upstream resilience, and the
+   aaspectra → xpsoasis auth subrequest then goes to the origin instead of
+   round-tripping through Cloudflare).
+2. Refl repo: README/CLAUDE/HANDOFF-ROLLOUT/memory mentions → `.dev`
+   (no code: the module already takes `hostname`).
+3. Build xty, pure check, live check, then **ask the user** and
+   `nix run .#deploy-xty`. After the switch: start the four ACME orders
+   (`systemctl start acme-<name>.service`), check `https://<name>/` through
+   Cloudflare, refl's WebSocket over the proxy, cookies, then remove the
+   mkForce lines and redeploy so renewals are wired normally.
+4. Old certs/vhosts for `.com` disappear with the switch; nothing to clean.
 
-## Approved design (plan file content, survives only here)
+## Remaining / external (user)
 
-### Canonical module interface — all projects converge on cfo's shape
+- Mercado Pago webhook is registered at
+  `https://directo.hhefesto.com/api/webhooks/mercadopago` → re-register at
+  the `.dev` URL (the backend also polls MP as a fallback).
+- Google OAuth redirect URIs for directo, if used → `.dev`.
+- Any hard-coded `hhefesto.com` in the project repos (survey pending).
+- `chmod 600 ~/cloudflare-api-token`.
 
-Typed options module `services.<name>.profile.*` (NOT a positional factory).
-Each project's `flake.nix` exports `nixosModules.default` **closing over its
-own `self`** so packages and secret paths default correctly.
+## Log
 
-```nix
-services.<name>.profile = {
-  enable;                                  # mkEnableOption
-  mode;                                    # enum [ "development" "production" ]
-  serverName;                              # str — vhost/domain
-  ports = { nginx; backend; database ? 5432; };   # collide-able → consumer sets
-  database = { name ? "<name>"; user ? name; };   # collide-able
-  acmeEmail ? "hhefesto@rdataa.com";
-  openFirewall ? true;
-};
-```
-
-Derived INSIDE the module: packages default to `self.packages.${pkgs.system}.*`;
-`mode == "production"` declares its own `age.secrets` (files at
-`${self}/secrets/*.age`, mode 0400) + forceSSL/ACME/443 + cookieSecure;
-`mode == "development"` gives postgres trust auth for its own user,
-networking.hosts alias, dev conveniences. Vhost gains HSTS + security headers +
-`limit_req` on auth endpoints (M1/L1); backends gain cfo's hardening block (M3).
-
-Naming: `serverName` everywhere; per-project extras stay as options
-(wedding: videoDir/videoMaxBytes/admin hash; expedientes: htmlDir,
-startingBackup seed, backup.* restic; cfo: backup.* toggle). cfo's unused
-`staging` mode collapses to the 2-mode enum.
-
-### Consumer end-state (this repo's flake.nix)
-
-Per host: import `inputs.<x>.nixosModules.default` once + a settings block:
-
-```nix
-services.expedientes.profile = { enable = true; mode = "production";
-  serverName = "docxty.net";     ports = { nginx = 80; backend = 3000; }; };
-services.cfo.profile         = { enable = true; mode = "production";
-  serverName = "cfo-vision.com"; ports = { nginx = 80; backend = 3033; frontend = 8083; }; };
-services.wedding.profile     = { enable = true; mode = "production";
-  serverName = "xty-y-dan.net";  ports = { nginx = 80; backend = 3001; }; };
-```
-
-Workstations: `mode = "development"`, cfo nginx 8082 / wedding 8084,
-serverName `*.local`. Dies from consumer: the remaining factory functions,
-manual agenix blocks, expedientes' manual TLS block, desktop trust-auth lines,
-package threading, and the inline xty postgres-compat module (see gotcha #3).
-
-### Invariants — MUST NOT change (prod data)
-
-DB names/users (`expedientes`, `cfo`, `wedding`), postgres **16** on 5432
-(pin stays in consumer as host concern), `/var/lib/expedientes*`,
-`/var/lib/wedding/videos`, `/run/agenix/<existing-names>`, systemd unit names,
-domains. Only option paths and code location change.
-
-## State of play
-
-### DONE (as of 2026-07-04, on delfos)
-
-- Phase 0 (see git history): vesiet removal, fail2ban, firewall trim, H2
-  interim fix, H1 wiring (rotation still pending).
-- **Phase 2 — wedding** (`04331bc` on master, pushed): services.wedding.profile
-  module, nginx.nix vhost split (HSTS/headers/limit_req on /api/admin/login),
-  in-module agenix, permanent LoadCredential, hardening. Legacy factory kept.
-- **Phase 3 — expedientes** (`b049584`, pushed): same treatment; database.nix
-  password hook fixed to postgresql-setup.service; TLS/ACME in-module
-  (mkDefault so legacy overrides win); limit_req on /api/login; restic backup
-  enabled by default in production mode; seed ordered after postgresql-setup.
-- **Phase 4 — cfo** (`1a45928`, pushed): profile.nix wrapper (self-defaults,
-  in-module agenix, dev writeText password moved in); staging enum collapsed.
-- **Phase 5 — consumer** (`1b6cf2d` on env-review-hardening): factories/manual
-  agenix/inline postgres hack deleted; postgresql_16 pin → xty.nix; per-host
-  single-import + profile blocks; pre-deploy checks updated (LoadCredential
-  path; postStart just needs no ALTER USER). All hosts build; flake check and
-  pre-deploy-xty pass.
-- **Backup verified (deploy gate #1 SATISFIED)**: the restic mechanism had
-  been dead since Apr 25 (module was only in expedientes' old self-deploy).
-  Manual restic snapshot `53235259` taken 2026-07-04 from xty (fresh pg_dump +
-  html); full repo mirrored to delfos at ~/.local/share/expedientes/restic-mirror;
-  restic check clean; dump verified with pg_restore --list. Post-deploy the
-  daily 03:00 timer returns permanently.
-
-### Remaining
-
-1. **User runs `bash secrets/rotate-user-password.sh`** (interactive; old hash
-   burned in git history) → git add secrets/user-password.age, remove the
-   burnedHash fallback in configuration-core.nix, rebuild, verify sudo.
-2. **Phase 6 — deploy**: `nix run .#deploy-xty` — needs explicit user
-   confirmation (gate #2). Verify after: HTTPS+HSTS on 3 domains, 429 on
-   login brute force, 0400 secrets, nmap 22/80/443 only, expedientes-backup
-   timer active, drop stale vesiet DB + /run/agenix/vesiet-* if desired.
-
-### Gotchas that still apply
-
-- Flake purity: git add new files in project repos before nix build.
-- Dev loop: --override-input docxty/wedding-page path:$HOME/src/<repo>.
-- agenix identityPaths on workstations lives in the consumer's
-  workstationServices block (admin key decrypts shared dev secrets).
-- configuration-gui.nix carries the unrelated enableConfiguredRecompile=false
-  (xmonad work) — keep.
-- Project repos may move ahead on origin (happened twice); fetch/rebase before
-  committing in them.
+- 2026-09-19 11:4x: token verified read-only (zone list); four A records
+  created on hhefesto.dev; consumer edits started.

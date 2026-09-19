@@ -123,12 +123,13 @@
         xtyServices = {
           imports = projectModules ++ [ inputs.refl.nixosModules.default ];
 
-          # Refl: plain http on the public address until hhefesto.com DNS is
-          # back; then set hostname + ingress.enable and drop openFirewall.
+          # Refl: nginx + ACME behind the Cloudflare proxy; the game server
+          # stays on loopback.
           services.refl.profile = {
             enable = true;
-            backend = { address = "62.238.6.4"; port = 3007; openFirewall = true; };
-            ingress.enable = false;
+            hostname = "refl.hhefesto.dev";
+            backend = { address = "127.0.0.1"; port = 3007; };
+            ingress.enable = true;
           };
 
           services.expedientes.profile = {
@@ -149,18 +150,18 @@
           services.directo.profile = {
             enable = true;
             mode = "production";
-            serverName = "directo.hhefesto.com";
+            serverName = "directo.hhefesto.dev";
             ports = { nginx = 80; backend = 3002; };
           };
 
           services.xpsoasis.profile = {
             enable = true;
             mode = "production";
-            serverName = "xpsoasis.hhefesto.com";
+            serverName = "xpsoasis.hhefesto.dev";
             # Parent-domain session cookie so the Spectra sibling vhost can
             # authorize through /b/auth/me with the same cookie.
-            cookieDomain = "xpsoasis.hhefesto.com";
-            spectraUrl = "https://aaspectra.xpsoasis.hhefesto.com";
+            cookieDomain = "xpsoasis.hhefesto.dev";
+            spectraUrl = "https://aaspectra.xpsoasis.hhefesto.dev";
             ports = { nginx = 80; backend = 3003; };
           };
 
@@ -170,20 +171,21 @@
           services.aaspectra.profile = {
             enable = true;
             mode = "production";
-            serverName = "aaspectra.xpsoasis.hhefesto.com";
+            serverName = "aaspectra.xpsoasis.hhefesto.dev";
             ports = { nginx = 80; backend = 3004; };
-            oasisUrl = "https://xpsoasis.hhefesto.com";
+            oasisUrl = "https://xpsoasis.hhefesto.dev";
           };
 
-          # The aaspectra certificate order can only succeed once its A
-          # record exists; keep the order unit out of activation so a
-          # missing record cannot fail the switch (deploy war story 2).
-          # The daily acme timer keeps retrying, so the real certificate
-          # replaces the self-signed placeholder on its own once DNS
-          # resolves — or start it manually:
-          #   systemctl start acme-aaspectra.xpsoasis.hhefesto.com.service
-          systemd.services."acme-aaspectra.xpsoasis.hhefesto.com".wantedBy =
-            nixpkgs.lib.mkForce [ ];
+          # New hhefesto.dev vhosts (2026-09-19): keep their ACME order units
+          # out of activation so a failed order cannot fail the switch (deploy
+          # war story 2). Start them by hand after the switch, e.g.
+          #   systemctl start acme-refl.hhefesto.dev.service
+          # and drop these lines once every certificate exists; the daily
+          # acme timer renews them from then on.
+          systemd.services."acme-directo.hhefesto.dev".wantedBy = nixpkgs.lib.mkForce [ ];
+          systemd.services."acme-xpsoasis.hhefesto.dev".wantedBy = nixpkgs.lib.mkForce [ ];
+          systemd.services."acme-aaspectra.xpsoasis.hhefesto.dev".wantedBy = nixpkgs.lib.mkForce [ ];
+          systemd.services."acme-refl.hhefesto.dev".wantedBy = nixpkgs.lib.mkForce [ ];
         };
 
         mkHost = { hostModules, extraSpecialArgs ? {} }: nixpkgs.lib.nixosSystem {
@@ -320,14 +322,14 @@
             ++ lib.optionals (!(hasXtyVhost "xty-y-dan.net")) [
               "nginx must define xty-y-dan.net vhost"
             ]
-            ++ lib.optionals (!(hasXtyVhost "directo.hhefesto.com")) [
-              "nginx must define directo.hhefesto.com vhost"
+            ++ lib.optionals (!(hasXtyVhost "directo.hhefesto.dev")) [
+              "nginx must define directo.hhefesto.dev vhost"
             ]
-            ++ lib.optionals (!(hasXtyVhost "xpsoasis.hhefesto.com")) [
-              "nginx must define xpsoasis.hhefesto.com vhost"
+            ++ lib.optionals (!(hasXtyVhost "xpsoasis.hhefesto.dev")) [
+              "nginx must define xpsoasis.hhefesto.dev vhost"
             ]
-            ++ lib.optionals (!(hasXtyVhost "aaspectra.xpsoasis.hhefesto.com")) [
-              "nginx must define aaspectra.xpsoasis.hhefesto.com vhost"
+            ++ lib.optionals (!(hasXtyVhost "aaspectra.xpsoasis.hhefesto.dev")) [
+              "nginx must define aaspectra.xpsoasis.hhefesto.dev vhost"
             ]
             ++ lib.optionals (!(hasSsl443 "docxty.net")) [
               "docxty.net must listen on 443 with ssl"
@@ -335,14 +337,14 @@
             ++ lib.optionals (!(hasSsl443 "xty-y-dan.net")) [
               "xty-y-dan.net must listen on 443 with ssl"
             ]
-            ++ lib.optionals (!(hasSsl443 "directo.hhefesto.com")) [
-              "directo.hhefesto.com must listen on 443 with ssl"
+            ++ lib.optionals (!(hasSsl443 "directo.hhefesto.dev")) [
+              "directo.hhefesto.dev must listen on 443 with ssl"
             ]
-            ++ lib.optionals (!(hasSsl443 "xpsoasis.hhefesto.com")) [
-              "xpsoasis.hhefesto.com must listen on 443 with ssl"
+            ++ lib.optionals (!(hasSsl443 "xpsoasis.hhefesto.dev")) [
+              "xpsoasis.hhefesto.dev must listen on 443 with ssl"
             ]
-            ++ lib.optionals (!(hasSsl443 "aaspectra.xpsoasis.hhefesto.com")) [
-              "aaspectra.xpsoasis.hhefesto.com must listen on 443 with ssl"
+            ++ lib.optionals (!(hasSsl443 "aaspectra.xpsoasis.hhefesto.dev")) [
+              "aaspectra.xpsoasis.hhefesto.dev must listen on 443 with ssl"
             ]
             ++ lib.optionals ((xtyCfg.systemd.services.xpsoasis-backend.environment.AANALYZER_WORKER or "") != "1") [
               "xpsoasis backend must own the deferred-job worker (AANALYZER_WORKER=1)"
@@ -368,11 +370,14 @@
             ++ lib.optionals ((xtyRefl.CapabilityBoundingSet or "x") != "" || (xtyRefl.NoNewPrivileges or false) != true) [
               "refl must run without capabilities and with NoNewPrivileges"
             ]
-            ++ lib.optionals (!(builtins.elem 3007 xtyCfg.networking.firewall.allowedTCPPorts)) [
-              "refl on xty is reached on plain http port 3007 (no DNS yet); the firewall must open it"
+            ++ lib.optionals (builtins.elem 3007 xtyCfg.networking.firewall.allowedTCPPorts) [
+              "refl must not expose port 3007 once it is behind the ingress"
             ]
-            ++ lib.optionals (hasXtyVhost "refl.hhefesto.com") [
-              "refl ingress must stay off until hhefesto.com DNS is restored"
+            ++ lib.optionals (!(hasXtyVhost "refl.hhefesto.dev")) [
+              "nginx must define refl.hhefesto.dev vhost"
+            ]
+            ++ lib.optionals (!(hasSsl443 "refl.hhefesto.dev")) [
+              "refl.hhefesto.dev must listen on 443 with ssl"
             ];
           preDeployXty = pkgs.runCommand "pre-deploy-xty" {} ''
             ${if checkFailures == [] then ''
