@@ -40,14 +40,15 @@ Primary languages: **Nix, Haskell, Agda**. Strongly prefers functional, type-dri
 | `wedding-page` | wedding RSVP | xty-y-dan.net | 3001 | `wedding` |
 | `directo` | store (refacciones, Querétaro) | directo.hhefesto.com | 3002 | `directo` |
 | `xpsoasis` | AAnalyzer (Servant + Reflex; production Yesod is reference-only in master) | xpsoasis.hhefesto.com | 3003 | `aanalyzer_yesod` (user `analyzer`) |
+| `refl` | The Refl Game (Agda/Lean/Bend proof game, no DB) | http://62.238.6.4:3007 until hhefesto.com DNS returns, then refl.hhefesto.com | 3007 (public address, plain http) | none |
 
-Workstation dev nginx ports: expedientes 80, wedding 8084, directo 8085, xpsoasis 8086. xpsOasis has one Servant backend on 3003 for `/api`, `/b`, `/ws`, and the SPA.
+Workstation dev nginx ports: expedientes 80, wedding 8084, directo 8085, xpsoasis 8086; refl on olimpo is loopback 3007 (no nginx). xpsOasis has one Servant backend on 3003 for `/api`, `/b`, `/ws`, and the SPA.
 
 Deploy: `nix run .#deploy-xty` (docxty backup health check → pure checks → live SSH checks → build → deploy-rs). Backup health check standalone: `nix run .#check-docxty-backups` (`DOCXTY_BACKUP_CHECK_FAST=1` skips the restic integrity pass). **Update policy: manual only** — no `system.autoUpgrade`; every prod update goes through the check pipeline.
 
 ### Key flake inputs
 
-`nixpkgs` (nixos-unstable), `flake-parts`, `deploy-rs`, `home-manager` (release-25.11), `agenix`, `docxty`/`wedding-page`/`directo` (project repos), and an Olimpo-local `path:/home/hhefesto/src/xpsoasis` input. Restore xpsOasis to its Git branch after the single-backend changes are committed; never deploy xty while path-pinned. Other inputs: `claude-code-nix`, `opencode`, `telomare`, `spacemacs` (non-flake).
+`nixpkgs` (nixos-unstable), `flake-parts`, `deploy-rs`, `home-manager` (release-25.11), `agenix`, `docxty`/`wedding-page`/`directo`/`refl` (project repos; `refl` keeps its own nixpkgs pins for the provers, no `follows`), and an Olimpo-local `path:/home/hhefesto/src/xpsoasis` input. Restore xpsOasis to its Git branch after the single-backend changes are committed; never deploy xty while path-pinned. Other inputs: `claude-code-nix`, `opencode`, `telomare`, `spacemacs` (non-flake).
 
 Binary caches: `hercules-ci.cachix.org`, `telomare.cachix.org`, `nixcache.reflex-frp.org`, `claude-code.cachix.org`.
 

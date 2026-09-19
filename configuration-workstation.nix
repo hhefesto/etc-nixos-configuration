@@ -132,7 +132,10 @@ in
       please = "sudo";
       n = "nix -Lv";
       nd = "nix -Lv develop -c zsh";
-      sn = "sudo nixos-rebuild -v switch --flake ~/src/etc-nixos-configuration";
+      # Build and evaluate as the invoking user so the ssh-agent is
+      # available for the private git+ssh flake inputs; --sudo elevates
+      # only the activation steps.
+      sn = "nixos-rebuild -v switch --sudo --flake ~/src/etc-nixos-configuration";
       gr = "grep -R --exclude='TAGS' --exclude-dir={.stack-work,dist-newstyle,result,result-2} -n";
       where = "pwd";
     };

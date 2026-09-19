@@ -1,8 +1,14 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 {
-  imports = [ ./hardware-configuration-olimpo.nix ];
+  imports = [ ./hardware-configuration-olimpo.nix inputs.refl.nixosModules.default ];
 
   networking.hostName = "olimpo";
+
+  services.refl.profile = {
+    enable = true;
+    backend = { address = "127.0.0.1"; port = 3007; };
+    ingress.enable = false;
+  };
 
   # OpenCL for the RX 580 (Polaris/gfx803). ROCm dropped this GPU, so the
   # compute path is Mesa's rusticl; RUSTICL_ENABLE exposes the radeonsi

@@ -1,3 +1,35 @@
+# Refl on olimpo and xty — 2026-09-18 (evening)
+
+Branch `refl-xty` (from master `83d7a5b`) adds the `refl` input
+(`github:hhefesto/refl`, public, no `follows`), imports
+`inputs.refl.nixosModules.default` for both hosts, and enables
+`services.refl.profile`: olimpo on loopback 3007 (ingress off), xty on the
+public address `62.238.6.4:3007` with `backend.openFirewall = true` and
+ingress off because hhefesto.com DNS is still being repaired. The pure
+pre-deploy checks assert refl's memory/swap/task limits, empty capability
+set, the open port and the absence of a `refl.hhefesto.com` vhost. When DNS
+is back: set `hostname = "refl.hhefesto.com"`, `ingress.enable = true`,
+drop `openFirewall`, keep the ACME order unit out of activation until the A
+record resolves (as for aaspectra), and add the vhost/ssl443 pure checks.
+
+The earlier WIP (a `path:` `cardano-stake-pool` input for xty, lock bumps of
+aanalyzer-classic/deploy-rs/determinate/claude-code-nix, the store-snapshot
+`refl` input) is in `git stash` ("WIP before refl-xty"), not on this branch:
+xty must not get a mainnet Cardano node or a `path:` input by accident.
+The `sn` alias fix (`nixos-rebuild --sudo`, evaluation as the user) and the
+olimpo block were taken from it.
+
+Deploy only with `nix run .#deploy-xty` (docxty backup health → pure checks
+→ live checks → build → deploy-rs). This branch also carries the two
+undeployed master commits (nixpkgs bump 2026-08-21, Determinate Nix
+migration 2026-09-01), so the first xty deploy from it restarts the other
+apps on their new closures; refl itself has no database and no nginx.
+Rollback for refl alone: disable its profile and redeploy, keeping
+`/var/lib/refl`. See `~/src/refl/HANDOFF-ROLLOUT.md` for the game side and
+the rollout log.
+
+---
+
 # Session handoff: environment review, xty hardening, module normalization
 
 Written 2026-07-04 on olimpo, for continuing on delfos. Everything a fresh

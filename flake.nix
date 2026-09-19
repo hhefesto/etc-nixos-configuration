@@ -17,6 +17,9 @@
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # The Refl proof game (Agda / Lean 4 / Bend 2). Its provers keep their
+    # own nixpkgs pins on purpose: no `follows`.
+    refl.url = "github:hhefesto/refl";
     docxty.url = "git+ssh://git@github.com/hhefesto/docxty";
     wedding-page.url = "github:hhefesto/wedding-website";
     directo.url = "git+ssh://git@github.com/hhefesto/directo";
@@ -118,7 +121,15 @@
         };
 
         xtyServices = {
-          imports = projectModules;
+          imports = projectModules ++ [ inputs.refl.nixosModules.default ];
+
+          # Refl: plain http on the public address until hhefesto.com DNS is
+          # back; then set hostname + ingress.enable and drop openFirewall.
+          services.refl.profile = {
+            enable = true;
+            backend = { address = "62.238.6.4"; port = 3007; openFirewall = true; };
+            ingress.enable = false;
+          };
 
           services.expedientes.profile = {
             enable = true;
@@ -238,6 +249,7 @@
           xtyPostgresUsers = map (user: user.name) xtyCfg.services.postgresql.ensureUsers;
           xtyPostgresSetupPostStart = xtyCfg.systemd.services.postgresql-setup.postStart or "";
           xtyNginxVhosts = xtyCfg.services.nginx.virtualHosts;
+          xtyRefl = xtyCfg.systemd.services.refl.serviceConfig;
           hasXtyVhost = name: builtins.hasAttr name xtyNginxVhosts;
           hasSsl443 = name:
             let listen = if hasXtyVhost name then xtyNginxVhosts.${name}.listen else [];
@@ -349,6 +361,18 @@
             ]
             ++ lib.optionals ((toString (lib.head (xtyCfg.systemd.services.xpsoasis-backend.serviceConfig.EnvironmentFile or [ "" ]))) != "/run/agenix/xpsoasis-backend-env") [
               "xpsoasis backend must use the production AANALYZER_PGPASS secret"
+            ]
+            ++ lib.optionals ((xtyRefl.MemoryMax or "") != "2048M" || (xtyRefl.MemorySwapMax or 1) != 0 || (xtyRefl.TasksMax or 0) != 128) [
+              "refl must keep its memory, swap and task limits (2048M, no swap, 128 tasks)"
+            ]
+            ++ lib.optionals ((xtyRefl.CapabilityBoundingSet or "x") != "" || (xtyRefl.NoNewPrivileges or false) != true) [
+              "refl must run without capabilities and with NoNewPrivileges"
+            ]
+            ++ lib.optionals (!(builtins.elem 3007 xtyCfg.networking.firewall.allowedTCPPorts)) [
+              "refl on xty is reached on plain http port 3007 (no DNS yet); the firewall must open it"
+            ]
+            ++ lib.optionals (hasXtyVhost "refl.hhefesto.com") [
+              "refl ingress must stay off until hhefesto.com DNS is restored"
             ];
           preDeployXty = pkgs.runCommand "pre-deploy-xty" {} ''
             ${if checkFailures == [] then ''
