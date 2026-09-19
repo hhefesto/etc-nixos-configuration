@@ -28,6 +28,16 @@ Rollback for refl alone: disable its profile and redeploy, keeping
 `/var/lib/refl`. See `~/src/refl/HANDOFF-ROLLOUT.md` for the game side and
 the rollout log.
 
+**Deployed 2026-09-18 21:30 CST** (xty generation 69, `fbbb7a1`). The first
+switch took docxty.net down for ~12 minutes: nginx refuses to start when a
+`proxy_pass` upstream does not resolve, and the aaspectra vhost proxies to
+`xpsoasis.hhefesto.com`, which has no DNS right now. `xty.nix` now pins the
+hhefesto.com names to 62.238.6.4 (`networking.hosts`); keep that until DNS
+is back, and remember that any nginx restart on xty is an outage without it.
+The activation of generation 68 also showed the known "user activation for
+root failed" / exit 4 while the switch had applied; generation 69 activated
+cleanly. refl is in the live pre-deploy check now.
+
 ---
 
 # Session handoff: environment review, xty hardening, module normalization
