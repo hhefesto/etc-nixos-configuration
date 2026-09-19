@@ -114,3 +114,14 @@ this pass): `xpsoasis/static/js/checkVersion.js` (legacy Yesod asset whose
   `nix run .#deploy-xty`; after the switch start the four
   `acme-<name>.service` units by hand and verify, then drop the mkForce
   guards and redeploy.
+- 2026-09-19 12:50: first `.dev` deploy succeeded cleanly (xty generation 70,
+  `jwp2qrb7…`); docxty.net and xty-y-dan.net stayed 200 throughout; all four
+  Let's Encrypt certificates were issued during the switch despite the
+  mkForce guards (nginx pulls the acme units in); refl answers 200 with
+  `__Host-refl; Secure`, port 3007 is closed; xpsoasis serves
+  `spectraAppUrl = https://aaspectra.xpsoasis.hhefesto.dev`; directo redirects
+  http → https. **Cloudflare's Universal SSL covers only one subdomain
+  level**, so `aaspectra.xpsoasis.hhefesto.dev` failed the TLS handshake
+  through the proxy and was switched to DNS-only (origin cert directly).
+  `refl-browser-test` against https://refl.hhefesto.dev passed with all three
+  provers. Second deploy (guards removed) started.
