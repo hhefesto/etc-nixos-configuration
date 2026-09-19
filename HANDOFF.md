@@ -59,16 +59,58 @@ Move every hhefesto.com thing to hhefesto.dev; Refl lives at
    mkForce lines and redeploy so renewals are wired normally.
 4. Old certs/vhosts for `.com` disappear with the switch; nothing to clean.
 
+## Inventory (survey of every checkout under ~/src, 2026-09-19)
+
+Config-only, done on this branch: the six option values in `flake.nix`
+(directo/xpsoasis/aaspectra `serverName`, xpsoasis `cookieDomain` and
+`spectraUrl`, aaspectra `oasisUrl`), the ACME-guard unit names, the pure
+checks, the refl block, the `xty.nix` pin, `Claude.md`. Every project module
+derives ACME, forceSSL, public base URL, cookie domain and cross-links from
+those options; directo's Mercado Pago `notification_url` and Google OAuth
+`redirectUri` follow `DIRECTO_PUBLIC_BASE_URL`, its cookies are host-only.
+Refl derives its WebSocket origin and cookie policy from `hostname`.
+
+Personal site `~/src/hhefesto.com` (GitHub Pages): CNAME, canonical and
+`og:url` moved to hhefesto.dev in local commit `9fd2dea` (**not pushed**);
+apex `A` records to GitHub Pages (185.199.108-111.153, DNS-only) and
+`www` CNAME → hhefesto.github.io created on the zone.
+
+Code that still names an old domain (needs a code change + push, out of
+this pass): `xpsoasis/static/js/checkVersion.js` (legacy Yesod asset whose
+`len = 21` parses the URL by length); `xpsoasis` mail templates and
+`Softwares.hs` link to `xpsoasis.org` (pre-existing, not .com);
+`aanalyzer-classic` `headless-backend` Delphi client `PUnit2.dfm` posts to
+`https://dev.hhefesto.com/api/recivePost` (compiled, distributed);
+`hhefesto.github.io/contact.markdown` links hhefesto.com.
+
 ## Remaining / external (user)
 
-- Mercado Pago webhook is registered at
-  `https://directo.hhefesto.com/api/webhooks/mercadopago` → re-register at
-  the `.dev` URL (the backend also polls MP as a fallback).
-- Google OAuth redirect URIs for directo, if used → `.dev`.
-- Any hard-coded `hhefesto.com` in the project repos (survey pending).
+- `git push` the three local commits when ready: consumer branch `refl-xty`
+  (`b3564d6`, also still unmerged into master), `~/src/hhefesto.com` master
+  (`9fd2dea`), and refl master docs (see `~/src/refl`). GitHub Pages: set
+  the custom domain to hhefesto.dev in the repo settings after the push
+  (the CNAME file alone is not enough) and enable "Enforce HTTPS" once the
+  certificate is issued.
+- Mercado Pago dashboard webhook `https://directo.hhefesto.com/api/webhooks/mercadopago`
+  → `https://directo.hhefesto.dev/api/webhooks/mercadopago` (new
+  preferences self-correct; the dashboard entry and in-flight ones do not).
+- Google Cloud console: authorized redirect URIs
+  `https://directo.hhefesto.dev/api/auth/<provider>/callback` and the
+  JavaScript origin. Stripe dashboard: check for a webhook on the old host.
+- Mail: SPF/DKIM/DMARC for hhefesto.dev if mail should come from it (xpsoasis
+  sends through msmtp with the Gmail app password; sender domain lives there).
+- Users: the xpsoasis `cookieDomain` change logs everyone out; web-push
+  subscriptions are per origin and must be re-subscribed (do **not** rotate
+  the VAPID keys at the same time).
 - `chmod 600 ~/cloudflare-api-token`.
 
 ## Log
 
 - 2026-09-19 11:4x: token verified read-only (zone list); four A records
   created on hhefesto.dev; consumer edits started.
+- 2026-09-19 12:0x: consumer branch committed (`b3564d6`): xty closure
+  `jwp2qrb7…-nixos-system-xty-26.11.20260831.34ab990` built, pure checks
+  passed. Apex/www records created. Awaiting the user's go for
+  `nix run .#deploy-xty`; after the switch start the four
+  `acme-<name>.service` units by hand and verify, then drop the mkForce
+  guards and redeploy.
