@@ -125,3 +125,18 @@ this pass): `xpsoasis/static/js/checkVersion.js` (legacy Yesod asset whose
   through the proxy and was switched to DNS-only (origin cert directly).
   `refl-browser-test` against https://refl.hhefesto.dev passed with all three
   provers. Second deploy (guards removed) started.
+- 2026-09-19 13:0x: second deploy (guards removed) succeeded; final state
+  in "Final state" below.
+
+## Final state (2026-09-19)
+
+- xty generation 71 serves https://directo.hhefesto.dev,
+  https://xpsoasis.hhefesto.dev (Spectra link → aaspectra), 
+  https://aaspectra.xpsoasis.hhefesto.dev (DNS-only record, origin cert) and
+  https://refl.hhefesto.dev, plus the unchanged docxty.net and xty-y-dan.net.
+  Certificates: Let's Encrypt, renewed by the acme timers.
+- Local, unpushed commits: consumer branch `refl-xty` (still not merged into
+  master; the "WIP before refl-xty" stash holds the cardano work),
+  `~/src/hhefesto.com` master (`9fd2dea`), `~/src/refl` master docs.
+- The apex hhefesto.dev points at GitHub Pages but serves nothing until
+  `~/src/hhefesto.com` is pushed and the repo's custom domain is set.
