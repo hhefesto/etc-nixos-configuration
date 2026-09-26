@@ -120,16 +120,26 @@
           };
         };
 
-        xtyServices = {
+        xtyServices = { config, ... }: {
           imports = projectModules ++ [ inputs.refl.nixosModules.default ];
 
           # Refl: nginx + ACME behind the Cloudflare proxy; the game server
-          # stays on loopback.
+          # stays on loopback. The vhost now restores the visitor's address
+          # from CF-Connecting-IP so the dashboard can geolocate at all.
+          age.secrets.refl-dashboard-password = {
+            file = "${inputs.refl}/secrets/refl-dashboard-password.age";
+            owner = "root";
+            group = "root";
+            mode = "0400";
+          };
+
           services.refl.profile = {
             enable = true;
             hostname = "refl.hhefesto.dev";
             backend = { address = "127.0.0.1"; port = 3007; };
             ingress.enable = true;
+            # https://refl.hhefesto.dev/dashboard/ — user "refl"
+            dashboard.passwordFile = config.age.secrets.refl-dashboard-password.path;
           };
 
           services.expedientes.profile = {
@@ -373,6 +383,21 @@
             ]
             ++ lib.optionals (!(hasSsl443 "refl.hhefesto.dev")) [
               "refl.hhefesto.dev must listen on 443 with ssl"
+            ]
+            # The dashboard must never reach the public internet unprotected,
+            # and the password must never be a command-line argument.
+            ++ lib.optionals (!(lib.any (a: a == "--dashboard-password-file")
+                 (lib.splitString " " (xtyRefl.ExecStart or "")))) [
+              "refl must be given a dashboard password file"
+            ]
+            ++ lib.optionals ((lib.head ((xtyCfg.systemd.services.refl.serviceConfig.LoadCredential or [ "" ]) ++ [ "" ]))
+                 != "dashboard-password:/run/agenix/refl-dashboard-password") [
+              "refl must read the dashboard password from the agenix secret"
+            ]
+            # Without the real-IP block every visit geolocates to Cloudflare.
+            ++ lib.optionals (!(lib.hasInfix "real_ip_header CF-Connecting-IP"
+                 (xtyCfg.services.nginx.virtualHosts."refl.hhefesto.dev".extraConfig or ""))) [
+              "refl.hhefesto.dev must recover the client address from CF-Connecting-IP"
             ];
           preDeployXty = pkgs.runCommand "pre-deploy-xty" {} ''
             ${if checkFailures == [] then ''

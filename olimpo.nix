@@ -1,13 +1,25 @@
-{ pkgs, inputs, ... }:
+{ config, pkgs, inputs, ... }:
 {
   imports = [ ./hardware-configuration-olimpo.nix inputs.refl.nixosModules.default ];
 
   networking.hostName = "olimpo";
 
+  # Refl's own agenix secret, as with the other project inputs: the
+  # password never enters the store or the unit's ExecStart, systemd
+  # LoadCredential hands it to the process.
+  age.secrets.refl-dashboard-password = {
+    file = "${inputs.refl}/secrets/refl-dashboard-password.age";
+    owner = "root";
+    group = "root";
+    mode = "0400";
+  };
+
   services.refl.profile = {
     enable = true;
     backend = { address = "127.0.0.1"; port = 3007; };
     ingress.enable = false;
+    # http://127.0.0.1:3007/dashboard/ — user "refl"
+    dashboard.passwordFile = config.age.secrets.refl-dashboard-password.path;
   };
 
   # OpenCL for the RX 580 (Polaris/gfx803). ROCm dropped this GPU, so the

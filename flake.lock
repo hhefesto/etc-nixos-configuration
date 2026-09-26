@@ -8,11 +8,11 @@
         "purescript-overlay": "purescript-overlay"
       },
       "locked": {
-        "lastModified": 1789783408,
-        "narHash": "sha256-fvAjSzZsRV5PnOwd6eC6q/gnZL36qZTxrBP4MBSJfiA=",
+        "lastModified": 1790047469,
+        "narHash": "sha256-w3nxX9a/hDNzCWuJ5a9YJOi0frMx9Zfjh3sna2JMyiI=",
         "ref": "headless-backend",
-        "rev": "65ffd27572eea45a55db04e9d385d3db68435504",
-        "revCount": 1647,
+        "rev": "513412ea8944bff4a24a7a9631f6a70d114b131a",
+        "revCount": 1648,
         "type": "git",
         "url": "ssh://git@github.com/rdataa/aanalyzer-classic"
       },
@@ -133,11 +133,11 @@
         "systems": "systems_2"
       },
       "locked": {
-        "lastModified": 1789790521,
-        "narHash": "sha256-bV8YsQ4mV92qwj7kwYH6FFKvECRos8SyrAFvgikXxsY=",
+        "lastModified": 1790096491,
+        "narHash": "sha256-zeY26igEw0G1GnVe1fA8pa/+q7mxanzCUV91GUTedzk=",
         "owner": "sadjow",
         "repo": "claude-code-nix",
-        "rev": "736ada361161f0a3e69844e3918b6e9bc69ed035",
+        "rev": "7e5f1c52ca206b2a3a535ec0e8f89bd1ae5f1afa",
         "type": "github"
       },
       "original": {
@@ -152,11 +152,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1789762479,
-        "narHash": "sha256-4KCSgkNu6206dYNXEgUSd4XznX+8De/T/KYQDWAmqY8=",
+        "lastModified": 1790108060,
+        "narHash": "sha256-E0Jcy9cFahc6OVjLD+cHBryUCpwehF6i79Ej/xpSDoA=",
         "owner": "sadjow",
         "repo": "codex-cli-nix",
-        "rev": "a7ed999eef6da100f126543dd5ab8817ddf003e6",
+        "rev": "e6d8256f5d5005a8de04ada728c6bbe33a13a207",
         "type": "github"
       },
       "original": {
@@ -1204,11 +1204,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1789632929,
-        "narHash": "sha256-RjR8AyvGlWuw16XRj7C1YDEw4E27ciuyPeB2nDMzgTU=",
+        "lastModified": 1790055231,
+        "narHash": "sha256-QpXotokGh5eeMG1Njiuh27oP0rK6t5+cMp7ymXSs7mc=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "a32edd7654519351e48e80372a928df336394670",
+        "rev": "b6c98e9e6633ee64753b594ff4a5febf0367fc00",
         "type": "github"
       },
       "original": {
@@ -1220,11 +1220,11 @@
     },
     "nixpkgs_3": {
       "locked": {
-        "lastModified": 1789632929,
-        "narHash": "sha256-RjR8AyvGlWuw16XRj7C1YDEw4E27ciuyPeB2nDMzgTU=",
+        "lastModified": 1790055231,
+        "narHash": "sha256-QpXotokGh5eeMG1Njiuh27oP0rK6t5+cMp7ymXSs7mc=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "a32edd7654519351e48e80372a928df336394670",
+        "rev": "b6c98e9e6633ee64753b594ff4a5febf0367fc00",
         "type": "github"
       },
       "original": {
@@ -1312,11 +1312,11 @@
     },
     "nixpkgs_9": {
       "locked": {
-        "lastModified": 1789785513,
-        "narHash": "sha256-B44WL6h0XoLjJ41bUPJk0X5SDinLCII//6EcBLXKiJ0=",
+        "lastModified": 1790046670,
+        "narHash": "sha256-MYiI+CzL0tuWgRPjGsKCDHqYs2T3OzMlMQWOYWG0qso=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "20b1ddd1aa5ace70c9468305030aa4f9ef79671b",
+        "rev": "6774f7bc253789b113a4f39285dc0fa100abeacc",
         "type": "github"
       },
       "original": {
@@ -1376,11 +1376,11 @@
         "nixpkgs-reflex": "nixpkgs-reflex_2"
       },
       "locked": {
-        "lastModified": 1789871789,
-        "narHash": "sha256-51IoIGeTCas+ma+YxeMzqJAER8nHkR0uEh9V51V68c4=",
+        "lastModified": 1790011610,
+        "narHash": "sha256-x1qGUtQnYFJ/Y1VFu8zaIxEM0VpUdMK2mth34cwgo0g=",
         "owner": "hhefesto",
         "repo": "refl",
-        "rev": "207ba638ffef08350855c0d29a16db32c7b55d1a",
+        "rev": "73831d26711309bcefc61fa74000c4b5472be3f0",
         "type": "github"
       },
       "original": {
@@ -1445,11 +1445,11 @@
     "spacemacs": {
       "flake": false,
       "locked": {
-        "lastModified": 1789496649,
-        "narHash": "sha256-7twx8ByqA+Lu55ED6hk0HwwDbbT7pG70qmOZ4uXJ04E=",
+        "lastModified": 1790038707,
+        "narHash": "sha256-P86CqQhrDxY7XhWdwpHJsLHcuzmOYC24RwCOOODvtSY=",
         "owner": "syl20bnr",
         "repo": "spacemacs",
-        "rev": "ab5bb4cecff218d30c21fc4204260412c7ce8abd",
+        "rev": "baf53d86c4f77e494a98cc23a3fe83b37261624e",
         "type": "github"
       },
       "original": {
@@ -1683,11 +1683,11 @@
         "web-push": "web-push"
       },
       "locked": {
-        "lastModified": 1789708957,
-        "narHash": "sha256-1Mj91eNC04QNmcFRtIPU0+Z2qwkuRgh4HdLmdwXKdP8=",
+        "lastModified": 1790115140,
+        "narHash": "sha256-928qzRSoewBY8TZ+cTIfoyTwJ2L7LOmykN/uw/O3GaE=",
         "ref": "xpsoasis-single-servant",
-        "rev": "f42ce9f43b75c3fb093405667cd8879f6bdc5532",
-        "revCount": 1599,
+        "rev": "e48240d1c115b980c2ee5b52446c41aa0371e139",
+        "revCount": 1617,
         "type": "git",
         "url": "ssh://git@github.com/rdataa/xpsOasis"
       },

@@ -1,114 +1,204 @@
-# Refl tutorial review and Olimpo module rollout — 2026-09-19
+# Dashboard and deployment cache review — 2026-09-21
 
-Previous domain-move history: `HANDOFF-2026-09-19-domain-move.md`.
-Earlier rollout/outage: `HANDOFF-2026-09-18-refl-rollout-and-earlier.md`.
-Full teaching/review evidence: `~/src/refl/HANDOFF.md`.
+This entry supersedes the older rollout status below. Dashboard security and
+statistics work from review base `d945d39` is now in `3599898`; subsequent
+published changes through `16253c2` add curriculum links, presentation edits
+and prover-slot counts. Those later changes are retained.
 
-## Review baseline and findings
+## Production assessment
 
-Consumer `05765c2`, refl `13f600c`; both checkouts are on **master**, initially
-clean. The old `refl-xty` branch/unmerged descriptions are historical.
-Production uses https://refl.hhefesto.dev with nginx/ACME, not public :3007.
+The user reported a short in-page 404, then successful dashboard login followed
+by the normal game page. Read-only production checks found:
 
-**High, open:** `deployXty` has backup/pure/live gates, but no candidate versus
-running-system gate against unrelated restarts/reloads. Block production until
-one establishes that shared nginx, PostgreSQL, networking, docxty and all other
-projects remain untouched. Keep backup checks and disabled automatic rollback.
+- Refl restarted cleanly at 10:59:34 CST and remained active. No matching
+  HTTP 404 appeared among the day's requests carrying a Refl referrer.
+- Unauthenticated `/dashboard/` returned 401 with the Basic-auth challenge.
+  The configured credential returned 200 for both `/dashboard/` and
+  `/dashboard/data.json`, at the origin and through Cloudflare. The credential
+  was consumed on the host without printing it or putting it in arguments.
+- The current CDN JavaScript matched the deployed bundle byte for byte.
+  However, `/all.js` used a fixed name and was cached for four hours, while
+  Nix store files reported an invariant 1970 modification time. Date-only
+  revalidation returned 304. A stale client can show the game at `/dashboard/`;
+  clients predating the donation route also show an in-page 404 at `#/donate`.
 
-**Medium, fixed:** same-task input/navigation reproduced a lost edit from stale
-reactive text. The departure flush now reads the live textarea; exact Unicode
-and per-language drafts pass the new regression checks (details below).
+An authenticated clean Chromium session on September 21 rendered all six
+metric tiles and range controls on the live site before this fix was deployed.
+This confirms that the dashboard itself worked with the then-current client.
+The browser's historical fragment/cache contents were unavailable, so the
+exact earlier 404 remains unconfirmed. Server authentication is working;
+stale client code is consistent with both reports.
 
-**Low, addressed:** stale branch, publication, hint and deployment documentation.
+## Cache correction
 
-**Unverified:** KVM NixOS module test; Olimpo has no `/dev/kvm`. Isolated prover
-and local module acceptance do not substitute for VM resource-exhaustion tests.
+The built entry document now references `/all-<SHA256>.js`. The legacy
+`/all.js` remains available for compatibility. HTML entry responses use
+`Cache-Control: no-store` and bypass both static middleware and Warp's
+file-mtime conditional responses. Dashboard responses retain their stronger
+`private, no-store` header and authentication boundary.
 
-## Local rollout and approval
+Smoke checks verify that the referenced bundle's bytes match its filename,
+that both game and dashboard HTML use that URL, and that a 1970
+If-Modified-Since request still returns the current HTML with 200. Browser
+checks block the old `/all.js` URL while exercising game, dashboard, themes,
+mobile layout, request races, errors/retry and all prover flows.
 
-Only the reviewed refl snapshot is pinned; unrelated dependencies are unchanged.
-Added `ns = "nixos-rebuild switch --sudo --flake ~/src/etc-nixos-configuration"`
-to workstation zsh aliases. Existing `sn` remains available. The user's final
-path spelling had an extra slash; use the actual existing checkout above.
+## Retained analytics semantics
 
-Built with `nixos-rebuild build --flake ~/src/etc-nixos-configuration`.
-The user then runs `nixos-rebuild switch --sudo --flake
-~/src/etc-nixos-configuration`; start a new zsh afterwards for `ns`.
-After switch, verify http://127.0.0.1:3007 through the module and let the user
-assess the lesson. Explicit production approval is still required.
+Completions are distinct `(browser identity, lesson, language)` tuples per
+UTC period; Agda and Lean count separately. Checking establishes an opening.
+Bots and unclassified legacy events are excluded from browser metrics.
+Referrers, routes and language/lesson identifiers are sanitized on recording
+and historical reads, without automatically rewriting old logs. Full UTC
+collection days receive `.covered` sidecars; incomplete coverage suppresses
+percentage comparisons. Retention stays 400 days, insufficient for a yearly
+comparison. Active browsers means identities seen in the last five minutes,
+with minute heartbeats from visible tabs, deduplication across tabs and daily
+peaks. Heartbeats do not inflate navigation or completion counts.
 
-Exact source, build and test results are recorded below.
-No production switch, publication, remote push or local activation performed.
+## Verification and consumer build
 
-## Production and rollback
+Published fix: `0392db026c8c381e0a8a20cbba54aef9f6fb3581`.
+Native suites passed 98 examples; full flake checks passed. Isolated host
+verification passed 128 content checks, Chromium dashboard and game checks,
+all three provers including Lean outside the sandbox, and security checks.
+Evidence is in `/tmp/refl-dashboard-cache-native.log`,
+`/tmp/refl-dashboard-cache-flake-verified.log` and
+`/tmp/refl-dashboard-cache-isolated-verified.log`.
 
-Historical production: xty generation 71 at the previous pinned refl revision;
-not re-deployed by this review. Before approved deployment, record the actual
-running system and previous refl ExecStart/input, retain the old closure with
-a GC root and back up refl state. Compare candidate services/activation effects
-with the running system; block unrelated restart/reload changes. Monitor public
-site availability and protected service PIDs throughout activation.
+Only the consumer's refl lock node was updated to the published fix. Other
+lock nodes and the existing flake.nix, olimpo.nix and workstation configuration
+were verified unchanged. `nixos-rebuild build` succeeded for Olimpo:
+`/nix/store/5pqsarm94r0famym0nk8psmx98hamnbi-nixos-system-olimpo-26.11.20260919.20b1ddd`.
+Log: `/tmp/refl-cache-olimpo-build.log`. Local activation remains the user's
+`ns`; this agent did not switch Olimpo.
 
-For refl-only rollback, repin the previous refl input on the current consumer,
-build and pass the same unrelated-service gate before activation. Never use a
-whole-system `--rollback` for a refl regression. Keep player state unless a
-specific incompatible format change requires restoring its backup.
+## Rollout and rollback
+
+The user authorized production deployment on September 21. The production
+candidate is
+`/nix/store/lr6j88jqwfnnrzfabzp81a1zwmklclb8-nixos-system-xty-26.11.20260919.20b1ddd`.
+Before activation, the backup integrity, pure configuration and live health
+gates passed. Recursive comparison of the entire generated `/etc` differs
+only for `refl.service` and its target link. The NixOS dry activation explicitly
+listed only stopping and starting `refl.service`. Encrypted password bytes
+are unchanged. The guarded deployment script checks the exact running system,
+profile and dry activation output before switching. Activation succeeded;
+only Refl was stopped/started as a system service. NixOS also ran its standard
+user activation units and sysinit-reactivation target. Protected nginx,
+PostgreSQL, networking and application service PIDs, start timestamps and
+restart counts are unchanged.
+
+Production now runs the candidate above. Authenticated origin and public
+dashboard HTML/data requests return 200. A clean Chromium session renders all
+six metric tiles and the range controls. Public HTML contains the fingerprinted
+bundle and `Cache-Control: no-store`; a date-only conditional request returns
+200. Evidence: `/tmp/refl-cache-deploy.log`, `/tmp/refl-cache-auth-after.log`
+and `/tmp/refl-cache-live-browser-after.log`.
+
+The remote directory `/var/backups/refl/cache-fix-20260921` (root-only) contains
+the Refl state backup, previous system/profile paths, dry activation output,
+activation log and protected-service comparisons. The previous system and
+deploy-rs profile are retained as GC roots. The deployment script is
+`/tmp/refl-cache-deploy.sh`; it fails closed on an unexpected activation plan.
+No automatic whole-system rollback was enabled.
+
+Only the consumer's refl lock node may change; preserve its unrelated edits
+and dependency pins. The pre-fix lock is `/tmp/refl-cache-consumer-before.lock`,
+pinning `16253c2c85936fdbf68f54b6dc728095ea61695d`. Re-pin that node on the
+current consumer and rebuild for a refl-only rollback, accepting that it
+restores the cache issue. Keep player state and analytics data. Do not use a
+whole-system rollback.
+
+Future production updates still require approval and a candidate-versus-running
+system gate against unrelated service restarts/reloads. The consumer's generic
+deploy app does not yet enforce the additional gate used for this release.
+Preserve backup checks and disabled automatic rollback. The KVM module test
+remains unverified because `/dev/kvm` is absent.
+
+---
+# Meet in the middle — Olimpo review, 2026-09-19
+
+Consumer base: `75e231f03f9410612f41d4b0baeb4de5f6663d73`.
+Refl review base: `19bb9b7d177c6c3b53a38d7314b8309189f9616e`.
+Previous handoff preserved in `HANDOFF-2026-09-19-before-meet-review.md`.
+
+## Findings
+
+**High, open for production:** `deployXty` lacks a candidate/running-system
+comparison that blocks unrelated restarts/reloads. Before approved production
+activation, protect shared nginx, PostgreSQL, networking, docxty and other
+projects. Preserve backup checks and disabled automatic rollback. Publication
+to GitHub does not authorize production activation.
+
+**Medium, fixed in refl:** two separate Bend computational paths with number
+holes, plus a native rewrite alternative; reflexivity teaching in lesson 2;
+stable lesson URLs and original numeric Tutorial bookmark compatibility;
+existing-player prerequisite access without fabricated completion. Retained
+the earlier same-task draft flush fix and clipboard improvements.
+
+**Low, fixed:** stale publication/lesson guidance and incorrect Bend annotation
+claims. `{proof : Type}` is checked; `(proof : Type)` is not equivalent.
+
+**Unverified:** KVM module test; `/dev/kvm` is absent. Host browser/prover tests
+do not establish VM boot, cgroup-exhaustion or OOM-recovery behavior.
+
+## Verification and local review
+
+Refl native suites passed 71 examples. Full flake checks passed; isolated host
+verification passed 128 content checks, Chromium with Agda/Lean/Bend, retry and
+HTTP/WebSocket security. Browser checks submit authored demonstrations and
+reject incorrect numbers on either side while keeping partial proofs unsolved.
+Full evidence: `~/src/refl/HANDOFF.md`.
+
+Keep `refl.url = "github:hhefesto/refl"`. Update only that lock node after
+publication; preserve all of the user's refreshed system pins and kernel.
+`ns` is already defined in this repository's `configuration-workstation.nix`
+as `nixos-rebuild switch --sudo --flake ~/src/etc-nixos-configuration`.
+Existing shells may need `exec zsh`; do not edit generated `/etc/zshrc`.
+
+The agent builds with `nixos-rebuild build --flake ~/src/etc-nixos-configuration`.
+The user activates with `nixos-rebuild switch --sudo --flake
+~/src/etc-nixos-configuration`, then assesses http://127.0.0.1:3007.
+Approval of this new candidate is pending. No activation performed by the agent.
+Exact published revision and build result follow below.
+
+## Production and refl-only rollback
+
+Production is unchanged by this work and requires explicit approval after local
+assessment. Before deployment, record xty's actual system and refl ExecStart,
+retain the old closure as a GC root, back up refl state, and compare candidate
+activation effects. Block unrelated service restarts/reloads; monitor external
+availability and protected service PIDs. Keep `autoRollback = false` and
+`magicRollback = false` plus existing backup checks.
+
+To roll back refl alone, repin only its previous input on the current consumer,
+build, pass the same service-diff gate and activate that candidate. Never use
+whole-system `--rollback` for a refl regression. Preserve player state unless
+a demonstrated incompatible format change requires its backup.
 
 ## Verified candidate
 
-Reviewed implementation: refl `476f27d3d9bb7ebbc3a1ba3a65a2083bfe9223e7`.
-Immutable source `/nix/store/y3vyjacprm8dpkagr5fiy98b10anl36a-source`, NAR hash
-`sha256-QzAOP7R3u1meVRKGOB2xToCq9TAcTW/jVDUI9qXvrv0=`. Retained by
-`~/src/refl/result-reviewed-source`. The lock override is persistent: the normal
-build/switch commands select it without flags. Exactly one lock node changed:
-`refl`; all unrelated pins remain identical. Previous refl pin:
-`f529203020105b3e995833798348307ab80868a4`. Nothing pushed.
+Published refl HEAD: `9f84c926c3c5fd70d92ab9152fff07ae978a6923`.
+Tested implementation: `11649932894938d432535e407f0c8bc2d92c5189`.
+Only lock node `refl` differs from `/tmp/refl-meet-consumer-before.lock`;
+all unrelated user-refreshed pins are preserved.
 
-Passed in refl: 67 native tests; manifest and website builds; 122 content checks
-including host Lean; full `nix flake check` (106 in-sandbox content checks,
-browser with explicit Lean session skip, smoke/security/Bend); `verify-local`
-with 122 isolated checks, all-three-prover Chromium flows, failure/retry and
-security. Browser checks both actual authored hint proofs against level
-restrictions, rejects wrong proofs and leaves templates unfinished, checks hint
-order/building blocks before completion, selectors and exact immediate drafts.
+`nixos-rebuild build --flake ~/src/etc-nixos-configuration` succeeded:
+`/nix/store/aqk38xfyhb7vici9jgpqk2a3cfsvhxh4-nixos-system-olimpo-26.11.20260919.20b1ddd`.
+Log: `/tmp/refl-meet-olimpo-build.log`.
+Candidate refl ExecStart:
+`/nix/store/d68whka6mrplwjmhmqa4dhxrx1k5xjyc-refl-site/bin/refl-site`.
 
-The immediate edit/navigation test reproduced a lost edit. Fixed by reading the
-live textarea on departure rather than stale reactive text, and prioritizing the
-flush over simultaneous debounce. Repeated Unicode navigation and all language
-drafts now pass. Close/unmount delays remain; no claim of crash/tab-close or
-arbitrary-network-stall durability. KVM module test still unverified.
+Compared against the currently running system:
+`/nix/store/abcxpdmda31bp9xl0jbzcc0fvcjy79qf-nixos-system-olimpo-26.11.20260919.20b1ddd`.
+Recursive systemd unit comparison differs only for `refl.service` and its
+multi-user target link. Both systems use exactly the same kernel closure:
+`/nix/store/qmdwpmr1s2wj89ibpa8j72wikxzjhldy-linux-6.18.52/bzImage`.
+The candidate's generated zshrc contains the requested `ns` alias.
 
-The running module at http://127.0.0.1:3007 and public production health both
-reported 61 variants before activation. These probes do not validate the new
-candidate. After the user's switch, run the updated browser suite in existing
-service mode against :3007 and verify its ExecStart references the new closure.
-Olimpo lesson assessment and explicit xty approval are pending.
-
-## Olimpo build result and pre-existing drift
-
-Consumer configuration commit: `188cc609869d70a929c6c4bad882eb86f49a858d`;
-later commits only finalize these records. The module build succeeded:
-`/nix/store/yqsv22fni68nggn5q0iakm088d86yavd-nixos-system-olimpo-26.11.20260831.34ab990`.
-Its `etc/zshrc` contains the exact `ns` alias. Refl service ExecStart is
-`/nix/store/f8lx96yyy0hjswwgsk1h8v25447dw793-refl-site/bin/refl-site`.
-Log: `/tmp/refl-olimpo-build.log`.
-
-**Read before switching:** Olimpo currently runs
-`/nix/store/5pghfdayjcpb2vvjbsbxhl5hmn7cb109-nixos-system-olimpo-26.11.20260916.b1b8759`.
-This checkout has older pins; its full switch would change unrelated units
-including local nginx, PostgreSQL and NetworkManager, and change the next-boot
-kernel from 6.18.52 to 6.18.48. Only the refl lock entry was edited in this task;
-the unrelated drift was already present. The user was informed before switch.
-Unit comparison: `/tmp/refl-olimpo-unit-diff.txt`. No local switch was performed.
-
-After the user switches, verify the actual service and run:
-
-```sh
-cd ~/src/refl
-REFL_BROWSER_EXISTING_URL=http://127.0.0.1:3007 FONTCONFIG_FILE=/etc/fonts/fonts.conf \
-  /nix/store/r5n6ysvs7iwdsvja01f875a40sf2d7qs-refl-backend-0.1.0.0/bin/refl-browser-test \
-  result-browser-tools/bin/chromium unused games/refl
-```
-
-This uses a fresh browser identity and does not start/stop the module. Confirm
-that refl's ExecStart matches the candidate above before accepting the result.
+The new module is built but not activated. Live verification of this candidate
+at http://127.0.0.1:3007 must follow the user's switch; the currently running
+module is the previous revision. Production remains unchanged and unapproved.
+Previous refl lock for refl-only rollback:
+`19bb9b7d177c6c3b53a38d7314b8309189f9616e`.
