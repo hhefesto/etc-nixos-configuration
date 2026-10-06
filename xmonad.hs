@@ -3,10 +3,12 @@
 import           System.IO
 import           XMonad
 import           XMonad.Hooks.DynamicLog
-import           XMonad.Hooks.EwmhDesktops        (ewmh)
+import           XMonad.Hooks.EwmhDesktops        (ewmh, ewmhFullscreen)
 import           XMonad.Hooks.ManageDocks
+import           XMonad.Hooks.ManageHelpers       (doFullFloat, isFullscreen)
 import           XMonad.Layout.IndependentScreens
 import           XMonad.Layout.MouseResizableTile
+import           XMonad.Layout.NoBorders          (Ambiguity (OnlyScreenFloat), lessBorders)
 import           XMonad.Layout.Spacing
 import           XMonad.Util.EZConfig             (additionalKeysP)
 import           XMonad.Util.Run                  (spawnPipe)
@@ -37,18 +39,30 @@ myManageHook = composeAll
    , className =? "Org.gnome.Nautilus" --> doShift "3"
    , className =? "Gnome-control-center" --> doShift "4"
    , className =? "Signal" --> doShift "6"
+   , isFullscreen --> doFullFloat   -- games (Proton) fight a tiled window
    , manageDocks
    ]
 
+-- Workspaces, layout and title share @xmonadLogWidth@ columns of xmobar: the
+-- title gets what is left, so it can never push the right half off screen.
+fitTitle :: Int -> [String] -> [String]
+fitTitle width (ws : layout : name : rest) = ws : layout : name' : rest
+  where
+    room  = max 3 (width - length (xmobarStrip ws) - length layout - 6)
+    name' | null name = ""
+          | otherwise = xmobarColor "green" "" (shorten room name)
+fitTitle _ xs = xs
+
 main = do
     xmproc <- spawnPipe "xmobar"
-    xmonad . ewmh . docks $ def
+    xmonad . ewmhFullscreen . ewmh . docks $ def
         { manageHook = myManageHook <+> manageHook def
-        , layoutHook = avoidStruts . mySpacing $ layoutHook def
+        , layoutHook = lessBorders OnlyScreenFloat . avoidStruts . mySpacing $ layoutHook def
         , handleEventHook = handleEventHook def -- <+> docksEventHook
         , logHook = dynamicLogWithPP xmobarPP
                         { ppOutput = hPutStrLn xmproc
-                        , ppTitle = xmobarColor "green" "" . shorten @xmonadShortenLength@
+                        , ppTitle  = id
+                        , ppOrder  = fitTitle @xmonadLogWidth@
                         }
         , startupHook        = myStartupHook
         , modMask            = myModMask     -- Rebind Mod to the Windows key

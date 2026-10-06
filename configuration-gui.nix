@@ -1,5 +1,5 @@
 
-{ pkgs, lib, config, xmonadShortenLength ? 50, ... }:
+{ pkgs, lib, config, xmonadLogWidth ? 60, ... }:
 let
   # The terminal xmonad opens (M-S-<Return>, and the startupHook one).
   #
@@ -142,7 +142,7 @@ in
   services.xserver.windowManager.xmonad = {
     enable = true;
     enableConfiguredRecompile = false;
-    config = builtins.replaceStrings [ "@xmonadShortenLength@" ] [ "${toString xmonadShortenLength}" ] (pkgs.lib.readFile ./xmonad.hs);
+    config = builtins.replaceStrings [ "@xmonadLogWidth@" ] [ "${toString xmonadLogWidth}" ] (pkgs.lib.readFile ./xmonad.hs);
     enableContribAndExtras = true;
     extraPackages = haskellPackages: [
       haskellPackages.xmonad-contrib

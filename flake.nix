@@ -207,7 +207,7 @@
             workstationServices
             (home-manager-module { xmobarrc = ./xmobarrc-delfos; })
           ];
-          extraSpecialArgs = { xmonadShortenLength = 26; tmuxAccent = "#7fff00"; };
+          extraSpecialArgs = { xmonadLogWidth = 56; tmuxAccent = "#7fff00"; };
         };
 
         nixosConfigurations.olimpo = mkHost {
@@ -218,7 +218,7 @@
             workstationServices
             (home-manager-module { xmobarrc = ./xmobarrc-olimpo; })
           ];
-          extraSpecialArgs = { xmonadShortenLength = 50; tmuxAccent = "#7fff00"; };
+          extraSpecialArgs = { xmonadLogWidth = 60; tmuxAccent = "#7fff00"; };
         };
 
         nixosConfigurations.xty = mkHost {
