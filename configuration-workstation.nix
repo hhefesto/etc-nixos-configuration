@@ -83,7 +83,7 @@ in
     hunspellDicts.es-any
     hunspellDicts.es-mx
     hunspellDicts.en-us
-    (aspellWithDicts (dicts: with dicts; [ es en en-computers en-science ]))
+    (aspellWithDicts (dicts: with dicts; [ es en ]))
     unrar
     unzip
     hack-font

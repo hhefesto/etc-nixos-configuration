@@ -39,7 +39,12 @@ in
     insomnia
     brightnessctl
     alsa-utils
-    kvmtool
+    # GCC 16 warns that x86 `regparm` is ignored on x86_64; kvmtool builds with -Werror.
+    (kvmtool.overrideAttrs (old: {
+      env = old.env // {
+        NIX_CFLAGS_COMPILE = old.env.NIX_CFLAGS_COMPILE + " -Wno-error=attributes";
+      };
+    }))
     kdePackages.kdenlive
     brave
     virt-manager
@@ -159,7 +164,7 @@ in
         add Control = Control_R
       '';
     in ''
-      ${pkgs.xorg.xmodmap}/bin/xmodmap ${myCustomLayout}
+      ${pkgs.xmodmap}/bin/xmodmap ${myCustomLayout}
       ${pkgs.dbus}/bin/dbus-update-activation-environment --systemd --all
       exec >>"$HOME/.xsession.log" 2>&1
       echo "[XSESSION] Started at $(date)"
